@@ -3,7 +3,8 @@
 // Node runtime; index.ts applies them in will-attach-webview and on the two
 // partitions' webRequest.
 
-import { PDF_PREVIEW_PARTITION, type PreviewPartition } from '../shared/preview-partitions'
+import { PDF_PREVIEW_PARTITION, PLAN_REVIEW_PARTITION, type PreviewPartition } from '../shared/preview-partitions'
+import { isLoopbackHttpUrl } from './plan-review'
 
 const FILE_PROTOCOL = 'file:'
 const PDF_EXTENSION = '.pdf'
@@ -83,7 +84,17 @@ function isPdfPreviewGuest(guest: PreviewGuest): boolean {
  */
 export function previewGuestPreferences(guest: PreviewGuest): PreviewGuestPreferences {
   const pdfPreview = isPdfPreviewGuest(guest)
-  return { plugins: pdfPreview, javascript: pdfPreview || guest.workspaceTrusted }
+  return { plugins: pdfPreview, javascript: pdfPreview || isPlanReviewGuest(guest) || guest.workspaceTrusted }
+}
+
+/** Plannotator's review page: the plan-review partition showing a server on this machine. */
+function isPlanReviewGuest(guest: PreviewGuest): boolean {
+  return guest.partition === PLAN_REVIEW_PARTITION && isLoopbackHttpUrl(guest.src)
+}
+
+/** A guest may attach only for a local file preview or Plannotator's review page. */
+export function isAllowedPreviewGuest(guest: PreviewGuest): boolean {
+  return guest.src.startsWith('file://') || isPlanReviewGuest(guest)
 }
 
 /**

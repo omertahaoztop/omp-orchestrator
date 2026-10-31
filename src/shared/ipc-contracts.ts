@@ -231,6 +231,7 @@ export const IPC_CHANNELS = {
   EVENT_SESSION_DIGESTS: 'event:session-digests',
   EVENT_NOTIFY_FOCUS: 'event:notify-focus',
   EVENT_ARTIFACT_SHOWN: 'event:artifact-shown',
+  EVENT_PLAN_REVIEW: 'event:plan-review',
   EVENT_SESSION_RUNTIME: 'event:session-runtime',
   EVENT_ACTIVATE_WORKSPACE: 'event:activate-workspace',
   EVENT_FILE_CHANGE: 'event:file-change',
@@ -693,6 +694,13 @@ export interface ArtifactEntry {
 export interface ArtifactShownEvent {
   runtimeId: string
   artifact: ArtifactEntry
+}
+
+/** A Plannotator review of a workspace's agent opened, or ended (its server stopped). */
+export interface PlanReviewEvent {
+  url: string
+  workspaceId: string
+  closed: boolean
 }
 
 /**

@@ -7,3 +7,5 @@ export const HTML_PREVIEW_PARTITION = 'preview'
 export const PDF_PREVIEW_PARTITION = 'persist:pdf-preview'
 export type PreviewPartition = typeof HTML_PREVIEW_PARTITION | typeof PDF_PREVIEW_PARTITION
 export const PREVIEW_PARTITIONS: readonly PreviewPartition[] = [HTML_PREVIEW_PARTITION, PDF_PREVIEW_PARTITION]
+/** Plannotator's plan review: its own loopback server, with scripts; persisted so its settings cookies survive (main/preview-guest.ts). */
+export const PLAN_REVIEW_PARTITION = 'persist:plan-review'

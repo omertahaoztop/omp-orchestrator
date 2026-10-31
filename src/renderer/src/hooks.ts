@@ -85,6 +85,20 @@ export function usePiEvents(): void {
       activateWorkspaceIntent(intent)
     })
 
+    // A Plannotator review opens beside its workspace's chat and closes itself once its server stops.
+    const unsubscribePlanReview = window.piDesktop.onPlanReview(({ url, workspaceId, closed }) => {
+      const state = useAppStore.getState()
+      if (closed) {
+        if (state.planReview?.url !== url) return
+        useAppStore.setState({ planReview: null })
+        if (state.chatSidePanel === 'plan') void state.setChatSidePanel(null)
+        return
+      }
+      useAppStore.setState({ planReview: { url, workspaceId } })
+      activateWorkspaceIntent({ workspaceId })
+      void state.setChatSidePanel('plan')
+    })
+
     // A reload leaves the dialog slot empty while main still holds the prompt.
     void recoverPendingPrompts()
 
@@ -109,6 +123,7 @@ export function usePiEvents(): void {
       unsubscribeDigestRead()
       unsubscribeFocus()
       unsubscribeArtifacts()
+      unsubscribePlanReview()
     }
   }, [handlePiEvent, handlePendingPromptCounts, handleWorkspaceActivity, handleSessionRuntime, handleSessionDigests, recoverPendingPrompts])
 }

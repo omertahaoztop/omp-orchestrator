@@ -114,7 +114,7 @@ export interface PreviewTarget {
 }
 
 /** A secondary view in the chat's side slot. */
-export type ChatSidePanel = 'files' | 'diff' | 'tasks'
+export type ChatSidePanel = 'files' | 'diff' | 'tasks' | 'plan'
 
 /**
  * Whether a side panel takes the whole side slot. The chat then shows no file
@@ -122,7 +122,7 @@ export type ChatSidePanel = 'files' | 'diff' | 'tasks'
  * The layout and the actions that open a panel read this one rule.
  */
 export function sidePanelHidesPreview(panel: ChatSidePanel | null): boolean {
-  return panel === 'diff' || panel === 'tasks'
+  return panel === 'diff' || panel === 'tasks' || panel === 'plan'
 }
 
 // ─── Composer Draft ──────────────────────────────────────────────────────────
@@ -349,6 +349,8 @@ interface AppState {
   // in the chat workspace. Lifted into the store so it survives navigating
   // away from chat (e.g. into Settings) and back.
   chatSidePanel: ChatSidePanel | null
+  // The open Plannotator review and the workspace whose agent asked for it.
+  planReview: { url: string; workspaceId: string } | null
   sidebarOpen: boolean
   terminalOpen: boolean
   reviewOpen: boolean
@@ -1201,6 +1203,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   workflowPanelWorkspaceId: null,
   chatScrollBottomNonce: 0,
   chatSidePanel: null,
+  planReview: null,
   sidebarOpen: true,
   terminalOpen: false,
   reviewOpen: false,

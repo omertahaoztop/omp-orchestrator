@@ -96,6 +96,10 @@
     "nextSteps": {
       "title": "Suggested next steps"
     },
+    "planReview": {
+      "close": "Close plan review",
+      "title": "Plan review"
+    },
     "projectPicker": {
       "noProject": "No project",
       "noProjectHomeDirectory": "No project — home directory",

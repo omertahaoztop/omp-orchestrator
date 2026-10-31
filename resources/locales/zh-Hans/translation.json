@@ -96,6 +96,10 @@
     "nextSteps": {
       "title": "建议的后续步骤"
     },
+    "planReview": {
+      "close": "关闭计划审查",
+      "title": "计划审查"
+    },
     "projectPicker": {
       "noProject": "无项目",
       "noProjectHomeDirectory": "无项目 — 主目录",

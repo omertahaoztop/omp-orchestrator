@@ -96,6 +96,10 @@
     "nextSteps": {
       "title": "Пропоновані кроки"
     },
+    "planReview": {
+      "close": "Закрити перевірку плану",
+      "title": "Перевірка плану"
+    },
     "projectPicker": {
       "noProject": "Без проєкту",
       "noProjectHomeDirectory": "Без проєкту — домашня папка",

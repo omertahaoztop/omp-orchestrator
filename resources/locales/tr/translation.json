@@ -96,6 +96,10 @@
     "nextSteps": {
       "title": "Önerilen sonraki adımlar"
     },
+    "planReview": {
+      "close": "Plan incelemesini kapat",
+      "title": "Plan incelemesi"
+    },
     "projectPicker": {
       "noProject": "Proje yok",
       "noProjectHomeDirectory": "Proje yok — ev dizini",

@@ -31,6 +31,7 @@ import { FileTree, FileSearch, FilePreview } from './file-tree'
 import { ImageViewer } from './image-viewer'
 import { DiffViewer } from './diff-viewer'
 import { SubagentPanel } from './subagent-panel'
+import { PlanReviewPanel } from './plan-review-panel'
 import { TerminalPanel } from './terminal'
 import { isFileWatchDemanded, useChatScroll, useChatVisible, useChatWidth } from '../hooks'
 import { messageColumnClass } from '../utils/chat-width'
@@ -83,6 +84,7 @@ export function ChatPanel(): React.JSX.Element {
   // round-trip). Widths stay local — resetting them on remount is benign.
   const sidePanel = useAppStore((state) => state.chatSidePanel)
   const setSidePanel = useAppStore((state) => state.setChatSidePanel)
+  const planUrl = useAppStore((state) => state.planReview?.workspaceId === state.activeWorkspace?.id ? state.planReview?.url ?? null : null)
   const [sidePanelWidth, setSidePanelWidth] = useState(DEFAULT_SIDE_PANEL_WIDTH)
   const [filePaneWidth, setFilePaneWidth] = useState(DEFAULT_FILE_PANE_WIDTH)
 
@@ -148,7 +150,7 @@ export function ChatPanel(): React.JSX.Element {
     }
   }, [])
 
-  const showSidePanel = sidePanel !== null || previewTarget !== null
+  const showSidePanel = (sidePanel !== null && (sidePanel !== 'plan' || planUrl !== null)) || previewTarget !== null
   const showFileTree = sidePanel === 'files'
   // The diff and the Tasks panel take the whole side slot; previews wait behind them.
   const previewAllowed = !sidePanelHidesPreview(sidePanel)
@@ -247,6 +249,11 @@ export function ChatPanel(): React.JSX.Element {
         {showTasks && (
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <SubagentPanel onClose={() => setSidePanel(null)} />
+          </div>
+        )}
+        {sidePanel === 'plan' && planUrl && (
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+            <PlanReviewPanel url={planUrl} onClose={() => setSidePanel(null)} />
           </div>
         )}
         {showEditor && (

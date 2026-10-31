@@ -94,6 +94,7 @@ import type {
   I18nEnvironment,
   ArtifactEntry,
   ArtifactShownEvent,
+  PlanReviewEvent,
 } from '../shared/ipc-contracts'
 import type { ThemeFile } from '../shared/theme/theme-file'
 import type { SubagentListResult, SubagentTranscriptRef, SubagentTranscriptResult } from '../shared/subagent-task'
@@ -459,6 +460,7 @@ interface PiDesktopAPI {
   onSessionDigests(callback: (map: SessionDigestMap) => void): () => void
   onNotifyFocus(callback: (runtimeId: string | null) => void): () => void
   onArtifactShown(callback: (event: ArtifactShownEvent) => void): () => void
+  onPlanReview(callback: (event: PlanReviewEvent) => void): () => void
   onSessionRuntime(callback: (runtime: SessionRuntimeInfo) => void): () => void
   onActivateWorkspace(callback: (payload: WorkspaceActivationIntent) => void): () => void
   onFileChange(callback: (event: FileChangeEvent) => void): () => void
@@ -816,6 +818,14 @@ const api: PiDesktopAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_ARTIFACT_SHOWN, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_ARTIFACT_SHOWN, handler)
+    }
+  },
+
+  onPlanReview: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: PlanReviewEvent) => callback(data)
+    ipcRenderer.on(IPC_CHANNELS.EVENT_PLAN_REVIEW, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_PLAN_REVIEW, handler)
     }
   },
 

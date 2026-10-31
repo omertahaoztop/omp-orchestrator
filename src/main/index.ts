@@ -1,10 +1,12 @@
 import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, protocol, session, shell } from 'electron'
-import { existsSync, mkdirSync } from 'fs'
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'fs'
 import { basename, dirname, join, resolve as resolvePath } from 'path'
 import { isTrustedRendererUrl, RENDERER_INDEX_PATH } from './renderer-origin'
 import { workspaceTrustStore } from './workspace-trust'
-import { PREVIEW_PARTITIONS } from '../shared/preview-partitions'
-import { isBlockedPreviewRequest, previewGuestPreferences } from './preview-guest'
+import { PLAN_REVIEW_PARTITION, PREVIEW_PARTITIONS } from '../shared/preview-partitions'
+import { isAllowedPreviewGuest, isBlockedPreviewRequest, previewGuestPreferences } from './preview-guest'
+import { isLoopbackHttpUrl, parsePlanReviewArgs, planReviewOpenerScript } from './plan-review'
+import { openPlanReview } from './ipc/plan-review-wiring'
 import { WorkspaceManager } from './workspace-manager'
 import type { WorkspaceTerminals } from './workspace-terminals'
 import { registerIpcHandlers, loadAppSettings, saveAppSettings } from './ipc-handlers'
@@ -126,8 +128,10 @@ async function reloadMainWindowWithGuard(ignoreCache: boolean): Promise<void> {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', () => {
-    showMainWindow()
+  app.on('second-instance', (_event, argv) => {
+    const review = parsePlanReviewArgs(argv)
+    if (review) openPlanReview(review)
+    else showMainWindow()
   })
 }
 
@@ -139,6 +143,15 @@ const userDataDir = externalUserDataDir ?? getCanonicalUserDataDir(app.getPath('
 mkdirSync(userDataDir, { recursive: true })
 app.setPath('userData', userDataDir)
 configureGuiDataDir(userDataDir)
+
+// Agents started here hand Plannotator reviews to this app (see plan-review.ts); a user's own opener wins.
+if (!process.env.PLANNOTATOR_BROWSER && process.platform !== 'win32') {
+  const self = process.env.APPIMAGE ? [process.env.APPIMAGE] : app.isPackaged ? [process.execPath] : [process.execPath, app.getAppPath()]
+  const opener = join(userDataDir, 'plannotator-open')
+  writeFileSync(opener, planReviewOpenerScript([...self, '--no-sandbox']))
+  chmodSync(opener, 0o755)
+  process.env.PLANNOTATOR_BROWSER = opener
+}
 
 // Voice dictation on the GPU needs WebGPU, which Chromium keeps off on Linux
 // unless it starts with extra switches. Set them now, before the app is ready.
@@ -301,7 +314,7 @@ function createMainWindow(): BrowserWindow {
       webPreferences.javascript = false
     }
 
-    if (!params.src.startsWith('file://')) {
+    if (!isAllowedPreviewGuest({ partition: params.partition, src: params.src, workspaceTrusted: false })) {
       event.preventDefault()
     }
   })
@@ -611,7 +624,8 @@ app.on('web-contents-created', (_event, contents) => {
       // An untrusted preview may not navigate away from its local file (e.g. a
       // malicious page redirecting itself to a remote URL). Trusted previews of
       // your own project may navigate freely.
-      if (!url.startsWith('file://') && !isActiveWorkspaceTrusted()) event.preventDefault()
+      const planReview = contents.session === session.fromPartition(PLAN_REVIEW_PARTITION) && isLoopbackHttpUrl(url)
+      if (!url.startsWith('file://') && !planReview && !isActiveWorkspaceTrusted()) event.preventDefault()
     })
   }
 })

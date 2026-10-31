@@ -3,7 +3,7 @@ import { activeShortcuts } from '../utils/app-shortcuts'
 import { formatShortcut } from '../../../shared/keyboard-shortcuts'
 import { useTranslation } from 'react-i18next'
 import { clsx } from 'clsx'
-import { FolderTree, GitCompare, ListChecks, Terminal, ShieldCheck } from 'lucide-react'
+import { ClipboardCheck, FolderTree, GitCompare, ListChecks, Terminal, ShieldCheck } from 'lucide-react'
 import { countRunningSubagentTasks } from '../../../shared/subagent-task'
 
 export function ChatToolRail(): React.JSX.Element {
@@ -14,6 +14,7 @@ export function ChatToolRail(): React.JSX.Element {
   const diffShortcut = useAppStore((state) => activeShortcuts(state).diff)
   const setSidePanel = useAppStore((state) => state.setChatSidePanel)
   const runningSubagents = useAppStore((state) => countRunningSubagentTasks(state.subagentTasks))
+  const hasPlanReview = useAppStore((state) => state.planReview !== null && state.planReview.workspaceId === state.activeWorkspace?.id)
 
   return (
     <nav className="flex w-10 shrink-0 flex-col items-center gap-1 border-l border-border bg-app py-2">
@@ -45,6 +46,14 @@ export function ChatToolRail(): React.JSX.Element {
         badge={runningSubagents}
         badgeLabel={t('chat.toolbar.subagentsRunning', { count: runningSubagents })}
       />
+      {hasPlanReview && (
+        <RailButton
+          icon={<ClipboardCheck size={16} />}
+          active={sidePanel === 'plan'}
+          onClick={() => void setSidePanel(sidePanel === 'plan' ? null : 'plan')}
+          title={t('chat.planReview.title')}
+        />
+      )}
       <RailButton
         icon={<Terminal size={16} />}
         active={terminalOpen}

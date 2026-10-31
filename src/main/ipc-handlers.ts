@@ -31,6 +31,7 @@ import { registerSubagentHandlers } from './ipc/subagent-handlers'
 import { wireWorkspaceActivity, type WindowControls } from './ipc/workspace-activity-wiring'
 import { wireSessionDigests } from './ipc/session-digest-wiring'
 import { wireArtifacts } from './ipc/artifact-wiring'
+import { wirePlanReview } from './ipc/plan-review-wiring'
 import type { WorkspaceTerminals } from './workspace-terminals'
 
 export { loadAppSettings, saveAppSettings } from './ipc/settings'
@@ -87,6 +88,7 @@ export function registerIpcHandlers(
   const workspaceActivity = wireWorkspaceActivity(ctx, windowControls, iconPath)
   wireSessionDigests(ctx)
   wireArtifacts(ctx)
+  wirePlanReview(ctx, windowControls.showWindow)
 
   // Router construction, the dialog-answer channels, the pending-prompt
   // flush/get pair and the two workspace hooks all live in extension-ui-ipc.ts
