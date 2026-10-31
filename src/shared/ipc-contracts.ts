@@ -77,6 +77,7 @@ export const IPC_CHANNELS = {
   UI_CONFIRM_RESPONSE: 'ui:confirm-response',
   UI_INPUT_RESPONSE: 'ui:input-response',
   UI_EDITOR_RESPONSE: 'ui:editor-response',
+  UI_ASK_RESPONSE: 'ui:ask-response',
   UI_PENDING_FLUSH: 'ui:pending-flush',
   UI_PENDING_GET: 'ui:pending-get',
   UI_EDITOR_DIRTY_SET: 'ui:editor-dirty-set',
@@ -584,11 +585,30 @@ export interface PiResponseEvent {
   data?: unknown
 }
 
+/** One question of OMP's `ask` dialog (sent after `set_ask_dialog`); hosts always offer free text. */
+export interface PiAskQuestion {
+  id: string
+  question: string
+  header?: string
+  options: Array<{ label: string; description?: string; preview?: string }>
+  multi?: boolean
+  /** Index of the recommended option. */
+  recommended?: number
+}
+
+/** One answer per question, in question order; single-select carries one option OR customInput. */
+export interface PiAskAnswer {
+  id: string
+  selectedOptions: string[]
+  customInput?: string
+}
+
 // Extension UI events
 export interface PiExtensionUiRequest {
   type: 'extension_ui_request'
   id: string
-  method: 'select' | 'confirm' | 'input' | 'editor' | 'notify' | 'setStatus' | 'setWidget' | 'setTitle' | 'set_editor_text' | 'open_url' | 'cancel'
+  method: 'select' | 'confirm' | 'input' | 'editor' | 'ask' | 'notify' | 'setStatus' | 'setWidget' | 'setTitle' | 'set_editor_text' | 'open_url' | 'cancel'
+  questions?: PiAskQuestion[]
   title?: string
   message?: string
   options?: string[]

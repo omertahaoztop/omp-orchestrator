@@ -439,7 +439,7 @@ export class WorkspaceManager {
       if (entry.runlessPromptRuns === entry.agentRunStarts) this.settleRunlessPrompt(entry, promptResultRefusal(event)?.reason)
     })
     manager.on('extension_ui_request', (event: { method?: string }) => {
-      if (event.method === 'select' || event.method === 'confirm' || event.method === 'input' || event.method === 'editor') {
+      if (event.method === 'select' || event.method === 'confirm' || event.method === 'input' || event.method === 'editor' || event.method === 'ask') {
         this.emitRuntimeActivity(entry, 'needs-approval')
       }
     })

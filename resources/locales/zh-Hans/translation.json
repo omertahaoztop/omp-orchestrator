@@ -66,6 +66,11 @@
       "waitingOnEngine": "{{agent}} 已启动 — 正在等待引擎完成加载。本地模型可能需要一些时间…"
     },
     "extensionUi": {
+      "askFallbackTitle": "",
+      "askMultiHint": "",
+      "askOtherPlaceholder": "",
+      "askRecommended": "",
+      "askSubmit": "",
       "editFallbackTitle": "编辑",
       "hideForNowWithShortcut": "暂时隐藏（{{shortcut}}）",
       "inputFallbackTitle": "输入",

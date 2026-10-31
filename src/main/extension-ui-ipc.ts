@@ -66,7 +66,7 @@ export function createExtensionUiRouter(deps: {
 export function wireExtensionUiIpc<TEvent>(deps: ExtensionUiIpcDeps<TEvent>): void {
   const { handle, assertTrustedSender, router, workspace, broadcast } = deps
 
-  // All four dialog answers route through the router so they reach the ORIGIN
+  // Every dialog answer routes through the router so it reaches the ORIGIN
   // Pi — the one that asked — not whichever workspace happens to be active now.
   const handleDialogResponse = (
     channel: string,
@@ -83,6 +83,12 @@ export function wireExtensionUiIpc<TEvent>(deps: ExtensionUiIpcDeps<TEvent>): vo
   handleDialogResponse(IPC_CHANNELS.UI_CONFIRM_RESPONSE, (confirmed) => ({ confirmed: !!confirmed }))
   handleDialogResponse(IPC_CHANNELS.UI_INPUT_RESPONSE, (value) => ({ value }))
   handleDialogResponse(IPC_CHANNELS.UI_EDITOR_RESPONSE, (value) => ({ value }))
+  // null cancels the whole dialog; OMP validates each answer against its questions.
+  handleDialogResponse(IPC_CHANNELS.UI_ASK_RESPONSE, (answers) => {
+    if (answers === null) return { cancelled: true }
+    if (!Array.isArray(answers)) throw new Error('answers must be an array or null')
+    return { answers }
+  })
 
   handle(IPC_CHANNELS.UI_PENDING_FLUSH, async (event, workspaceId: unknown) => {
     assertTrustedSender(event)

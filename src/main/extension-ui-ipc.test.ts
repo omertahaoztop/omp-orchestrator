@@ -17,12 +17,13 @@ const REQUEST_ID = 'req-1'
 const STOPPED_STATUS = { status: 'stopped', pid: null, error: null, engine: 'pi', startupPhase: undefined }
 const PENDING_COUNTS: PendingPromptCounts = { [WS_A]: 2, [WS_B]: 1 }
 
-/** The four channels that answer a blocking extension-UI dialog. */
+/** The channels that answer a blocking extension-UI dialog. */
 const RESPONSE_CHANNELS = [
   IPC_CHANNELS.UI_SELECT_RESPONSE,
   IPC_CHANNELS.UI_CONFIRM_RESPONSE,
   IPC_CHANNELS.UI_INPUT_RESPONSE,
   IPC_CHANNELS.UI_EDITOR_RESPONSE,
+  IPC_CHANNELS.UI_ASK_RESPONSE,
 ]
 /** The three whose payload is carried through verbatim as `value`. */
 const VALUE_CHANNELS = [
@@ -147,6 +148,18 @@ test('the confirm channel forwards a boolean, whatever the renderer sent', async
   assert.deepEqual(h.routerCalls, [
     { method: 'respond', args: [REQUEST_ID, { confirmed: true }] },
     { method: 'respond', args: [REQUEST_ID, { confirmed: false }] },
+  ])
+})
+
+test('the ask channel forwards answers, cancels on null, and rejects any other payload', async () => {
+  const h = createHarness()
+  const answers = [{ id: 'q1', selectedOptions: ['A'] }]
+  await h.invoke(IPC_CHANNELS.UI_ASK_RESPONSE, TRUSTED, REQUEST_ID, answers)
+  await h.invoke(IPC_CHANNELS.UI_ASK_RESPONSE, TRUSTED, REQUEST_ID, null)
+  await assert.rejects(h.invoke(IPC_CHANNELS.UI_ASK_RESPONSE, TRUSTED, REQUEST_ID, 'A'), /answers must be an array or null/)
+  assert.deepEqual(h.routerCalls, [
+    { method: 'respond', args: [REQUEST_ID, { answers }] },
+    { method: 'respond', args: [REQUEST_ID, { cancelled: true }] },
   ])
 })
 

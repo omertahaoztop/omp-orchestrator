@@ -66,6 +66,11 @@
       "waitingOnEngine": "{{agent}} hazır — motorun yüklenmesi bekleniyor. Yerel modeller biraz sürebilir…"
     },
     "extensionUi": {
+      "askFallbackTitle": "Pi soruyor",
+      "askMultiHint": "Bir veya birden çok seçin",
+      "askOtherPlaceholder": "Diğer: kendi cevabınızı yazın",
+      "askRecommended": "Önerilen",
+      "askSubmit": "Cevapları gönder",
       "editFallbackTitle": "Düzenle",
       "hideForNowWithShortcut": "Şimdilik gizle ({{shortcut}})",
       "inputFallbackTitle": "Giriş",

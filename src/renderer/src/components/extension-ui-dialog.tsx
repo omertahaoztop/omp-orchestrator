@@ -9,6 +9,7 @@ import {
   splitPromptText,
 } from './extension-ui-dialog-helpers'
 import { isImeComposing } from '../utils/ime-composing'
+import { AskForm } from './ask-form'
 
 // Stacking tiers for the two extension-UI surfaces, which can be on screen at
 // the same time. The toast MUST outrank the dialog's full-screen backdrop: at
@@ -29,6 +30,7 @@ export function ExtensionUiDialog(): React.JSX.Element | null {
   const respondExtensionUi = useAppStore((state) => state.respondExtensionUi)
   const dismissExtensionUi = useAppStore((state) => state.dismissExtensionUi)
   const dismissExtensionNotify = useAppStore((state) => state.dismissExtensionNotify)
+  const { t } = useTranslation()
 
   // Temporary hide (issue #61): the prompt stays unanswered in the store while
   // the user reads the chat behind it. Keyed by request id so a new prompt is
@@ -66,7 +68,7 @@ export function ExtensionUiDialog(): React.JSX.Element | null {
     <NotifyToast key={notify.id} request={notify} onDismiss={dismissExtensionNotify} />
   ) : null
 
-  // Dialog slot: the store routes only select/confirm/input/editor here. A
+  // Dialog slot: the store routes only select/confirm/input/editor/ask here. A
   // hidden prompt stays mounted (only its overlay is display:none) so text the
   // user already typed into an input or editor survives the hide.
   const dialog = ((): React.JSX.Element | null => {
@@ -105,6 +107,19 @@ export function ExtensionUiDialog(): React.JSX.Element | null {
             onSubmit={(value) => respondExtensionUi(request.id, { value })}
             {...frame}
           />
+        )
+      case 'ask':
+        return (
+          <DialogOverlay hidden={hidden} onBackdropClick={hide}>
+            <DialogBox prompt={t('chat.extensionUi.askFallbackTitle')} onCancel={dismissExtensionUi} onHide={hide} wide>
+              <AskForm
+                key={request.id}
+                questions={request.questions ?? []}
+                onSubmit={(answers) => respondExtensionUi(request.id, { answers })}
+                onCancel={dismissExtensionUi}
+              />
+            </DialogBox>
+          </DialogOverlay>
         )
       default:
         return null

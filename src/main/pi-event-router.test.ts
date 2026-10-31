@@ -13,7 +13,7 @@ const PROMPT_TIMEOUT_MS = 5_000
  * rather than drop when its workspace is inactive; narrowing the router's set
  * to a subset would deadlock the other methods' turns.
  */
-const BLOCKING_METHODS: readonly PiExtensionUiRequest['method'][] = ['select', 'confirm', 'input', 'editor']
+const BLOCKING_METHODS: readonly PiExtensionUiRequest['method'][] = ['select', 'confirm', 'input', 'editor', 'ask']
 
 function dialogRequest(id: string, overrides: Partial<PiExtensionUiRequest> = {}): PiExtensionUiRequest {
   return {

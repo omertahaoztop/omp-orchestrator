@@ -33,6 +33,7 @@ const BLOCKING_UI_METHODS: ReadonlySet<PiExtensionUiRequest['method']> = new Set
   'confirm',
   'input',
   'editor',
+  'ask',
 ])
 
 interface QueuedPrompt {

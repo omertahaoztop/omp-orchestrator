@@ -63,6 +63,7 @@ import type {
   PiAutoRetryStartEvent,
   PiAutoRetryEndEvent,
   PiExtensionUiRequest,
+  PiAskAnswer,
   Workspace,
   LinkedTaskOptions,
   InstalledPackage,
@@ -2770,7 +2771,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           // Toast slot: kept apart from the dialog slot so a notification can
           // never clobber an unanswered blocking prompt.
           set({ extensionNotify: uiEvent })
-        } else if (uiEvent.method === 'select' || uiEvent.method === 'confirm' || uiEvent.method === 'input' || uiEvent.method === 'editor') {
+        } else if (uiEvent.method === 'select' || uiEvent.method === 'confirm' || uiEvent.method === 'input' || uiEvent.method === 'editor' || uiEvent.method === 'ask') {
           set({ extensionUiRequest: uiEvent })
         }
         break
@@ -2831,6 +2832,8 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
 
     if (extensionUiRequest.method === 'confirm') {
       window.piDesktop.ui.respondConfirm(id, !!response.confirmed)
+    } else if (extensionUiRequest.method === 'ask') {
+      window.piDesktop.ui.respondAsk(id, response.answers as PiAskAnswer[])
     } else if (extensionUiRequest.method === 'select' || extensionUiRequest.method === 'input' || extensionUiRequest.method === 'editor') {
       window.piDesktop.ui.respondInput(id, String(response.value ?? ''))
     }
@@ -2843,6 +2846,8 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     if (extensionUiRequest) {
       if (extensionUiRequest.method === 'confirm') {
         window.piDesktop.ui.respondConfirm(extensionUiRequest.id, false)
+      } else if (extensionUiRequest.method === 'ask') {
+        window.piDesktop.ui.respondAsk(extensionUiRequest.id, null)
       } else {
         window.piDesktop.ui.respondInput(extensionUiRequest.id, '')
       }

@@ -64,6 +64,7 @@ import type {
   PermissionRulesWorkspaceStatus,
   PermissionRulesRemoveResult,
   PendingPromptCounts,
+  PiAskAnswer,
   WorkspaceActivityMap,
   WorkflowRunSummary,
   WorkflowRunDetail,
@@ -418,6 +419,8 @@ interface PiDesktopAPI {
     respondConfirm(id: string, confirmed: boolean): void
     respondInput(id: string, value: string): void
     respondEditor(id: string, value: string): void
+    /** null cancels the dialog. */
+    respondAsk(id: string, answers: PiAskAnswer[] | null): void
     /**
      * Ask main to (re-)deliver the workspace's held blocking prompt.
      * No-op unless the workspace is active when the flush executes.
@@ -726,6 +729,7 @@ const api: PiDesktopAPI = {
     respondConfirm: (id, confirmed) => ipcRenderer.invoke(IPC_CHANNELS.UI_CONFIRM_RESPONSE, id, confirmed),
     respondInput: (id, value) => ipcRenderer.invoke(IPC_CHANNELS.UI_INPUT_RESPONSE, id, value),
     respondEditor: (id, value) => ipcRenderer.invoke(IPC_CHANNELS.UI_EDITOR_RESPONSE, id, value),
+    respondAsk: (id, answers) => ipcRenderer.invoke(IPC_CHANNELS.UI_ASK_RESPONSE, id, answers),
     flushPendingPrompts: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.UI_PENDING_FLUSH, workspaceId),
     getPendingPrompts: () => ipcRenderer.invoke(IPC_CHANNELS.UI_PENDING_GET),
     setEditorDirty: (dirty, fileName) =>

@@ -66,6 +66,11 @@
       "waitingOnEngine": "{{agent}} is up — waiting for the engine to finish loading. Local models can take a while…"
     },
     "extensionUi": {
+      "askFallbackTitle": "Pi has questions",
+      "askMultiHint": "Select one or more",
+      "askOtherPlaceholder": "Other: type your own answer",
+      "askRecommended": "Recommended",
+      "askSubmit": "Send answers",
       "editFallbackTitle": "Edit",
       "hideForNowWithShortcut": "Hide for now ({{shortcut}})",
       "inputFallbackTitle": "Input",

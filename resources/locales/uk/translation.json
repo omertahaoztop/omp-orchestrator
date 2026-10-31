@@ -66,6 +66,11 @@
       "waitingOnEngine": "{{agent}} запущений — очікуємо завантаження рушія. Локальним моделям може знадобитися час…"
     },
     "extensionUi": {
+      "askFallbackTitle": "",
+      "askMultiHint": "",
+      "askOtherPlaceholder": "",
+      "askRecommended": "",
+      "askSubmit": "",
       "editFallbackTitle": "Змінити",
       "hideForNowWithShortcut": "Поки приховати ({{shortcut}})",
       "inputFallbackTitle": "Введення",

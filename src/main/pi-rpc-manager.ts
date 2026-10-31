@@ -1200,6 +1200,8 @@ export class PiRpcManager extends EventEmitter {
       if (Array.isArray(ready.supportedProtocolVersions) && ready.supportedProtocolVersions.includes(2)) {
         void this.sendCommand({ type: 'negotiate_protocol', protocolVersion: 2 }).catch(() => {})
       }
+      // Without the opt-in OMP splits `ask` into one plain select per question, dropping descriptions and multi-select.
+      void this.sendCommand({ type: 'set_ask_dialog', enabled: true }).catch(() => {})
       return
     }
 
