@@ -685,6 +685,12 @@
       "startupTimeoutSilentNoOutput": "Pi produced no output within {{seconds}}s.\n\nNo output captured. Check the app log for the exact spawn command, and try running `pi --mode rpc` directly in a terminal.",
       "startupTimeoutSilentWithStderr": "Pi produced no output within {{seconds}}s.\n\nPi stderr captured during startup:\n{{detail}}"
     },
+    "routines": {
+      "badCron": "Invalid schedule \"{{cron}}\". Use five fields: minute hour day month weekday.",
+      "fieldsRequired": "Name and prompt are required",
+      "neverRuns": "Schedule \"{{cron}}\" never runs",
+      "notFound": "Routine not found: {{id}}"
+    },
     "session": {
       "alreadyAttached": "Session file is already attached to a live runtime",
       "attachedToDifferentWorkspace": "Session is already attached to a different workspace runtime",
@@ -901,6 +907,23 @@
     "resumeFailedGeneric": "Could not proceed with {{workflow}}. Open the run for details.",
     "retryWithWorkflow": "Retry this workflow",
     "review": "Review",
+    "routines": {
+      "add": "Add routine",
+      "confirmRemove": "Remove?",
+      "empty": "No routines. Add one to start a session on a schedule.",
+      "missingProject": "Project removed",
+      "name": "Name",
+      "next": "next {{when}}",
+      "pause": "Pause",
+      "paused": "paused",
+      "prompt": "Prompt",
+      "remove": "Remove routine",
+      "resume": "Resume",
+      "runNow": "Run now",
+      "schedule": "Schedule (cron)",
+      "scheduleHint": "minute hour day month weekday, e.g. 0 9 * * 1-5 = weekdays at 09:00. Runs only while the app is open.",
+      "title": "Routines"
+    },
     "runtimeState": {
       "completed": "completed",
       "failed": "failed",

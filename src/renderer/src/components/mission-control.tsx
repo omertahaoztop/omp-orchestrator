@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, Archive, ArrowUpRight, CheckCircle2, Circle, Crosshair, FileText, Globe, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
+import { AlertCircle, Archive, ArrowUpRight, CalendarClock, CheckCircle2, Circle, Crosshair, FileText, Globe, Inbox, ListChecks, Loader2, Pause, Play, Plus, RefreshCw, Trash2, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
 import { SessionCleanup } from './session-cleanup'
@@ -12,7 +12,7 @@ import { canResumeRun } from '../utils/workflow-runs'
 import { NowContext, RelativeTime } from '../utils/relative-time'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
 import { PendingPromptCard } from './pending-prompt-card'
-import type { SessionDigest, SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
+import type { Routine, SessionDigest, SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
 import type { Translate } from '../../../shared/i18n'
 
 const WORKFLOW_STATUS_KEYS = {
@@ -312,6 +312,8 @@ export function MissionControl(): React.JSX.Element {
           )}
         </section>
 
+        <RoutinesSection now={now} />
+
         <section>
           <div className="mb-2 flex items-center justify-between">
             <SectionHeading title={t('missionControl.workflowActivity')} count={workflowRuns.length} />
@@ -492,6 +494,149 @@ function WorkflowRow({
         </button>
       )}
     </div>
+  )
+}
+
+const FIELD_CLASS = 'w-full rounded-md border border-border bg-app px-3 py-2 text-sm text-primary outline-none placeholder:text-faint focus:border-focus'
+
+/** Cron-scheduled prompts (main/routines.ts); each run opens a new session in its project. */
+function RoutinesSection({ now }: { now: number }): React.JSX.Element {
+  const { t } = useTranslation()
+  const workspaces = useAppStore((state) => state.workspaces)
+  const [routines, setRoutines] = useState<Routine[]>([])
+  const [adding, setAdding] = useState(false)
+  const [draft, setDraft] = useState({ name: '', cron: '', workspaceId: '', prompt: '' })
+  const [error, setError] = useState<string | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+
+  const reload = (): Promise<void> => window.piDesktop.routines.list().then(setRoutines)
+  useEffect(() => {
+    void reload()
+  }, [now])
+
+  const act = async (action: () => Promise<unknown>): Promise<boolean> => {
+    setError(null)
+    try {
+      await action()
+      await reload()
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message.replace(/^Error invoking remote method '[^']+': (Error: )?/, '') : String(err))
+      return false
+    }
+  }
+
+  const save = async (): Promise<void> => {
+    const workspaceId = draft.workspaceId || workspaces[0]?.id || ''
+    if (await act(() => window.piDesktop.routines.add({ ...draft, workspaceId }))) {
+      setAdding(false)
+      setDraft({ name: '', cron: '', workspaceId: '', prompt: '' })
+    }
+  }
+
+  const workspaceName = (id: string): string => workspaces.find((workspace) => workspace.id === id)?.name ?? t('missionControl.routines.missingProject')
+
+  return (
+    <section className="mb-6">
+      <div className="mb-2 flex items-center justify-between">
+        <SectionHeading title={t('missionControl.routines.title')} count={routines.length} />
+        {!adding && (
+          <button type="button" onClick={() => setAdding(true)} className="flex items-center gap-1 text-[11px] text-muted transition-colors hover:text-accent-fg">
+            <Plus size={12} />
+            {t('missionControl.routines.add')}
+          </button>
+        )}
+      </div>
+      {error && <div className="mb-2 rounded border border-error/40 bg-error-bg/20 px-3 py-2 text-[11px] text-error" role="status">{error}</div>}
+      {adding && (
+        <div className="mb-2 space-y-3 rounded-lg border border-border bg-surface/50 p-3">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-secondary">{t('missionControl.routines.name')}</span>
+              <input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className={FIELD_CLASS} />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-secondary">{t('common.project')}</span>
+              <select
+                value={draft.workspaceId || workspaces[0]?.id || ''}
+                onChange={(event) => setDraft({ ...draft, workspaceId: event.target.value })}
+                data-themed-select="true"
+                className={FIELD_CLASS}
+              >
+                {workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+              </select>
+            </label>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-secondary">{t('missionControl.routines.schedule')}</span>
+            <input value={draft.cron} onChange={(event) => setDraft({ ...draft, cron: event.target.value })} placeholder="0 9 * * 1-5" className={clsx(FIELD_CLASS, 'font-mono')} />
+            <span className="mt-1 block text-[11px] text-faint">{t('missionControl.routines.scheduleHint')}</span>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-secondary">{t('missionControl.routines.prompt')}</span>
+            <textarea value={draft.prompt} onChange={(event) => setDraft({ ...draft, prompt: event.target.value })} rows={3} className={clsx(FIELD_CLASS, 'resize-y leading-relaxed')} />
+          </label>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => { setAdding(false); setError(null) }} className="rounded-md px-3 py-1.5 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-primary">
+              {t('common.cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={() => void save()}
+              disabled={!draft.name.trim() || !draft.cron.trim() || !draft.prompt.trim() || workspaces.length === 0}
+              className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t('common.save')}
+            </button>
+          </div>
+        </div>
+      )}
+      {routines.length === 0 && !adding ? (
+        <EmptyState>{t('missionControl.routines.empty')}</EmptyState>
+      ) : (
+        <div className="space-y-1.5">
+          {routines.map((routine) => (
+            <div key={routine.id} className="flex items-center gap-3 rounded-lg border border-border bg-surface/50 px-3 py-2">
+              <CalendarClock size={14} className={clsx('shrink-0', routine.enabled ? 'text-accent-fg' : 'text-faint')} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm text-primary" title={routine.prompt}>{routine.name}</div>
+                <div className="truncate text-[11px] text-faint">
+                  {workspaceName(routine.workspaceId)} · <span className="font-mono">{routine.cron}</span> · {routine.nextRunAt
+                    ? t('missionControl.routines.next', { when: new Date(routine.nextRunAt).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) })
+                    : t('missionControl.routines.paused')}
+                </div>
+              </div>
+              <button type="button" onClick={() => void act(() => window.piDesktop.routines.run(routine.id))} title={t('missionControl.routines.runNow')} aria-label={t('missionControl.routines.runNow')} className="rounded p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-success">
+                <Play size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => void act(() => window.piDesktop.routines.setEnabled(routine.id, !routine.enabled))}
+                title={routine.enabled ? t('missionControl.routines.pause') : t('missionControl.routines.resume')}
+                aria-label={routine.enabled ? t('missionControl.routines.pause') : t('missionControl.routines.resume')}
+                className="rounded p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-primary"
+              >
+                {routine.enabled ? <Pause size={13} /> : <CalendarClock size={13} />}
+              </button>
+              {confirmRemove === routine.id ? (
+                <button
+                  type="button"
+                  onClick={() => void act(() => window.piDesktop.routines.remove(routine.id))}
+                  onBlur={() => setConfirmRemove(null)}
+                  className="rounded border border-error/40 px-2 py-1 text-[10px] font-medium text-error transition-colors hover:bg-error-bg/20"
+                >
+                  {t('missionControl.routines.confirmRemove')}
+                </button>
+              ) : (
+                <button type="button" onClick={() => setConfirmRemove(routine.id)} title={t('missionControl.routines.remove')} aria-label={t('missionControl.routines.remove')} className="rounded p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-error">
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 

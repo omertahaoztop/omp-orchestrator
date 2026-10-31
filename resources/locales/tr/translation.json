@@ -685,6 +685,12 @@
       "startupTimeoutSilentNoOutput": "Pi {{seconds}} sn içinde çıktı üretmedi.\n\nYakalanan çıktı yok. Tam başlatma komutu için uygulama günlüğüne bakın ve `pi --mode rpc` komutunu doğrudan bir terminalde çalıştırmayı deneyin.",
       "startupTimeoutSilentWithStderr": "Pi {{seconds}} sn içinde çıktı üretmedi.\n\nBaşlangıç sırasında yakalanan Pi stderr çıktısı:\n{{detail}}"
     },
+    "routines": {
+      "badCron": "Geçersiz zamanlama \"{{cron}}\". Beş alan kullanın: dakika saat gün ay haftanın günü.",
+      "fieldsRequired": "Ad ve istem zorunludur",
+      "neverRuns": "\"{{cron}}\" zamanlaması hiç çalışmıyor",
+      "notFound": "Rutin bulunamadı: {{id}}"
+    },
     "session": {
       "alreadyAttached": "Oturum dosyası zaten çalışan bir çalışma zamanına bağlı",
       "attachedToDifferentWorkspace": "Oturum zaten başka bir çalışma alanının çalışma zamanına bağlı",
@@ -901,6 +907,23 @@
     "resumeFailedGeneric": "{{workflow}} devam ettirilemedi. Ayrıntılar için çalıştırmayı açın.",
     "retryWithWorkflow": "Bu iş akışını yeniden dene",
     "review": "İncele",
+    "routines": {
+      "add": "Rutin ekle",
+      "confirmRemove": "Silinsin mi?",
+      "empty": "Rutin yok. Zamanlanmış oturum başlatmak için bir rutin ekleyin.",
+      "missingProject": "Proje kaldırılmış",
+      "name": "Ad",
+      "next": "sonraki {{when}}",
+      "pause": "Duraklat",
+      "paused": "duraklatıldı",
+      "prompt": "İstem",
+      "remove": "Rutini sil",
+      "resume": "Sürdür",
+      "runNow": "Şimdi çalıştır",
+      "schedule": "Zamanlama (cron)",
+      "scheduleHint": "dakika saat gün ay haftanın günü; ör. 0 9 * * 1-5 = hafta içi 09:00. Yalnızca uygulama açıkken çalışır.",
+      "title": "Rutinler"
+    },
     "runtimeState": {
       "completed": "tamamlandı",
       "failed": "başarısız",

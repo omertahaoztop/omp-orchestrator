@@ -95,6 +95,8 @@ import type {
   ArtifactEntry,
   ArtifactShownEvent,
   PlanReviewEvent,
+  Routine,
+  RoutineInput,
 } from '../shared/ipc-contracts'
 import type { ThemeFile } from '../shared/theme/theme-file'
 import type { SubagentListResult, SubagentTranscriptRef, SubagentTranscriptResult } from '../shared/subagent-task'
@@ -344,6 +346,14 @@ interface PiDesktopAPI {
     create(input: NoteInput): Promise<Note>
     update(id: string, patch: NoteUpdate): Promise<Note>
     remove(id: string): Promise<void>
+  }
+
+  routines: {
+    list(): Promise<Routine[]>
+    add(input: RoutineInput): Promise<Routine>
+    remove(id: string): Promise<void>
+    setEnabled(id: string, enabled: boolean): Promise<Routine>
+    run(id: string): Promise<void>
   }
 
   // File operations
@@ -685,6 +695,14 @@ const api: PiDesktopAPI = {
     create: (input) => ipcRenderer.invoke(IPC_CHANNELS.NOTES_CREATE, input),
     update: (id, patch) => ipcRenderer.invoke(IPC_CHANNELS.NOTES_UPDATE, id, patch),
     remove: (id) => ipcRenderer.invoke(IPC_CHANNELS.NOTES_REMOVE, id),
+  },
+
+  routines: {
+    list: () => ipcRenderer.invoke(IPC_CHANNELS.ROUTINES_LIST),
+    add: (input) => ipcRenderer.invoke(IPC_CHANNELS.ROUTINES_ADD, input),
+    remove: (id) => ipcRenderer.invoke(IPC_CHANNELS.ROUTINES_REMOVE, id),
+    setEnabled: (id, enabled) => ipcRenderer.invoke(IPC_CHANNELS.ROUTINES_SET_ENABLED, id, enabled),
+    run: (id) => ipcRenderer.invoke(IPC_CHANNELS.ROUTINES_RUN, id),
   },
 
   files: {

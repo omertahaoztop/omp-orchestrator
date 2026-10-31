@@ -74,25 +74,46 @@ async function deleteSessionFile(sessionPath: string): Promise<SessionDeleteResu
   }
 }
 
+async function startSessionRuntime(workspaceManager: WorkspaceManager, runtime: SessionRuntimeInfo, sessionPath?: string): Promise<void> {
+  const settings = await loadAppSettings(workspaceManager)
+  const workspace = workspaceManager.getWorkspaces().find((item) => item.id === runtime.workspaceId)
+  if (!workspace) return
+  const options = {
+    cwd: workspace.path,
+    ...(sessionPath ? { sessionPath } : {}),
+    provider: settings.defaultProvider ?? undefined,
+    model: settings.defaultModel ?? undefined,
+    defaultThinkingLevel: settings.defaultThinkingLevel ?? undefined,
+  }
+  await workspaceManager.startSessionRuntime(runtime.runtimeId, applyPermissionModeToStartOptions(
+    sessionPath ? applyResumePreference(options, settings) : options,
+    settings
+  ))
+}
+
+/** Starts a new session in the workspace and sends it the prompt; resolves once the runtime exists, not when Pi has started. */
+export async function launchTask(workspaceManager: WorkspaceManager, workspaceId: string, prompt: string): Promise<SessionRuntimeInfo> {
+  const workspace = workspaceManager.getWorkspaces().find((item) => item.id === workspaceId)
+  if (!workspace) throw new Error(t('errors.workspace.notFoundPlain'))
+  const runtime = await workspaceManager.createNewSessionRuntime(workspace.id)
+  // Reserve the runtime while startup and prompt delivery are asynchronous;
+  // list polling must not classify its header-only file as disposable.
+  workspaceManager.setSessionRuntimeActivity(runtime.runtimeId, 'working')
+  // Keep the prompt attached to this runtime. It must not go through the
+  // renderer's active-manager shortcut because the user can switch away
+  // before Pi finishes starting. The engine's answer settles the working
+  // state when the prompt runs no turn.
+  void startSessionRuntime(workspaceManager, runtime)
+    .then(() => workspaceManager.promptSessionRuntime(runtime.runtimeId, prompt))
+    .catch(() => workspaceManager.setSessionRuntimeActivity(runtime.runtimeId, 'failed'))
+  return runtime
+}
+
 export function registerSessionHandlers(ctx: IpcContext): void {
   const { workspaceManager, getActivePi, tagManager, archivedSessions } = ctx
 
-  const startRuntime = async (runtime: SessionRuntimeInfo, sessionPath?: string): Promise<void> => {
-    const settings = await loadAppSettings(workspaceManager)
-    const workspace = workspaceManager.getWorkspaces().find((item) => item.id === runtime.workspaceId)
-    if (!workspace) return
-    const options = {
-      cwd: workspace.path,
-      ...(sessionPath ? { sessionPath } : {}),
-      provider: settings.defaultProvider ?? undefined,
-      model: settings.defaultModel ?? undefined,
-      defaultThinkingLevel: settings.defaultThinkingLevel ?? undefined,
-    }
-    await workspaceManager.startSessionRuntime(runtime.runtimeId, applyPermissionModeToStartOptions(
-      sessionPath ? applyResumePreference(options, settings) : options,
-      settings
-    ))
-  }
+  const startRuntime = (runtime: SessionRuntimeInfo, sessionPath?: string): Promise<void> =>
+    startSessionRuntime(workspaceManager, runtime, sessionPath)
 
   // ─── Session Management ─────────────────────────────────────────────────
 
@@ -110,21 +131,7 @@ export function registerSessionHandlers(ctx: IpcContext): void {
     if (!isObject(input) || !isString(input.workspaceId) || !isString(input.prompt) || !input.prompt.trim()) {
       throw new Error('workspaceId and a non-empty prompt are required')
     }
-    const prompt = input.prompt
-    const workspace = workspaceManager.getWorkspaces().find((item) => item.id === input.workspaceId)
-    if (!workspace) throw new Error(t('errors.workspace.notFoundPlain'))
-    const runtime = await workspaceManager.createNewSessionRuntime(workspace.id)
-    // Reserve the runtime while startup and prompt delivery are asynchronous;
-    // list polling must not classify its header-only file as disposable.
-    workspaceManager.setSessionRuntimeActivity(runtime.runtimeId, 'working')
-    // Keep the prompt attached to this runtime. It must not go through the
-    // renderer's active-manager shortcut because the user can switch away
-    // before Pi finishes starting. The engine's answer settles the working
-    // state when the prompt runs no turn.
-    void startRuntime(runtime)
-      .then(() => workspaceManager.promptSessionRuntime(runtime.runtimeId, prompt))
-      .catch(() => workspaceManager.setSessionRuntimeActivity(runtime.runtimeId, 'failed'))
-    return runtime
+    return launchTask(workspaceManager, input.workspaceId, input.prompt)
   })
 
   const activateSession = async (sessionPath: string, cwd?: string): Promise<SessionRuntimeInfo> => {

@@ -213,6 +213,13 @@ export const IPC_CHANNELS = {
   NOTES_UPDATE: 'notes:update',
   NOTES_REMOVE: 'notes:remove',
 
+  // Routines (cron-scheduled prompts, each run in a new session)
+  ROUTINES_LIST: 'routines:list',
+  ROUTINES_ADD: 'routines:add',
+  ROUTINES_REMOVE: 'routines:remove',
+  ROUTINES_SET_ENABLED: 'routines:set-enabled',
+  ROUTINES_RUN: 'routines:run',
+
   // Themes (user-created theme storage)
   THEMES_LIST: 'themes:list',
   THEMES_SAVE: 'themes:save',
@@ -1735,6 +1742,21 @@ export interface LinkedShipResult {
  * single field so all notes live in one store and the UI merges by scope.
  */
 export type NoteScope = 'global' | string
+
+/** A prompt that starts a new session in its workspace on a cron schedule. */
+export interface Routine {
+  id: string
+  name: string
+  cron: string
+  workspaceId: string
+  prompt: string
+  enabled: boolean
+  lastRunAt: number | null
+  /** Null while disabled. */
+  nextRunAt: number | null
+}
+
+export type RoutineInput = Pick<Routine, 'name' | 'cron' | 'workspaceId' | 'prompt'>
 
 /** A reusable prompt or agent command the user has saved. */
 export interface Note {

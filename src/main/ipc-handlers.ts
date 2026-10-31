@@ -32,6 +32,7 @@ import { wireWorkspaceActivity, type WindowControls } from './ipc/workspace-acti
 import { wireSessionDigests } from './ipc/session-digest-wiring'
 import { wireArtifacts } from './ipc/artifact-wiring'
 import { wirePlanReview } from './ipc/plan-review-wiring'
+import { registerRoutineHandlers } from './ipc/routine-handlers'
 import type { WorkspaceTerminals } from './workspace-terminals'
 
 export { loadAppSettings, saveAppSettings } from './ipc/settings'
@@ -70,6 +71,7 @@ export function registerIpcHandlers(
   registerModelsConfigHandlers(ctx)
   registerCouncilHandlers(ctx)
   registerTagHandlers(ctx)
+  registerRoutineHandlers(ctx)
   registerNotesHandlers(ctx)
   registerFileHandlers(ctx)
   registerGitConveyorHandlers(ctx)

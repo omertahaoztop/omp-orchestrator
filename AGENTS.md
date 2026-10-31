@@ -91,7 +91,7 @@ src/
 │   ├── index.ts                  # App lifecycle, window creation, hardening
 │   ├── i18n.ts                   # Main-process language: OS language list, pseudo-language gate, apply the setting
 │   ├── ipc-handlers.ts           # IPC composition root (creates context, calls ipc/ modules)
-│   ├── ipc/                      # Domain-specific IPC handler modules (pi, session, files, ...); `session-digest-wiring.ts` and `artifact-wiring.ts` feed Komuta; `plan-review-wiring.ts` shows Plannotator reviews
+│   ├── ipc/                      # Domain-specific IPC handler modules (pi, session, files, ...); `session-digest-wiring.ts` and `artifact-wiring.ts` feed Komuta; `plan-review-wiring.ts` shows Plannotator reviews; `routine-handlers.ts` owns the routine scheduler
 │   ├── app-log.ts                # Main-process log: ring buffer + JSONL file in the GUI data dir
 │   ├── workspace-activity.ts     # Per-workspace activity state machine (working/approval/completed/failed)
 │   ├── notify-decision.ts        # Pure should-we-notify decision (focus/active-workspace aware)
@@ -109,6 +109,8 @@ src/
 │   ├── renderer-origin.ts        # Trusted-renderer URL check (navigation + IPC sender)
 │   ├── preview-guest.ts          # File-preview guest rules: which guest is the PDF preview, scripts, per-partition request block
 │   ├── plan-review.ts            # Plannotator opener script (PLANNOTATOR_BROWSER) and its relaunch-argv parser
+│   ├── cron.ts                   # Numeric 5-field cron parser, matcher and next-run finder (local time)
+│   ├── routines.ts               # Cron routines stored in routines.json; each run starts a new session with the prompt
 │   ├── window-background.ts      # Native window background that follows the theme
 │   ├── workspace-trust.ts        # Per-workspace trust registry (gates allow rules + preview)
 │   ├── workspace-manager.ts      # Multi-workspace management

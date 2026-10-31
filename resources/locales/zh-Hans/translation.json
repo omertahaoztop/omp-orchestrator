@@ -671,6 +671,12 @@
       "startupTimeoutSilentNoOutput": "Pi 在 {{seconds}} 秒内没有产生任何输出。\n\n没有捕获到输出。请在应用日志中查看确切的启动命令，并尝试在终端中直接运行 `pi --mode rpc`。",
       "startupTimeoutSilentWithStderr": "Pi 在 {{seconds}} 秒内没有产生任何输出。\n\n启动期间捕获的 Pi stderr：\n{{detail}}"
     },
+    "routines": {
+      "badCron": "无效的计划 \"{{cron}}\"。请使用五个字段：分 时 日 月 星期。",
+      "fieldsRequired": "名称和提示为必填项",
+      "neverRuns": "计划 \"{{cron}}\" 永远不会运行",
+      "notFound": "未找到例行任务：{{id}}"
+    },
     "session": {
       "alreadyAttached": "会话文件已绑定到活动运行时",
       "attachedToDifferentWorkspace": "会话已绑定到另一个工作区的运行时",
@@ -882,6 +888,23 @@
     "resumeFailedGeneric": "无法继续执行 {{workflow}}。打开该运行查看详情。",
     "retryWithWorkflow": "重试此工作流",
     "review": "审查",
+    "routines": {
+      "add": "添加例行任务",
+      "confirmRemove": "删除？",
+      "empty": "暂无例行任务。添加一个以按计划启动会话。",
+      "missingProject": "项目已移除",
+      "name": "名称",
+      "next": "下次 {{when}}",
+      "pause": "暂停",
+      "paused": "已暂停",
+      "prompt": "提示",
+      "remove": "删除例行任务",
+      "resume": "恢复",
+      "runNow": "立即运行",
+      "schedule": "计划 (cron)",
+      "scheduleHint": "分 时 日 月 星期，例如 0 9 * * 1-5 = 工作日 09:00。仅在应用打开时运行。",
+      "title": "例行任务"
+    },
     "runtimeState": {
       "completed": "已完成",
       "failed": "失败",
