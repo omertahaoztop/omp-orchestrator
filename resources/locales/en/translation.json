@@ -851,6 +851,24 @@
       "summarizing": "Writing the summary…",
       "unread": "Finished, not read yet"
     },
+    "cleanup": {
+      "archivedCount_one": "{{count}} session moved to the archive.",
+      "archivedCount_other": "{{count}} sessions moved to the archive.",
+      "archiveEmpty": "No archived session.",
+      "archiveSelected_one": "Archive {{count}} session",
+      "archiveSelected_other": "Archive {{count}} sessions",
+      "daysLabel": "Days",
+      "emptySession": "Empty session",
+      "filterEmpty": "Empty (no message)",
+      "filterOlder": "Older than (days):",
+      "nothing": "No session matches these filters.",
+      "open": "Session cleanup",
+      "restore": "Restore",
+      "restored": "“{{title}}” is back in the session list.",
+      "searchPlaceholder": "Search the archive",
+      "tabArchive": "Archive",
+      "tabCleanup": "Clean up"
+    },
     "controlUnavailable": "control unavailable",
     "focus": {
       "active": "Focus: {{session}}",

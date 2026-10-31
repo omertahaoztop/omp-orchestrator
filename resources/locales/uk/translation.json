@@ -883,6 +883,28 @@
       "summarizing": "",
       "unread": ""
     },
+    "cleanup": {
+      "archivedCount_one": "",
+      "archivedCount_few": "",
+      "archivedCount_many": "",
+      "archivedCount_other": "",
+      "archiveEmpty": "",
+      "archiveSelected_one": "",
+      "archiveSelected_few": "",
+      "archiveSelected_many": "",
+      "archiveSelected_other": "",
+      "daysLabel": "",
+      "emptySession": "",
+      "filterEmpty": "",
+      "filterOlder": "",
+      "nothing": "",
+      "open": "",
+      "restore": "",
+      "restored": "",
+      "searchPlaceholder": "",
+      "tabArchive": "",
+      "tabCleanup": ""
+    },
     "controlUnavailable": "керування недоступне",
     "focus": {
       "active": "",

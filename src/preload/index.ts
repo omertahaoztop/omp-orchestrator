@@ -146,6 +146,12 @@ interface PiDesktopAPI {
     archive(sessionId: string): Promise<ArchivedSessionsMap>
     unarchive(sessionId: string): Promise<ArchivedSessionsMap>
     listArchived(): Promise<ArchivedSessionsMap>
+    /** Every stored session, empty ones included, for Komuta's cleanup view. */
+    listForCleanup(): Promise<SessionListItem[]>
+    /** Moves session files into the sessions-archive folder; returns how many moved. */
+    archiveFiles(sessionPaths: string[]): Promise<number>
+    listArchiveFiles(): Promise<SessionListItem[]>
+    restoreArchiveFile(sessionPath: string): Promise<void>
     getLineage(): Promise<SessionLineageRecord[]>
     compact(customInstructions?: string): Promise<unknown>
   }
@@ -503,6 +509,10 @@ const api: PiDesktopAPI = {
     archive: (sessionId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_ARCHIVE, sessionId),
     unarchive: (sessionId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_UNARCHIVE, sessionId),
     listArchived: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_LIST_ARCHIVED),
+    listForCleanup: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_CLEANUP_LIST),
+    archiveFiles: (sessionPaths) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_ARCHIVE_FILES, sessionPaths),
+    listArchiveFiles: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_ARCHIVE_LIST_FILES),
+    restoreArchiveFile: (sessionPath) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_ARCHIVE_RESTORE, sessionPath),
   },
 
   model: {

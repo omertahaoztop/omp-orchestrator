@@ -851,6 +851,24 @@
       "summarizing": "Özet yazılıyor…",
       "unread": "Bitti, henüz okunmadı"
     },
+    "cleanup": {
+      "archivedCount_one": "{{count}} oturum arşive taşındı.",
+      "archivedCount_other": "{{count}} oturum arşive taşındı.",
+      "archiveEmpty": "Arşivde oturum yok.",
+      "archiveSelected_one": "{{count}} oturumu arşivle",
+      "archiveSelected_other": "{{count}} oturumu arşivle",
+      "daysLabel": "Gün",
+      "emptySession": "Boş oturum",
+      "filterEmpty": "Boş (mesajsız)",
+      "filterOlder": "Şu kadar günden eski:",
+      "nothing": "Bu filtrelere uyan oturum yok.",
+      "open": "Oturum temizliği",
+      "restore": "Geri yükle",
+      "restored": "“{{title}}” oturum listesine geri döndü.",
+      "searchPlaceholder": "Arşivde ara",
+      "tabArchive": "Arşiv",
+      "tabCleanup": "Temizle"
+    },
     "controlUnavailable": "denetim kullanılamıyor",
     "focus": {
       "active": "Odak: {{session}}",

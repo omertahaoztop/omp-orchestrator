@@ -48,6 +48,10 @@ export const IPC_CHANNELS = {
   SESSION_ARCHIVE: 'session:archive',
   SESSION_UNARCHIVE: 'session:unarchive',
   SESSION_LIST_ARCHIVED: 'session:list-archived',
+  SESSION_CLEANUP_LIST: 'session:cleanup-list',
+  SESSION_ARCHIVE_FILES: 'session:archive-files',
+  SESSION_ARCHIVE_LIST_FILES: 'session:archive-list-files',
+  SESSION_ARCHIVE_RESTORE: 'session:archive-restore',
   SESSION_GET_LINEAGE: 'session:get-lineage',
   SESSION_COMPACT: 'session:compact',
 

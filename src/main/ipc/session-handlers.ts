@@ -25,6 +25,8 @@ import { readdir, stat, unlink } from 'fs/promises'
 import { basename, join, resolve } from 'path'
 import { existsSync } from 'fs'
 import { moveToTrash } from '../session-trash'
+import { archiveRootFor, moveSession } from '../session-archive'
+import { isPathWithin } from '../../../resources/path-within'
 import { assertTrustedSender, isObject, isString } from './validation'
 import { applyResumePreference, applyPermissionModeToStartOptions } from './pi-start-options'
 import { loadAppSettings } from './settings'
@@ -337,6 +339,38 @@ export function registerSessionHandlers(ctx: IpcContext): void {
     return archivedSessions.getAll()
   })
 
+  ipcMain.handle(IPC_CHANNELS.SESSION_CLEANUP_LIST, async () => listLabeledSessions(workspaceManager, getSessionRoots()))
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_ARCHIVE_FILES, async (event, sessionPaths: unknown): Promise<number> => {
+    assertTrustedSender(event)
+    if (!Array.isArray(sessionPaths) || !sessionPaths.every(isString)) throw new Error('sessionPaths must be strings')
+    let archived = 0
+    for (const sessionPath of sessionPaths) {
+      const root = getSessionRoots().find((r) => isPathWithin(r, sessionPath))
+      // An open tab keeps writing to its file; it stays where it is.
+      if (!root || workspaceManager.getSessionRuntimeForPath(sessionPath)) continue
+      try {
+        await moveSession(sessionPath, root, archiveRootFor(root))
+        archived++
+      } catch (err) {
+        console.warn('[sessions] archive failed', sessionPath, err)
+      }
+    }
+    return archived
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_ARCHIVE_LIST_FILES, async () => (
+    listLabeledSessions(workspaceManager, getSessionRoots().map(archiveRootFor))
+  ))
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_ARCHIVE_RESTORE, async (event, sessionPath: unknown): Promise<void> => {
+    assertTrustedSender(event)
+    if (!isString(sessionPath)) throw new Error('sessionPath must be a string')
+    const root = getSessionRoots().find((r) => isPathWithin(archiveRootFor(r), sessionPath))
+    if (!root) throw new Error('sessionPath must be inside a session archive')
+    await moveSession(sessionPath, archiveRootFor(root), root)
+  })
+
   ipcMain.handle(IPC_CHANNELS.SESSION_GET_LINEAGE, async () => {
     return readSessionLineage()
   })
@@ -399,25 +433,43 @@ async function fillSessionLabels(
   })
 }
 
+/**
+ * Every parent session under `roots`, newest first. Rows whose project came
+ * from a registered workspace rather than from a desanitized directory name
+ * land in `workspaceMatched`; fillSessionLabels must not overwrite those.
+ */
+async function collectSessionRows(
+  wm: WorkspaceManager,
+  roots: string[]
+): Promise<{ entries: SessionEntry[]; workspaceMatched: Set<SessionEntry> }> {
+  const entries: SessionEntry[] = []
+  const workspaceMatched = new Set<SessionEntry>()
+  // Precompute workspace match map once (was O(workspaces) per file).
+  // Keys use pathsEqual semantics: case-fold only on win32.
+  const workspaceBySanitized = new Map(
+    wm.getWorkspaces().map((ws) => [workspaceMatchKey(sanitizePath(ws.path)), ws] as const)
+  )
+  for (const root of roots) {
+    await collectSessionFiles(entries, root, workspaceBySanitized, workspaceMatched)
+  }
+  entries.sort((a, b) => b.lastModified - a.lastModified)
+  return { entries, workspaceMatched }
+}
+
+/** Every session under `roots` with its labels and content state, for Komuta's cleanup and archive views. */
+async function listLabeledSessions(wm: WorkspaceManager, roots: string[]): Promise<SessionEntry[]> {
+  const { entries, workspaceMatched } = await collectSessionRows(wm, roots)
+  await fillSessionLabels(entries, workspaceMatched)
+  return entries
+}
+
 function createListSessions(wm: WorkspaceManager) {
   return async function listSessions(_cwd: string): Promise<SessionEntry[]> {
     try {
       await wm.pruneEmptySessionRuntimes()
-      const entries: SessionEntry[] = []
-      // Rows whose project came from a registered workspace rather than from a
-      // desanitized directory name. fillSessionLabels must not overwrite those.
-      const workspaceMatched = new Set<SessionEntry>()
-      // Precompute workspace match map once (was O(workspaces) per file).
-      // Keys use pathsEqual semantics: case-fold only on win32.
-      const workspaceBySanitized = new Map(
-        wm.getWorkspaces().map((ws) => [workspaceMatchKey(sanitizePath(ws.path)), ws] as const)
-      )
       // Pi and OMP each keep their sessions in their own store, so a single
       // root would hide every session started under the other engine.
-      for (const root of getSessionRoots()) {
-        await collectSessionFiles(entries, root, workspaceBySanitized, workspaceMatched)
-      }
-      entries.sort((a, b) => b.lastModified - a.lastModified)
+      const { entries, workspaceMatched } = await collectSessionRows(wm, getSessionRoots())
       // Only read names for the sessions we actually return (avoids reading the
       // whole store), then surface each session's latest session_info name.
       const top = entries.slice(0, MAX_SESSION_LIST)

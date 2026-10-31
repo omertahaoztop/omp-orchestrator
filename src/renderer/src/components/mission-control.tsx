@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Crosshair, FileText, Globe, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
+import { AlertCircle, Archive, ArrowUpRight, CheckCircle2, Circle, Crosshair, FileText, Globe, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
+import { SessionCleanup } from './session-cleanup'
 import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/agent-engine-label'
 import { getSessionTitle } from '../utils/session-title'
 import { pathsEqual } from '../../../shared/path-compare'
@@ -43,6 +44,7 @@ export function MissionControl(): React.JSX.Element {
   const focusRuntime = notifyFocusRuntimeId ? sessionRuntimes[notifyFocusRuntimeId] : undefined
   const artifacts = useAppStore((state) => state.artifacts)
   const openArtifact = useAppStore((state) => state.openArtifact)
+  const [cleanupOpen, setCleanupOpen] = useState(false)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
 
@@ -146,6 +148,18 @@ export function MissionControl(): React.JSX.Element {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setCleanupOpen((open) => !open)}
+              aria-pressed={cleanupOpen}
+              className={clsx(
+                'flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors hover:bg-surface-hover hover:text-primary',
+                cleanupOpen ? 'border-accent/50 text-primary' : 'border-border text-muted',
+              )}
+            >
+              <Archive size={12} />
+              {t('missionControl.cleanup.open')}
+            </button>
+            <button
+              type="button"
               onClick={() => void refreshWorkflowRuns()}
               className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-primary"
               title={t('missionControl.refreshWorkflowRuns')}
@@ -163,6 +177,8 @@ export function MissionControl(): React.JSX.Element {
             </button>
           </div>
         </div>
+
+        {cleanupOpen && <div className="mb-6"><SessionCleanup /></div>}
 
         {focusRuntime && (
           <div className="mb-6 flex items-center gap-3 rounded-lg border border-accent/40 bg-accent-bg/10 px-4 py-3">

@@ -835,6 +835,22 @@
       "summarizing": "",
       "unread": ""
     },
+    "cleanup": {
+      "archivedCount_other": "",
+      "archiveEmpty": "",
+      "archiveSelected_other": "",
+      "daysLabel": "",
+      "emptySession": "",
+      "filterEmpty": "",
+      "filterOlder": "",
+      "nothing": "",
+      "open": "",
+      "restore": "",
+      "restored": "",
+      "searchPlaceholder": "",
+      "tabArchive": "",
+      "tabCleanup": ""
+    },
     "controlUnavailable": "控制不可用",
     "focus": {
       "active": "",
