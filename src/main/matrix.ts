@@ -153,7 +153,10 @@ export function startMatrixBridge(deps: MatrixBridgeDeps): MatrixBridge {
     for (const { request, project } of pending) {
       if (posted.has(request.id)) continue
       posted.add(request.id)
-      send(questionMessage(request, project)).then(({ event_id }) => asked.set(event_id, request.id), warn)
+      send(questionMessage(request, project)).then(({ event_id }) => asked.set(event_id, request.id), (error) => {
+        posted.delete(request.id)
+        warn(error)
+      })
     }
   }
 

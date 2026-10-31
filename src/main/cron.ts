@@ -36,7 +36,8 @@ export function parseCron(expression: string): CronSchedule {
   if (parts.length !== 5) throw new Error(`a schedule needs 5 fields (minute hour day month weekday): ${expression}`)
   const [minutes, hours, days, months, weekdays] = parts.map((part, index) => parseField(part, FIELDS[index]))
   if (weekdays.delete(7)) weekdays.add(0)
-  return { minutes, hours, days, months, weekdays, dayOr: parts[2] !== '*' && parts[4] !== '*' }
+  // Vixie cron counts a day field starting with '*' (even '*/2') as unrestricted.
+  return { minutes, hours, days, months, weekdays, dayOr: !parts[2].startsWith('*') && !parts[4].startsWith('*') }
 }
 
 function dayMatches(schedule: CronSchedule, date: Date): boolean {

@@ -148,7 +148,7 @@ configureGuiDataDir(userDataDir)
 if (!process.env.PLANNOTATOR_BROWSER && process.platform !== 'win32') {
   const self = process.env.APPIMAGE ? [process.env.APPIMAGE] : app.isPackaged ? [process.execPath] : [process.execPath, app.getAppPath()]
   const opener = join(userDataDir, 'plannotator-open')
-  writeFileSync(opener, planReviewOpenerScript([...self, '--no-sandbox']))
+  writeFileSync(opener, planReviewOpenerScript([...self, ...(app.commandLine.hasSwitch('no-sandbox') ? ['--no-sandbox'] : [])]))
   chmodSync(opener, 0o755)
   process.env.PLANNOTATOR_BROWSER = opener
 }

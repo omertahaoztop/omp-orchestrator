@@ -16,6 +16,9 @@ test('day of month and weekday are either-or when both are set; 7 is Sunday', ()
   assert.equal(cronMatches(schedule, at('2026-11-01T12:00:00')), true)
   assert.equal(cronMatches(schedule, at('2026-11-08T12:00:00')), true)
   assert.equal(cronMatches(schedule, at('2026-11-09T12:00:00')), false)
+  const stepped = parseCron('0 12 */2 * 1')
+  assert.equal(cronMatches(stepped, at('2026-11-09T12:00:00')), true)
+  assert.equal(cronMatches(stepped, at('2026-11-03T12:00:00')), false)
 })
 
 test('bad and never-firing schedules are told apart', () => {
