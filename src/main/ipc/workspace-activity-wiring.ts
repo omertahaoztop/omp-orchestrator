@@ -54,19 +54,26 @@ export function wireWorkspaceActivity(
   // Activation intent from a notification clicked while no window existed;
   // the freshly created renderer pulls it once its subscriptions are live.
   let pendingActivation: WorkspaceActivationIntent | null = null
+  let focusRuntimeId: string | null = null
+  const held = { completed: 0, failed: 0 }
 
   const showNotification = async (
     notification: WorkspaceActivityNotification,
   ): Promise<void> => {
     const settings = await loadAppSettings(workspaceManager)
     const window = getWindow()
-    const permitted = shouldNotify({
+    const decision = shouldNotify({
       enabled: settings.desktopNotifications,
+      onlyQuestions: settings.notifyOnlyQuestions,
+      kind: notification.kind,
       windowFocused: window?.isFocused() ?? false,
       eventWorkspaceId: notification.workspaceId,
       activeWorkspaceId: workspaceManager.getActiveWorkspaceId(),
+      eventRuntimeId: notification.runtimeId ?? null,
+      focusRuntimeId,
     })
-    if (!permitted || !Notification.isSupported()) return
+    if (decision === 'hold' && notification.kind !== 'needs-approval') held[notification.kind] += 1
+    if (decision !== 'show' || !Notification.isSupported()) return
 
     const workspace = workspaceManager
       .getWorkspaces()
@@ -114,6 +121,25 @@ export function wireWorkspaceActivity(
       }
     })
     osNotification.show()
+  }
+
+  // Ending focus (or moving it) reports what it muted in one notification.
+  const setFocus = async (runtimeId: string | null): Promise<void> => {
+    if (runtimeId === focusRuntimeId) return
+    focusRuntimeId = runtimeId
+    ctx.broadcast(IPC_CHANNELS.EVENT_NOTIFY_FOCUS, runtimeId)
+    const { completed, failed } = held
+    held.completed = 0
+    held.failed = 0
+    if (completed + failed === 0 || !Notification.isSupported()) return
+    if (!(await loadAppSettings(workspaceManager)).desktopNotifications) return
+    const summary = new Notification({
+      title: t('notifications.focusSummaryTitle'),
+      body: t('notifications.focusSummary', { completed, failed }),
+      ...(iconPath ? { icon: iconPath } : {}),
+    })
+    summary.on('click', showWindow)
+    summary.show()
   }
 
   const tracker = createWorkspaceActivityTracker({
@@ -167,7 +193,15 @@ export function wireWorkspaceActivity(
     tracker.handleWorkspaceRemoved(workspaceId)
   })
 
+  workspaceManager.onSessionRuntime((runtime) => {
+    if (runtime.closed && runtime.runtimeId === focusRuntimeId) void setFocus(null)
+  })
+
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_ACTIVITY_GET, async () => tracker.getMap())
+  ipcMain.handle(IPC_CHANNELS.NOTIFY_FOCUS_GET, async () => focusRuntimeId)
+  ipcMain.handle(IPC_CHANNELS.NOTIFY_FOCUS_SET, async (_event, runtimeId: unknown) => {
+    await setFocus(typeof runtimeId === 'string' ? runtimeId : null)
+  })
 
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_TAKE_PENDING_ACTIVATION, async () => {
     const intent = pendingActivation

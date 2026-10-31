@@ -123,6 +123,8 @@ export const IPC_CHANNELS = {
   WORKSPACE_ACTIVITY_GET: 'workspace:activity',
   SESSION_DIGESTS_GET: 'session-digests:get',
   SESSION_DIGEST_MARK_READ: 'session-digests:mark-read',
+  NOTIFY_FOCUS_GET: 'notify:focus-get',
+  NOTIFY_FOCUS_SET: 'notify:focus-set',
   WORKSPACE_TAKE_PENDING_ACTIVATION: 'workspace:take-pending-activation',
 
   // Repo sets and linked tasks (one task across several git repositories)
@@ -222,6 +224,7 @@ export const IPC_CHANNELS = {
   EVENT_PENDING_PROMPTS: 'event:pending-prompts',
   EVENT_WORKSPACE_ACTIVITY: 'event:workspace-activity',
   EVENT_SESSION_DIGESTS: 'event:session-digests',
+  EVENT_NOTIFY_FOCUS: 'event:notify-focus',
   EVENT_SESSION_RUNTIME: 'event:session-runtime',
   EVENT_ACTIVATE_WORKSPACE: 'event:activate-workspace',
   EVENT_FILE_CHANGE: 'event:file-change',
@@ -1436,6 +1439,9 @@ export interface AppSettings {
   // Model for the two-sentence end-of-turn summaries on Komuta, passed to
   // `--model`; '@smol' is OMP's cheap-model role.
   summaryModel: string
+  // Desktop notifications only for questions and approvals; finished and
+  // failed turns show as unread on Komuta instead.
+  notifyOnlyQuestions: boolean
   // Interface language: 'system' (follow the OS language list) or a bundled
   // language code. Unknown values reset to 'system' on load.
   language: string

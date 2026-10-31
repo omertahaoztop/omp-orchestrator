@@ -59,7 +59,8 @@ export function Sidebar(): React.JSX.Element {
   const { t } = useTranslation()
   const activeEngineLabel = useAppStore((state) => agentEngineLabel(state.piEngine) ?? DEFAULT_AGENT_ENGINE_LABEL)
   const currentView = useAppStore((state) => state.currentView)
-  const komutaBadge = useAppStore((state) => state.pendingPrompts.length)
+  const komutaBadge = useAppStore((state) => state.pendingPrompts.length +
+    Object.values(state.sessionDigests).filter((digest) => digest.finishedAt !== null && !digest.read).length)
   const setCurrentView = useAppStore((state) => state.setCurrentView)
   const toggleSidebar = useAppStore((state) => state.toggleSidebar)
   const sessionState = useAppStore((state) => state.sessionState)

@@ -848,6 +848,12 @@
       "unread": "Bitti, henüz okunmadı"
     },
     "controlUnavailable": "denetim kullanılamıyor",
+    "focus": {
+      "active": "Odak: {{session}}",
+      "end": "Odağı bitir",
+      "hint": "Diğer oturumlar sessiz kalır; odak bitince tek bir özet gelir.",
+      "start": "Bu oturuma odaklan: diğerlerini sustur"
+    },
     "idle": "{{agent}} boşta",
     "inbox": {
       "deny": "Reddet",
@@ -961,6 +967,8 @@
   "notifications": {
     "completed": "Pi işini bitirdi.",
     "failed": "Pi bir hatayla durdu.",
+    "focusSummary": "Odaktayken {{completed}} oturum bitti, {{failed}} oturum hata verdi.",
+    "focusSummaryTitle": "Odak bitti",
     "needs-approval": "Pi onayınızı bekliyor.",
     "withSession": "{{body}} Biten oturumu açmak için tıklayın."
   },
@@ -1350,6 +1358,10 @@
     "minimizeToTrayOnClose": {
       "description": "Pencere kapatıldığında Pi Desktop'tan çıkmak yerine sistem tepsisinde çalışmaya devam et (Windows ve Linux)",
       "label": "Kapatınca sistem tepsisine küçült"
+    },
+    "notifyOnlyQuestions": {
+      "description": "Masaüstü bildirimi yalnız bir oturum cevabınızı beklediğinde gelir. Biten turlar Komuta ekranında görünür.",
+      "label": "Yalnız sorularda bildir"
     },
     "openToHomeOnLaunch": {
       "description": "Açık: tam Ana sayfa başlatıcısı (istatistikler, son kullanılanlar, klasör aç). Kapalı: Sohbet, boş oturumun ortadaki istem kutusu ve proje seçiciyle açılır.",

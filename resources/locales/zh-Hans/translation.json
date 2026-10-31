@@ -832,6 +832,12 @@
       "unread": ""
     },
     "controlUnavailable": "控制不可用",
+    "focus": {
+      "active": "",
+      "end": "",
+      "hint": "",
+      "start": ""
+    },
     "idle": "{{agent}} 处于空闲状态",
     "inbox": {
       "deny": "",
@@ -944,6 +950,8 @@
   "notifications": {
     "completed": "Pi 已完成工作。",
     "failed": "Pi 因错误而停止。",
+    "focusSummary": "",
+    "focusSummaryTitle": "",
     "needs-approval": "Pi 正在等待你的批准。",
     "withSession": "{{body}} 点击打开已完成的会话。"
   },
@@ -1323,6 +1331,10 @@
     "minimizeToTrayOnClose": {
       "description": "关闭窗口时让 Pi Desktop 继续在系统托盘中运行而不是退出（Windows 和 Linux）",
       "label": "关闭时最小化到托盘"
+    },
+    "notifyOnlyQuestions": {
+      "description": "",
+      "label": ""
     },
     "openToHomeOnLaunch": {
       "description": "开：完整的主页启动器（统计、最近项、打开文件夹）。关：打开聊天，显示空会话的居中提示和项目选择器。",

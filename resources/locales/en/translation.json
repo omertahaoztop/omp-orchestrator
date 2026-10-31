@@ -848,6 +848,12 @@
       "unread": "Finished, not read yet"
     },
     "controlUnavailable": "control unavailable",
+    "focus": {
+      "active": "Focus: {{session}}",
+      "end": "End focus",
+      "hint": "Other sessions stay silent; you get one summary when focus ends.",
+      "start": "Focus on this session: silence the others"
+    },
     "idle": "{{agent}} is idle",
     "inbox": {
       "deny": "Deny",
@@ -961,6 +967,8 @@
   "notifications": {
     "completed": "Pi finished working.",
     "failed": "Pi stopped with an error.",
+    "focusSummary": "While you were focused: {{completed}} finished, {{failed}} failed.",
+    "focusSummaryTitle": "Focus ended",
     "needs-approval": "Pi is waiting for your approval.",
     "withSession": "{{body}} Click to open the finished session."
   },
@@ -1350,6 +1358,10 @@
     "minimizeToTrayOnClose": {
       "description": "Keep Pi Desktop running in the system tray when you close the window instead of quitting (Windows and Linux)",
       "label": "Minimize to Tray on Close"
+    },
+    "notifyOnlyQuestions": {
+      "description": "Desktop notifications fire only when a session waits for your answer. Finished turns show in Command.",
+      "label": "Notify only for questions"
     },
     "openToHomeOnLaunch": {
       "description": "On: full Home launcher (stats, recents, open folder). Off: open Chat with the empty-session center prompt and project picker.",

@@ -880,6 +880,12 @@
       "unread": ""
     },
     "controlUnavailable": "управление недоступно",
+    "focus": {
+      "active": "",
+      "end": "",
+      "hint": "",
+      "start": ""
+    },
     "idle": "{{agent}} бездействует",
     "inbox": {
       "deny": "",
@@ -995,6 +1001,8 @@
   "notifications": {
     "completed": "Pi завершил работу.",
     "failed": "Pi остановился с ошибкой.",
+    "focusSummary": "",
+    "focusSummaryTitle": "",
     "needs-approval": "Pi ждёт вашего одобрения.",
     "withSession": "{{body}} Нажмите, чтобы открыть завершённую сессию."
   },
@@ -1404,6 +1412,10 @@
     "minimizeToTrayOnClose": {
       "description": "При закрытии окна оставлять Pi Desktop в системном трее (Windows и Linux)",
       "label": "Сворачивать в трей при закрытии"
+    },
+    "notifyOnlyQuestions": {
+      "description": "",
+      "label": ""
     },
     "openToHomeOnLaunch": {
       "description": "Включено: главный экран со статистикой, недавними проектами и выбором папки. Выключено: пустой чат с полем ввода и выбором проекта.",

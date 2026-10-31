@@ -56,6 +56,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   desktopNotifications: true,
   suggestNextSteps: true,
   summaryModel: '@smol',
+  notifyOnlyQuestions: true,
   language: SYSTEM_LANGUAGE,
   shortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
   council: DEFAULT_COUNCIL_CONFIG,

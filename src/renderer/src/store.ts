@@ -378,6 +378,8 @@ interface AppState {
   workspaceActivity: WorkspaceActivityMap
   // Per-runtime turn timing and end-of-turn summary for the Komuta board.
   sessionDigests: SessionDigestMap
+  // Session in focus mode, mirrored from main; null when focus mode is off.
+  notifyFocusRuntimeId: string | null
   // Dynamic workflow runs read from the extension's persisted run journal.
   workflowRuns: WorkflowRunSummary[]
   // Extension status entries (setStatus fire-and-forget). Keyed by statusKey.
@@ -1209,6 +1211,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   pendingPrompts: [],
   workspaceActivity: {},
   sessionDigests: {},
+  notifyFocusRuntimeId: null,
   workflowRuns: [],
   extensionStatuses: {},
   subagentTasks: [],

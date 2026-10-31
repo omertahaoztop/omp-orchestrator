@@ -880,6 +880,12 @@
       "unread": ""
     },
     "controlUnavailable": "керування недоступне",
+    "focus": {
+      "active": "",
+      "end": "",
+      "hint": "",
+      "start": ""
+    },
     "idle": "{{agent}} простоює",
     "inbox": {
       "deny": "",
@@ -995,6 +1001,8 @@
   "notifications": {
     "completed": "Pi завершив роботу.",
     "failed": "Pi зупинився з помилкою.",
+    "focusSummary": "",
+    "focusSummaryTitle": "",
     "needs-approval": "Pi чекає на ваше схвалення.",
     "withSession": "{{body}} Натисніть, щоб відкрити завершену сесію."
   },
@@ -1404,6 +1412,10 @@
     "minimizeToTrayOnClose": {
       "description": "Після закриття вікна залишати Pi Desktop у системному треї (Windows і Linux)",
       "label": "Згортати до трея після закриття"
+    },
+    "notifyOnlyQuestions": {
+      "description": "",
+      "label": ""
     },
     "openToHomeOnLaunch": {
       "description": "Увімкнено: головний екран зі статистикою, нещодавніми проєктами й вибором папки. Вимкнено: порожній чат із полем введення та вибором проєкту.",

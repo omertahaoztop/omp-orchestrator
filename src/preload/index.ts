@@ -214,6 +214,9 @@ interface PiDesktopAPI {
     getActivity(): Promise<WorkspaceActivityMap>
     getSessionDigests(): Promise<SessionDigestMap>
     markSessionDigestRead(runtimeId: string): Promise<void>
+    /** The session in focus mode (others' finished/failed notifications are held), or null. */
+    getNotifyFocus(): Promise<string | null>
+    setNotifyFocus(runtimeId: string | null): Promise<void>
     /**
      * Consume the activation intent from a notification clicked while no
      * window existed (macOS closed-window case). Null when there is none.
@@ -444,6 +447,7 @@ interface PiDesktopAPI {
   onPendingPrompts(callback: (counts: PendingPromptCounts) => void): () => void
   onWorkspaceActivity(callback: (map: WorkspaceActivityMap) => void): () => void
   onSessionDigests(callback: (map: SessionDigestMap) => void): () => void
+  onNotifyFocus(callback: (runtimeId: string | null) => void): () => void
   onSessionRuntime(callback: (runtime: SessionRuntimeInfo) => void): () => void
   onActivateWorkspace(callback: (payload: WorkspaceActivationIntent) => void): () => void
   onFileChange(callback: (event: FileChangeEvent) => void): () => void
@@ -553,6 +557,8 @@ const api: PiDesktopAPI = {
     getActivity: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ACTIVITY_GET),
     getSessionDigests: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGESTS_GET),
     markSessionDigestRead: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGEST_MARK_READ, runtimeId),
+    getNotifyFocus: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_GET),
+    setNotifyFocus: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_SET, runtimeId),
     takePendingActivation: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_TAKE_PENDING_ACTIVATION),
   },
 
@@ -778,6 +784,14 @@ const api: PiDesktopAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_SESSION_DIGESTS, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_SESSION_DIGESTS, handler)
+    }
+  },
+
+  onNotifyFocus: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, runtimeId: string | null) => callback(runtimeId)
+    ipcRenderer.on(IPC_CHANNELS.EVENT_NOTIFY_FOCUS, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_NOTIFY_FOCUS, handler)
     }
   },
 

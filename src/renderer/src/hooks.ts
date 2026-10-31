@@ -35,6 +35,9 @@ export function usePiEvents(): void {
         state.markActiveDigestRead()
       }
     })
+    const setFocus = (notifyFocusRuntimeId: string | null): void => useAppStore.setState({ notifyFocusRuntimeId })
+    const unsubscribeFocus = window.piDesktop.onNotifyFocus(setFocus)
+    void window.piDesktop.workspace.getNotifyFocus().then(setFocus).catch(() => undefined)
 
     // A desktop-notification click hands the renderer the switch intent so the
     // usual streaming/dirty-editor confirms still run; landing on chat shows
@@ -96,6 +99,7 @@ export function usePiEvents(): void {
       unsubscribeActivate()
       unsubscribeDigests()
       unsubscribeDigestRead()
+      unsubscribeFocus()
     }
   }, [handlePiEvent, handlePendingPromptCounts, handleWorkspaceActivity, handleSessionRuntime, handleSessionDigests, recoverPendingPrompts])
 }

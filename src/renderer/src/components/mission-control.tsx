@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Crosshair, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
 import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/agent-engine-label'
@@ -39,6 +39,8 @@ export function MissionControl(): React.JSX.Element {
   const pendingPrompts = useAppStore((state) => state.pendingPrompts)
   const answerPendingPrompt = useAppStore((state) => state.answerPendingPrompt)
   const sessionDigests = useAppStore((state) => state.sessionDigests)
+  const notifyFocusRuntimeId = useAppStore((state) => state.notifyFocusRuntimeId)
+  const focusRuntime = notifyFocusRuntimeId ? sessionRuntimes[notifyFocusRuntimeId] : undefined
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
 
@@ -160,6 +162,25 @@ export function MissionControl(): React.JSX.Element {
           </div>
         </div>
 
+        {focusRuntime && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-accent/40 bg-accent-bg/10 px-4 py-3">
+            <Crosshair size={15} className="shrink-0 text-accent-fg" />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm text-primary">
+                {t('missionControl.focus.active', { session: sessionTitleFor(focusRuntime.sessionPath, focusRuntime.sessionId) })}
+              </div>
+              <div className="text-[11px] text-faint">{t('missionControl.focus.hint')}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void window.piDesktop.workspace.setNotifyFocus(null)}
+              className="shrink-0 rounded-md border border-border-strong px-3 py-1.5 text-xs text-muted transition-colors hover:bg-surface-hover"
+            >
+              {t('missionControl.focus.end')}
+            </button>
+          </div>
+        )}
+
         <section className="mb-6">
           <SectionHeading title={t('missionControl.inbox.title')} count={pendingPrompts.length} />
           {pendingPrompts.length === 0 ? (
@@ -207,6 +228,10 @@ export function MissionControl(): React.JSX.Element {
                         onReview={runtime.sessionPath && (runtime.activity === 'completed' || workspace?.kind === 'worktree')
                           ? () => void reviewRuntime(runtime)
                           : null}
+                        focused={notifyFocusRuntimeId === runtime.runtimeId}
+                        onToggleFocus={() => void window.piDesktop.workspace.setNotifyFocus(
+                          notifyFocusRuntimeId === runtime.runtimeId ? null : runtime.runtimeId,
+                        )}
                       />
                     )
                   })}
@@ -289,6 +314,8 @@ function RuntimeCard({
   projectName,
   onOpen,
   onReview,
+  focused,
+  onToggleFocus,
 }: {
   runtime: SessionRuntimeInfo
   digest: SessionDigest | undefined
@@ -296,12 +323,14 @@ function RuntimeCard({
   projectName: string
   onOpen: (() => void) | null
   onReview: (() => void) | null
+  focused: boolean
+  onToggleFocus: () => void
 }): React.JSX.Element {
   const { t } = useTranslation()
   const finishedAt = isRunning(runtime) ? null : digest?.finishedAt ?? null
   const unread = finishedAt !== null && !digest?.read
   return (
-    <div className={clsx('rounded-lg border bg-surface/50 px-3 py-3', unread ? 'border-accent/50' : 'border-border')}>
+    <div className={clsx('rounded-lg border bg-surface/50 px-3 py-3', focused || unread ? 'border-accent/50' : 'border-border')}>
       <div className="flex items-center gap-3">
         <SessionRuntimeIndicator runtime={runtime} />
         {!runtime.activity && runtime.status === 'running' && (
@@ -324,6 +353,18 @@ function RuntimeCard({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={onToggleFocus}
+            aria-pressed={focused}
+            title={focused ? t('missionControl.focus.end') : t('missionControl.focus.start')}
+            className={clsx(
+              'rounded p-1 transition-colors hover:bg-highlight',
+              focused ? 'text-accent-fg' : 'text-faint hover:text-primary',
+            )}
+          >
+            <Crosshair size={13} />
+          </button>
           {onOpen && (
             <button
               type="button"

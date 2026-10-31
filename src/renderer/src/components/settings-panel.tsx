@@ -134,6 +134,7 @@ export function SettingsPanel(): React.JSX.Element {
   const [autoScroll, setAutoScroll] = useState(draft0.autoScroll ?? settings?.autoScroll ?? DEFAULT_SETTINGS.autoScroll)
   const [singleDollarMath, setSingleDollarMath] = useState(draft0.singleDollarMath ?? settings?.singleDollarMath ?? DEFAULT_SETTINGS.singleDollarMath)
   const [desktopNotifications, setDesktopNotifications] = useState(draft0.desktopNotifications ?? settings?.desktopNotifications ?? DEFAULT_SETTINGS.desktopNotifications)
+  const [notifyOnlyQuestions, setNotifyOnlyQuestions] = useState(draft0.notifyOnlyQuestions ?? settings?.notifyOnlyQuestions ?? DEFAULT_SETTINGS.notifyOnlyQuestions)
   const [suggestNextSteps, setSuggestNextSteps] = useState(draft0.suggestNextSteps ?? settings?.suggestNextSteps ?? DEFAULT_SETTINGS.suggestNextSteps)
   const [summaryModel, setSummaryModel] = useState(draft0.summaryModel ?? settings?.summaryModel ?? DEFAULT_SETTINGS.summaryModel)
   const [resumeLastSession, setResumeLastSession] = useState(draft0.resumeLastSession ?? settings?.resumeLastSession ?? DEFAULT_SETTINGS.resumeLastSession)
@@ -322,6 +323,7 @@ export function SettingsPanel(): React.JSX.Element {
     setAutoScroll(draft.autoScroll ?? settings.autoScroll)
     setSingleDollarMath(draft.singleDollarMath ?? settings.singleDollarMath)
     setDesktopNotifications(draft.desktopNotifications ?? settings.desktopNotifications)
+    setNotifyOnlyQuestions(draft.notifyOnlyQuestions ?? settings.notifyOnlyQuestions)
     setSuggestNextSteps(draft.suggestNextSteps ?? settings.suggestNextSteps)
     setSummaryModel(draft.summaryModel ?? settings.summaryModel)
     setResumeLastSession(draft.resumeLastSession ?? settings.resumeLastSession)
@@ -582,6 +584,7 @@ export function SettingsPanel(): React.JSX.Element {
       autoScroll,
       singleDollarMath,
       desktopNotifications,
+      notifyOnlyQuestions,
       suggestNextSteps,
       summaryModel,
       resumeLastSession,
@@ -657,6 +660,7 @@ export function SettingsPanel(): React.JSX.Element {
       autoScroll: DEFAULT_SETTINGS.autoScroll,
       singleDollarMath: DEFAULT_SETTINGS.singleDollarMath,
       desktopNotifications: DEFAULT_SETTINGS.desktopNotifications,
+      notifyOnlyQuestions: DEFAULT_SETTINGS.notifyOnlyQuestions,
       suggestNextSteps: DEFAULT_SETTINGS.suggestNextSteps,
       summaryModel: DEFAULT_SETTINGS.summaryModel,
       resumeLastSession: DEFAULT_SETTINGS.resumeLastSession,
@@ -683,6 +687,7 @@ export function SettingsPanel(): React.JSX.Element {
     setAutoScroll(defaults.autoScroll!)
     setSingleDollarMath(defaults.singleDollarMath!)
     setDesktopNotifications(defaults.desktopNotifications!)
+    setNotifyOnlyQuestions(defaults.notifyOnlyQuestions!)
     setSuggestNextSteps(defaults.suggestNextSteps!)
     setSummaryModel(defaults.summaryModel!)
     setResumeLastSession(defaults.resumeLastSession!)
@@ -1095,6 +1100,13 @@ export function SettingsPanel(): React.JSX.Element {
             description={t('settings.desktopNotifications.description')}
           >
             <Toggle checked={desktopNotifications} onChange={(v) => { setDesktopNotifications(v); setSettingsDraft({ desktopNotifications: v }) }} />
+          </SettingsRow>
+
+          <SettingsRow
+            label={t('settings.notifyOnlyQuestions.label')}
+            description={t('settings.notifyOnlyQuestions.description')}
+          >
+            <Toggle checked={notifyOnlyQuestions} onChange={(v) => { setNotifyOnlyQuestions(v); setSettingsDraft({ notifyOnlyQuestions: v }) }} />
           </SettingsRow>
 
           <SettingsRow
