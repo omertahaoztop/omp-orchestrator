@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Crosshair, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Crosshair, FileText, Globe, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
 import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/agent-engine-label'
@@ -41,6 +41,8 @@ export function MissionControl(): React.JSX.Element {
   const sessionDigests = useAppStore((state) => state.sessionDigests)
   const notifyFocusRuntimeId = useAppStore((state) => state.notifyFocusRuntimeId)
   const focusRuntime = notifyFocusRuntimeId ? sessionRuntimes[notifyFocusRuntimeId] : undefined
+  const artifacts = useAppStore((state) => state.artifacts)
+  const openArtifact = useAppStore((state) => state.openArtifact)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
 
@@ -265,6 +267,29 @@ export function MissionControl(): React.JSX.Element {
                     <div className="h-full bg-accent" style={{ width: `${todo.total ? (todo.done / todo.total) * 100 : 0}%` }} />
                   </div>
                   <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-muted">{todo.done}/{todo.total}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="mb-6">
+          <SectionHeading title={t('missionControl.artifacts.title')} count={artifacts.length} />
+          {artifacts.length === 0 ? (
+            <EmptyState>{t('missionControl.artifacts.empty')}</EmptyState>
+          ) : (
+            <div className="space-y-1.5">
+              {artifacts.slice(0, 8).map((artifact) => (
+                <button
+                  key={artifact.source}
+                  type="button"
+                  onClick={() => void openArtifact(artifact)}
+                  title={artifact.source}
+                  className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface/50 px-3 py-2 text-left transition-colors hover:border-border-strong hover:bg-surface-hover"
+                >
+                  {artifact.url ? <Globe size={14} className="shrink-0 text-muted" /> : <FileText size={14} className="shrink-0 text-muted" />}
+                  <span className="min-w-0 flex-1 truncate text-sm text-primary">{artifact.label}</span>
+                  <span className="shrink-0 text-[11px] text-faint"><RelativeTime timestamp={artifact.shownAt} /></span>
                 </button>
               ))}
             </div>

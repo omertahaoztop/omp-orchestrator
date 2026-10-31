@@ -881,7 +881,8 @@ export class PiRpcManager extends EventEmitter {
       cwd: options.cwd,
       // Windows only: redirect TEMP so pi-subagents can mkdir without EPERM on
       // locked %LocalAppData%\Temp trees. POSIX keeps the system temp (OS cleanup).
-      env: buildPiRunEnv(cli.needsShell, { ...process.env, ...buildPiChildEnv(), ...options.env }),
+      // OMP_ARTIFACTS_EXTERNAL_VIEWER: the app previews show_artifact files, so omp-artifacts needs no kitty.
+      env: buildPiRunEnv(cli.needsShell, { ...process.env, ...buildPiChildEnv(), OMP_ARTIFACTS_EXTERNAL_VIEWER: '1', ...options.env }),
       // .cmd/.bat/.ps1 shims on Windows can't be invoked directly from
       // spawn — they need the cmd.exe interpreter via shell:true.
       shell: cli.needsShell,

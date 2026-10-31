@@ -838,6 +838,10 @@
     "zoomOut": "Uzaklaştır"
   },
   "missionControl": {
+    "artifacts": {
+      "empty": "Oturumların show_artifact ile gösterdiği dosya ve sayfalar burada listelenir.",
+      "title": "Son artifact'ler"
+    },
     "board": {
       "ended": "bitti:",
       "finished": "Bitti",

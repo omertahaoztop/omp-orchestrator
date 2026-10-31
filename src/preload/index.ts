@@ -92,6 +92,8 @@ import type {
   GitConveyorPullRequestOptions,
   GitConveyorPullRequestResult,
   I18nEnvironment,
+  ArtifactEntry,
+  ArtifactShownEvent,
 } from '../shared/ipc-contracts'
 import type { ThemeFile } from '../shared/theme/theme-file'
 import type { SubagentListResult, SubagentTranscriptRef, SubagentTranscriptResult } from '../shared/subagent-task'
@@ -217,6 +219,8 @@ interface PiDesktopAPI {
     /** The session in focus mode (others' finished/failed notifications are held), or null. */
     getNotifyFocus(): Promise<string | null>
     setNotifyFocus(runtimeId: string | null): Promise<void>
+    /** Recent show_artifact files and URLs, newest first. */
+    listArtifacts(): Promise<ArtifactEntry[]>
     /**
      * Consume the activation intent from a notification clicked while no
      * window existed (macOS closed-window case). Null when there is none.
@@ -448,6 +452,7 @@ interface PiDesktopAPI {
   onWorkspaceActivity(callback: (map: WorkspaceActivityMap) => void): () => void
   onSessionDigests(callback: (map: SessionDigestMap) => void): () => void
   onNotifyFocus(callback: (runtimeId: string | null) => void): () => void
+  onArtifactShown(callback: (event: ArtifactShownEvent) => void): () => void
   onSessionRuntime(callback: (runtime: SessionRuntimeInfo) => void): () => void
   onActivateWorkspace(callback: (payload: WorkspaceActivationIntent) => void): () => void
   onFileChange(callback: (event: FileChangeEvent) => void): () => void
@@ -559,6 +564,7 @@ const api: PiDesktopAPI = {
     markSessionDigestRead: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGEST_MARK_READ, runtimeId),
     getNotifyFocus: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_GET),
     setNotifyFocus: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_SET, runtimeId),
+    listArtifacts: () => ipcRenderer.invoke(IPC_CHANNELS.ARTIFACTS_LIST),
     takePendingActivation: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_TAKE_PENDING_ACTIVATION),
   },
 
@@ -792,6 +798,14 @@ const api: PiDesktopAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_NOTIFY_FOCUS, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_NOTIFY_FOCUS, handler)
+    }
+  },
+
+  onArtifactShown: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: ArtifactShownEvent) => callback(data)
+    ipcRenderer.on(IPC_CHANNELS.EVENT_ARTIFACT_SHOWN, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_ARTIFACT_SHOWN, handler)
     }
   },
 

@@ -838,6 +838,10 @@
     "zoomOut": "Zoom Out"
   },
   "missionControl": {
+    "artifacts": {
+      "empty": "Files and pages sessions show with show_artifact appear here.",
+      "title": "Recent artifacts"
+    },
     "board": {
       "ended": "finished",
       "finished": "Finished",

@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { readFile } from 'node:fs/promises'
 import { IPC_CHANNELS } from '../../shared/ipc-contracts'
 import { readAttachment } from '../attachment-reader'
 import { isAuthorizedAttachmentPath } from '../path-authorization'
@@ -33,6 +34,8 @@ export function registerFileHandlers(ctx: IpcContext): void {
 
   ipcMain.handle(IPC_CHANNELS.FILE_READ, async (_event, filePath: unknown) => {
     if (!isString(filePath)) throw new Error('filePath must be a string')
+    // A show_artifact file may sit outside the workspace; main approved its exact path.
+    if (approvedAttachmentPaths.has(filePath)) return readFile(filePath, 'utf-8')
     const fs = workspaceManager.getActiveFileService()
     if (!fs) throw new Error(t('errors.workspace.noneActive'))
     return fs.readFileContent(filePath)

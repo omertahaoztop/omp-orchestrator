@@ -822,6 +822,10 @@
     "zoomOut": "缩小"
   },
   "missionControl": {
+    "artifacts": {
+      "empty": "",
+      "title": ""
+    },
     "board": {
       "ended": "",
       "finished": "",

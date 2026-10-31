@@ -22,6 +22,7 @@ import { workspaceNameFromFolderPath } from '../../shared/folder-drop'
 import { pathsEqual } from '../../shared/path-compare'
 import { EDITED_TITLE_MAX_CHARS, sessionPreview, stripInjectedPreamble, truncateTitle } from '../../shared/session-preview'
 import { validateModelsConfig, mergeModelsConfig, type ModelsConfig } from '../../shared/models-config'
+import { isImagePath } from './components/chat-file-link'
 import {
   applyOmpLifecycle,
   applyOmpProgress,
@@ -83,6 +84,8 @@ import type {
   PendingPromptCounts,
   PendingPromptItem,
   SessionDigestMap,
+  ArtifactEntry,
+  ArtifactShownEvent,
   WorkspaceActivityMap,
   WorkflowRunSummary,
   SessionRuntimeInfo,
@@ -380,6 +383,8 @@ interface AppState {
   sessionDigests: SessionDigestMap
   // Session in focus mode, mirrored from main; null when focus mode is off.
   notifyFocusRuntimeId: string | null
+  // Recent show_artifact files and URLs, newest first.
+  artifacts: ArtifactEntry[]
   // Dynamic workflow runs read from the extension's persisted run journal.
   workflowRuns: WorkflowRunSummary[]
   // Extension status entries (setStatus fire-and-forget). Keyed by statusKey.
@@ -619,6 +624,9 @@ interface AppActions {
   handleSessionDigests: (map: SessionDigestMap) => void
   /** A finished turn counts as read once its session is open in the chat view. */
   markActiveDigestRead: () => void
+  handleArtifactShown: (event: ArtifactShownEvent) => void
+  /** Files open in the side preview (switching to chat); URLs open in the browser. */
+  openArtifact: (artifact: ArtifactEntry) => Promise<void>
   dismissExtensionNotify: () => void
 
   // App confirmation dialog (promise-based; resolves true on confirm)
@@ -1212,6 +1220,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   workspaceActivity: {},
   sessionDigests: {},
   notifyFocusRuntimeId: null,
+  artifacts: [],
   workflowRuns: [],
   extensionStatuses: {},
   subagentTasks: [],
@@ -2908,6 +2917,22 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     const digest = activeSessionRuntimeId ? sessionDigests[activeSessionRuntimeId] : undefined
     if (currentView !== 'chat' || !digest?.finishedAt || digest.read) return
     void window.piDesktop.workspace.markSessionDigestRead(digest.runtimeId).catch(() => undefined)
+  },
+
+  handleArtifactShown: ({ runtimeId, artifact }) => {
+    set((state) => ({
+      artifacts: [artifact, ...state.artifacts.filter((item) => item.source !== artifact.source)].slice(0, 20),
+    }))
+    // Only the session on screen opens its artifact; the others wait in Komuta's list.
+    if (runtimeId === get().activeSessionRuntimeId && get().currentView === 'chat') void get().openArtifact(artifact)
+  },
+
+  openArtifact: async (artifact) => {
+    if (artifact.url) return window.piDesktop.system.openExternal(artifact.source)
+    const name = artifact.source.split(/[\\/]/).pop() ?? artifact.source
+    if (await get().setPreviewTarget({ kind: isImagePath(name) ? 'image' : 'code', name, path: artifact.source })) {
+      get().setCurrentView('chat')
+    }
   },
 
   handleWorkspaceActivity: (map) => {

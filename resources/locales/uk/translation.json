@@ -870,6 +870,10 @@
     "zoomOut": "Зменшити"
   },
   "missionControl": {
+    "artifacts": {
+      "empty": "",
+      "title": ""
+    },
     "board": {
       "ended": "",
       "finished": "",

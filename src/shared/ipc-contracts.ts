@@ -125,6 +125,7 @@ export const IPC_CHANNELS = {
   SESSION_DIGEST_MARK_READ: 'session-digests:mark-read',
   NOTIFY_FOCUS_GET: 'notify:focus-get',
   NOTIFY_FOCUS_SET: 'notify:focus-set',
+  ARTIFACTS_LIST: 'artifacts:list',
   WORKSPACE_TAKE_PENDING_ACTIVATION: 'workspace:take-pending-activation',
 
   // Repo sets and linked tasks (one task across several git repositories)
@@ -225,6 +226,7 @@ export const IPC_CHANNELS = {
   EVENT_WORKSPACE_ACTIVITY: 'event:workspace-activity',
   EVENT_SESSION_DIGESTS: 'event:session-digests',
   EVENT_NOTIFY_FOCUS: 'event:notify-focus',
+  EVENT_ARTIFACT_SHOWN: 'event:artifact-shown',
   EVENT_SESSION_RUNTIME: 'event:session-runtime',
   EVENT_ACTIVATE_WORKSPACE: 'event:activate-workspace',
   EVENT_FILE_CHANGE: 'event:file-change',
@@ -674,6 +676,20 @@ export interface SessionTodo {
 }
 
 export type SessionDigestMap = Record<string, SessionDigest>
+
+/** One file or URL an OMP session showed through omp-artifacts' show_artifact. */
+export interface ArtifactEntry {
+  /** Absolute file path, or an http(s) URL. */
+  source: string
+  label: string
+  url: boolean
+  shownAt: number
+}
+
+export interface ArtifactShownEvent {
+  runtimeId: string
+  artifact: ArtifactEntry
+}
 
 /**
  * Per-workspace background activity derived in the main process from every
