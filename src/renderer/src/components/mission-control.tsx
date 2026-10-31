@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Inbox, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowUpRight, CheckCircle2, Circle, Inbox, ListChecks, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
 import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/agent-engine-label'
@@ -62,6 +62,19 @@ export function MissionControl(): React.JSX.Element {
   const finishedRuntimes = runtimes
     .filter((runtime) => !isRunning(runtime))
     .sort((a, b) => (sessionDigests[b.runtimeId]?.finishedAt ?? 0) - (sessionDigests[a.runtimeId]?.finishedAt ?? 0))
+  // Sessions with an open step come first, then by how much is left.
+  const todoRuntimes = runtimes
+    .flatMap((runtime) => {
+      const todo = sessionDigests[runtime.runtimeId]?.todo
+      return todo && todo.total > 0 ? [{ runtime, todo }] : []
+    })
+    .sort((a, b) => Number(!a.todo.current) - Number(!b.todo.current) || (b.todo.total - b.todo.done) - (a.todo.total - a.todo.done))
+  const sessionTitleFor = (sessionPath: string | null, sessionId: string | null): string => {
+    const session = sessionPath ? sessionList.find((item) => pathsEqual(item.path, sessionPath)) : undefined
+    return session ? getSessionTitle(session.name, session.sessionId, session.preview) : sessionId ?? t('missionControl.startingSession')
+  }
+  const projectNameFor = (workspaceId: string | null): string =>
+    workspaces.find((item) => item.id === workspaceId)?.name ?? t('missionControl.unknownProject')
   const recentRuns = useMemo(
     () => [...workflowRuns].sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)).slice(0, 8),
     [workflowRuns]
@@ -155,13 +168,12 @@ export function MissionControl(): React.JSX.Element {
             <div className="space-y-2">
               {pendingPrompts.map((item) => {
                 const runtime = item.runtimeId ? sessionRuntimes[item.runtimeId] : undefined
-                const session = item.sessionPath ? sessionList.find((entry) => pathsEqual(entry.path, item.sessionPath!)) : undefined
                 return (
                   <PendingPromptCard
                     key={item.request.id}
                     item={item}
-                    sessionTitle={session ? getSessionTitle(session.name, session.sessionId, session.preview) : runtime?.sessionId ?? t('missionControl.startingSession')}
-                    projectName={workspaces.find((workspace) => workspace.id === item.workspaceId)?.name ?? t('missionControl.unknownProject')}
+                    sessionTitle={sessionTitleFor(item.sessionPath, runtime?.sessionId ?? null)}
+                    projectName={projectNameFor(item.workspaceId)}
                     onAnswer={(response) => answerPendingPrompt(item.request, response)}
                     onOpen={runtime ? () => void openRuntime(runtime) : null}
                   />
@@ -184,18 +196,13 @@ export function MissionControl(): React.JSX.Element {
                 <div className="space-y-2">
                   {list.map((runtime) => {
                     const workspace = workspaces.find((item) => item.id === runtime.workspaceId)
-                    const session = runtime.sessionPath
-                      ? sessionList.find((item) => pathsEqual(item.path, runtime.sessionPath!))
-                      : undefined
                     return (
                       <RuntimeCard
                         key={runtime.runtimeId}
                         runtime={runtime}
                         digest={sessionDigests[runtime.runtimeId]}
-                        title={session
-                          ? getSessionTitle(session.name, session.sessionId, session.preview)
-                          : runtime.sessionId ?? t('missionControl.startingSession')}
-                        projectName={workspace?.name ?? t('missionControl.unknownProject')}
+                        title={sessionTitleFor(runtime.sessionPath, runtime.sessionId)}
+                        projectName={projectNameFor(runtime.workspaceId)}
                         onOpen={runtime.sessionPath && workspace ? () => void openRuntime(runtime) : null}
                         onReview={runtime.sessionPath && (runtime.activity === 'completed' || workspace?.kind === 'worktree')
                           ? () => void reviewRuntime(runtime)
@@ -208,6 +215,36 @@ export function MissionControl(): React.JSX.Element {
             </section>
           ))}
         </div>
+
+        <section className="mb-6">
+          <SectionHeading title={t('missionControl.todos.title')} count={todoRuntimes.length} />
+          {todoRuntimes.length === 0 ? (
+            <EmptyState>{t('missionControl.todos.empty')}</EmptyState>
+          ) : (
+            <div className="space-y-1.5">
+              {todoRuntimes.map(({ runtime, todo }) => (
+                <button
+                  key={runtime.runtimeId}
+                  type="button"
+                  onClick={() => void openRuntime(runtime)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface/50 px-3 py-2 text-left transition-colors hover:border-border-strong hover:bg-surface-hover"
+                >
+                  <ListChecks size={14} className={clsx('shrink-0', todo.current ? 'text-accent-fg' : 'text-success')} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-primary">{todo.current ?? t('missionControl.todos.allDone')}</div>
+                    <div className="truncate text-[11px] text-faint">
+                      {sessionTitleFor(runtime.sessionPath, runtime.sessionId)} · {projectNameFor(runtime.workspaceId)}
+                    </div>
+                  </div>
+                  <div className="h-1 w-16 shrink-0 overflow-hidden rounded-full bg-card">
+                    <div className="h-full bg-accent" style={{ width: `${todo.total ? (todo.done / todo.total) * 100 : 0}%` }} />
+                  </div>
+                  <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-muted">{todo.done}/{todo.total}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section>
           <div className="mb-2 flex items-center justify-between">

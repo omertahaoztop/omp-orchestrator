@@ -914,6 +914,11 @@
     "startingSession": "Запуск сесії",
     "subtitle": "Фонові сесії та запуски процесів усіх проєктів.",
     "title": "Центр керування",
+    "todos": {
+      "allDone": "",
+      "empty": "",
+      "title": ""
+    },
     "unknownProject": "Невідомий проєкт",
     "workflowActivity": "Активність процесів",
     "workflowStatus": {

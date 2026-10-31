@@ -658,6 +658,16 @@ export interface SessionDigest {
   /** Two sentences from the summary model, or the first line of the last answer when it failed. */
   summary: string | null
   read: boolean
+  /** Latest OMP `todo` list of the session; null until the agent writes one. */
+  todo: SessionTodo | null
+}
+
+export interface SessionTodo {
+  done: number
+  /** Tasks not abandoned. */
+  total: number
+  /** The in-progress task, else the first pending one. */
+  current: string | null
 }
 
 export type SessionDigestMap = Record<string, SessionDigest>

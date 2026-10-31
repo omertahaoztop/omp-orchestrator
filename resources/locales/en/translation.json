@@ -880,6 +880,11 @@
     "startingSession": "Starting session",
     "subtitle": "What waits for you, what runs, what finished, and what comes next, across every project.",
     "title": "Command",
+    "todos": {
+      "allDone": "Every step is done",
+      "empty": "No session has a todo list yet.",
+      "title": "Todos"
+    },
     "unknownProject": "Unknown project",
     "workflowActivity": "Workflow activity",
     "workflowStatus": {

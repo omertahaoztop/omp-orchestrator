@@ -863,6 +863,11 @@
     "startingSession": "正在启动会话",
     "subtitle": "来自各个项目的后台会话与工作流运行。",
     "title": "任务控制中心",
+    "todos": {
+      "allDone": "",
+      "empty": "",
+      "title": ""
+    },
     "unknownProject": "未知项目",
     "workflowActivity": "工作流活动",
     "workflowStatus": {

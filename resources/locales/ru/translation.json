@@ -914,6 +914,11 @@
     "startingSession": "Запуск сессии",
     "subtitle": "Фоновые сессии и запуски процессов всех проектов.",
     "title": "Центр управления",
+    "todos": {
+      "allDone": "",
+      "empty": "",
+      "title": ""
+    },
     "unknownProject": "Неизвестный проект",
     "workflowActivity": "Активность процессов",
     "workflowStatus": {

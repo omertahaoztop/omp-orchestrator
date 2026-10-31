@@ -32,10 +32,10 @@ test('a finished turn is unread and gets the model summary of its request, answe
   const h = harness(async () => 'Fixed it. Next: release.')
   h.turn('\n  Done fixing.\nMore detail')
   assert.deepEqual(h.latest()['rt-1'], {
-    runtimeId: 'rt-1', workspaceId: 'ws-1', startedAt: 1000, finishedAt: 5000, summary: null, read: false,
+    runtimeId: 'rt-1', workspaceId: 'ws-1', startedAt: 1000, finishedAt: 5000, summary: null, read: false, todo: null,
   })
   await settle()
-  assert.deepEqual(h.runs, [{ request: 'fix the bug', answer: 'Done fixing.\nMore detail', files: ['a.ts'] }])
+  assert.deepEqual(h.runs, [{ request: 'fix the bug', answer: 'Done fixing.\nMore detail', files: ['a.ts'], nextStep: null }])
   assert.equal(h.latest()['rt-1'].summary, 'Fixed it. Next: release.')
   h.digests.markRead('rt-1')
   assert.equal(h.latest()['rt-1'].read, true)
@@ -64,4 +64,22 @@ test('edited paths come from path args and hashline section headers', () => {
   assert.deepEqual(editedPaths('write', { path: 'c.txt' }), ['c.txt'])
   assert.deepEqual(editedPaths('read', { path: 'c.txt' }), [])
   assert.deepEqual(editedPaths('constructor', { path: 'c.txt' }), [])
+})
+
+test('todo progress skips abandoned tasks, prefers the in-progress step, and survives the next turn', async () => {
+  const h = harness(async () => 'ok')
+  const phases = [
+    { name: 'A', tasks: [{ content: 'one', status: 'completed' }, { content: 'two', status: 'abandoned' }] },
+    { name: 'B', tasks: [{ content: 'three', status: 'pending' }, { content: 'four', status: 'in_progress' }] },
+  ]
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'agent_start' })
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'tool_execution_end', toolName: 'todo', result: { details: { phases } } })
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'tool_execution_end', toolName: 'bash', result: { details: { phases: [] } } })
+  assert.deepEqual(h.latest()['rt-1'].todo, { done: 1, total: 3, current: 'four' })
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'message_end', message: { role: 'assistant', content: 'done' } })
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'agent_end' })
+  await settle()
+  assert.equal(h.runs[0].nextStep, 'four')
+  h.digests.handleEvent('rt-1', 'ws-1', { type: 'agent_start' })
+  assert.deepEqual(h.latest()['rt-1'].todo, { done: 1, total: 3, current: 'four' })
 })

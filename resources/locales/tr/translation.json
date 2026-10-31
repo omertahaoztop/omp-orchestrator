@@ -880,6 +880,11 @@
     "startingSession": "Oturum başlatılıyor",
     "subtitle": "Tüm projelerde sizi bekleyenler, çalışanlar, bitenler ve sıradaki adımlar.",
     "title": "Komuta",
+    "todos": {
+      "allDone": "Tüm adımlar bitti",
+      "empty": "Henüz yapılacaklar listesi olan oturum yok.",
+      "title": "Yapılacaklar"
+    },
     "unknownProject": "Bilinmeyen proje",
     "workflowActivity": "İş akışı etkinliği",
     "workflowStatus": {

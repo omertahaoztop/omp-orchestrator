@@ -1,4 +1,4 @@
-import type { AgentEngineKind, SessionDigest, SessionDigestMap } from '../shared/ipc-contracts'
+import type { AgentEngineKind, SessionDigest, SessionDigestMap, SessionTodo } from '../shared/ipc-contracts'
 import { formatUntrustedBlock } from '../shared/untrusted-data'
 import { buildOneShotArgs, parseAssistantText, runOneShotPrompt } from './commit-message-generator'
 
@@ -6,6 +6,7 @@ export interface DigestRun {
   request: string
   answer: string
   files: string[]
+  nextStep: string | null
 }
 
 interface RunState extends SessionDigest {
@@ -42,6 +43,20 @@ export function firstLine(text: string): string {
   return text.split('\n').map((line) => line.trim()).find(Boolean) ?? ''
 }
 
+/** Progress of OMP's `todo` tool result (`details.phases[].tasks[].status`); null when it carries none. */
+export function todoProgress(result: unknown): SessionTodo | null {
+  const phases = (result as { details?: { phases?: unknown } } | null)?.details?.phases
+  if (!Array.isArray(phases)) return null
+  const tasks = phases.flatMap((phase) => Array.isArray(phase?.tasks) ? phase.tasks as { content?: unknown; status?: unknown }[] : [])
+  const live = tasks.filter((task) => task.status !== 'abandoned')
+  const current = live.find((task) => task.status === 'in_progress') ?? live.find((task) => task.status === 'pending')
+  return {
+    done: live.filter((task) => task.status === 'completed').length,
+    total: live.length,
+    current: typeof current?.content === 'string' ? current.content : null,
+  }
+}
+
 /**
  * Follows each session runtime's turns and keeps what the Komuta board shows:
  * when the turn ran, whether its end was seen, and a short summary of it.
@@ -60,8 +75,8 @@ export function createSessionDigests(deps: {
   const runs = new Map<string, RunState>()
 
   const getMap = (): SessionDigestMap => Object.fromEntries(
-    [...runs].map(([id, { runtimeId, workspaceId, startedAt, finishedAt, summary, read }]) => [
-      id, { runtimeId, workspaceId, startedAt, finishedAt, summary, read },
+    [...runs].map(([id, { runtimeId, workspaceId, startedAt, finishedAt, summary, read, todo }]) => [
+      id, { runtimeId, workspaceId, startedAt, finishedAt, summary, read, todo },
     ]),
   )
   const publish = (): void => deps.onChange(getMap())
@@ -72,7 +87,7 @@ export function createSessionDigests(deps: {
       switch (event.type) {
         case 'agent_start':
           runs.set(runtimeId, {
-            runtimeId, workspaceId, startedAt: deps.now(), finishedAt: null, summary: null, read: false,
+            runtimeId, workspaceId, startedAt: deps.now(), finishedAt: null, summary: null, read: false, todo: run?.todo ?? null,
             request: '', answer: '', files: new Set(), generation: (run?.generation ?? 0) + 1,
           })
           publish()
@@ -88,6 +103,13 @@ export function createSessionDigests(deps: {
         case 'tool_execution_start':
           for (const path of editedPaths(event.toolName, event.args)) run?.files.add(path)
           return
+        case 'tool_execution_end': {
+          const todo = event.toolName === 'todo' ? todoProgress(event.result) : null
+          if (!run || !todo) return
+          run.todo = todo
+          publish()
+          return
+        }
         case 'agent_end': {
           if (!run) return
           run.finishedAt = deps.now()
@@ -95,7 +117,7 @@ export function createSessionDigests(deps: {
           publish()
           if (!run.answer) return
           const { generation } = run
-          void deps.summarize({ request: run.request, answer: run.answer, files: [...run.files] }, runtimeId)
+          void deps.summarize({ request: run.request, answer: run.answer, files: [...run.files], nextStep: run.todo?.current ?? null }, runtimeId)
             .then((summary) => summary.trim() || firstLine(run.answer), () => firstLine(run.answer))
             .then((summary) => {
               if (runs.get(runtimeId)?.generation !== generation) return
@@ -130,6 +152,7 @@ export function buildSummaryPrompt(run: DigestRun, language: string): string {
     formatUntrustedBlock('USER REQUEST', clip(run.request)),
     formatUntrustedBlock('LAST ASSISTANT MESSAGE', clip(run.answer)),
     formatUntrustedBlock('CHANGED FILES', run.files.join('\n') || '(none)'),
+    formatUntrustedBlock('NEXT TODO STEP', run.nextStep ?? '(none)'),
   ].join('\n\n')
 }
 
