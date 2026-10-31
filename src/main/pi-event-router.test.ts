@@ -162,6 +162,22 @@ for (const method of BLOCKING_METHODS) {
   })
 }
 
+test('listPending returns delivered and queued prompts from every workspace, oldest first, without expired ones', () => {
+  const h = createHarness([WS_A, WS_B])
+  h.managers.get(WS_B)!.emit('event', dialogRequest('b1', { timeout: PROMPT_TIMEOUT_MS }))
+  h.clock.now = 10
+  h.managers.get(WS_A)!.emit('event', dialogRequest('a1', { method: 'ask' }))
+  h.clock.now = 20
+  h.managers.get(WS_A)!.emit('event', dialogRequest('a2'))
+  assert.deepEqual(h.router.listPending().map((item) => [item.event.id, item.manager === h.managers.get(WS_A), item.receivedAt]), [
+    ['b1', false, 0],
+    ['a1', true, 10],
+    ['a2', true, 20],
+  ])
+  h.clock.now = PROMPT_TIMEOUT_MS
+  assert.deepEqual(h.router.listPending().map((item) => item.event.id), ['a1', 'a2'])
+})
+
 // ─── Responding ──────────────────────────────────────────────────────────────
 
 test('answering a dialog whose workspace is no longer active does not chain the next one', () => {

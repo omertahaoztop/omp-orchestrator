@@ -872,6 +872,12 @@
   "missionControl": {
     "controlUnavailable": "управление недоступно",
     "idle": "{{agent}} бездействует",
+    "inbox": {
+      "deny": "",
+      "empty": "",
+      "title": "",
+      "waitingSince": ""
+    },
     "liveSessions": "Активные сессии",
     "needsAttention_one": "Требуют внимания: {{count}}",
     "needsAttention_few": "Требуют внимания: {{count}}",

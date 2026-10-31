@@ -1,4 +1,4 @@
-import { IPC_CHANNELS, type PendingPromptCounts } from '../shared/ipc-contracts'
+import { IPC_CHANNELS, type PendingPromptCounts, type PendingPromptItem } from '../shared/ipc-contracts'
 import { createPiEventRouter, type PiEventRouter } from './pi-event-router'
 import type { PiRpcManager } from './pi-rpc-manager'
 
@@ -24,6 +24,8 @@ export type IpcInvokeRegistrar<TEvent> = (
 export interface ExtensionUiWorkspace {
   getActivePiManager(): PiRpcManager | null
   workspaceIdFor(manager: PiRpcManager): string | null
+  runtimeIdFor(manager: PiRpcManager): string | null
+  sessionPathFor(manager: PiRpcManager): string | null
   onPiManager(listener: (manager: PiRpcManager) => void): void
   onActiveWorkspaceChanged(listener: (workspaceId: string | null) => void): void
 }
@@ -99,6 +101,17 @@ export function wireExtensionUiIpc<TEvent>(deps: ExtensionUiIpcDeps<TEvent>): vo
   handle(IPC_CHANNELS.UI_PENDING_GET, async (event) => {
     assertTrustedSender(event)
     return router.getPendingCounts()
+  })
+
+  handle(IPC_CHANNELS.UI_PENDING_LIST, async (event): Promise<PendingPromptItem[]> => {
+    assertTrustedSender(event)
+    return router.listPending().map(({ manager, event: request, receivedAt }) => ({
+      request,
+      workspaceId: workspace.workspaceIdFor(manager),
+      runtimeId: workspace.runtimeIdFor(manager),
+      sessionPath: workspace.sessionPathFor(manager),
+      receivedAt,
+    }))
   })
 
   // Every Pi manager feeds the router. It forwards non-dialog events ONLY from

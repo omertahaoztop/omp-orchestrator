@@ -7,7 +7,9 @@ import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/ag
 import { getSessionTitle } from '../utils/session-title'
 import { pathsEqual } from '../../../shared/path-compare'
 import { canResumeRun } from '../utils/workflow-runs'
+import { NowContext } from '../utils/relative-time'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
+import { PendingPromptCard } from './pending-prompt-card'
 import type { SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
 import type { Translate } from '../../../shared/i18n'
 
@@ -34,12 +36,18 @@ export function MissionControl(): React.JSX.Element {
   const setCurrentView = useAppStore((state) => state.setCurrentView)
   const setTaskLauncherOpen = useAppStore((state) => state.setTaskLauncherOpen)
   const openWorkflowRunsForWorkspace = useAppStore((state) => state.openWorkflowRunsForWorkspace)
+  const pendingPrompts = useAppStore((state) => state.pendingPrompts)
+  const answerPendingPrompt = useAppStore((state) => state.answerPendingPrompt)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
 
+  const [now, setNow] = useState(Date.now)
   useEffect(() => {
     void refreshWorkflowRuns()
-    const timer = window.setInterval(() => void refreshWorkflowRuns(), 5000)
+    const timer = window.setInterval(() => {
+      void refreshWorkflowRuns()
+      setNow(Date.now())
+    }, 5000)
     return () => window.clearInterval(timer)
   }, [refreshWorkflowRuns])
 
@@ -97,6 +105,7 @@ export function MissionControl(): React.JSX.Element {
   }
 
   return (
+    <NowContext.Provider value={now}>
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto max-w-5xl px-6 py-7">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -132,6 +141,30 @@ export function MissionControl(): React.JSX.Element {
             </button>
           </div>
         </div>
+
+        <section className="mb-6">
+          <SectionHeading title={t('missionControl.inbox.title')} count={pendingPrompts.length} />
+          {pendingPrompts.length === 0 ? (
+            <EmptyState>{t('missionControl.inbox.empty')}</EmptyState>
+          ) : (
+            <div className="space-y-2">
+              {pendingPrompts.map((item) => {
+                const runtime = item.runtimeId ? sessionRuntimes[item.runtimeId] : undefined
+                const session = item.sessionPath ? sessionList.find((entry) => pathsEqual(entry.path, item.sessionPath!)) : undefined
+                return (
+                  <PendingPromptCard
+                    key={item.request.id}
+                    item={item}
+                    sessionTitle={session ? getSessionTitle(session.name, session.sessionId, session.preview) : runtime?.sessionId ?? t('missionControl.startingSession')}
+                    projectName={workspaces.find((workspace) => workspace.id === item.workspaceId)?.name ?? t('missionControl.unknownProject')}
+                    onAnswer={(response) => answerPendingPrompt(item.request, response)}
+                    onOpen={runtime ? () => void openRuntime(runtime) : null}
+                  />
+                )
+              })}
+            </div>
+          )}
+        </section>
 
         <section className="mb-6">
           <SectionHeading title={t('missionControl.liveSessions')} count={runtimes.length} />
@@ -224,6 +257,7 @@ export function MissionControl(): React.JSX.Element {
         </section>
       </div>
     </div>
+    </NowContext.Provider>
   )
 }
 

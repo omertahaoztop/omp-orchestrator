@@ -35,6 +35,7 @@ const ALL_CHANNELS = [
   ...RESPONSE_CHANNELS,
   IPC_CHANNELS.UI_PENDING_FLUSH,
   IPC_CHANNELS.UI_PENDING_GET,
+  IPC_CHANNELS.UI_PENDING_LIST,
 ]
 
 /** Stand-in for IpcMainInvokeEvent: only the sender check ever reads it. */
@@ -77,6 +78,10 @@ function recordingRouter(calls: RouterCall[]): PiEventRouter {
     },
     handleActiveWorkspaceChanged: () =>
       calls.push({ method: 'handleActiveWorkspaceChanged', args: [] }),
+    listPending: () => {
+      calls.push({ method: 'listPending', args: [] })
+      return []
+    },
   }
 }
 
@@ -91,6 +96,8 @@ function createHarness(): Harness {
   const workspace: ExtensionUiWorkspace = {
     getActivePiManager: () => activePi,
     workspaceIdFor: () => null,
+    runtimeIdFor: () => null,
+    sessionPathFor: () => null,
     onPiManager: (listener) => managerListeners.push(listener),
     onActiveWorkspaceChanged: (listener) => activeListeners.push(() => listener(null)),
   }
@@ -266,6 +273,8 @@ function createRouterHarness(workspaceIds: string[]): RouterHarness {
       }
       return null
     },
+    runtimeIdFor: () => null,
+    sessionPathFor: () => null,
     onPiManager: () => {},
     onActiveWorkspaceChanged: () => {},
   }

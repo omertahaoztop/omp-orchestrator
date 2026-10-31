@@ -824,6 +824,12 @@
   "missionControl": {
     "controlUnavailable": "控制不可用",
     "idle": "{{agent}} 处于空闲状态",
+    "inbox": {
+      "deny": "",
+      "empty": "",
+      "title": "",
+      "waitingSince": ""
+    },
     "liveSessions": "运行中的会话",
     "needsAttention_other": "{{count}} 项需要关注",
     "newTask": "新建任务",

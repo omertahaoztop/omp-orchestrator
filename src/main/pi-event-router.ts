@@ -60,8 +60,16 @@ export interface PiEventRouter {
   flush(workspaceId: string): void
   /** Snapshot of held prompts; reaps timed-out ones so the figures stay honest. */
   getPendingCounts(): PendingPromptCounts
+  /** Every held blocking prompt with its asking manager, oldest first. */
+  listPending(): HeldPrompt[]
   /** Re-broadcast counts after an active-workspace change; delivers nothing. */
   handleActiveWorkspaceChanged(): void
+}
+
+export interface HeldPrompt {
+  manager: PiRpcManager
+  event: PiExtensionUiRequest
+  receivedAt: number
 }
 
 export function createPiEventRouter(deps: PiEventRouterDeps): PiEventRouter {
@@ -123,6 +131,15 @@ export function createPiEventRouter(deps: PiEventRouterDeps): PiEventRouter {
       if (workspaceId) counts[workspaceId] = (counts[workspaceId] ?? 0) + 1
     }
     return counts
+  }
+
+  const listPending = (): HeldPrompt[] => {
+    getPendingCounts() // reaps expired queued entries first
+    const held: HeldPrompt[] = [...delivered].map(([manager, entry]) => ({ manager, ...entry }))
+    for (const [manager, entries] of queues) {
+      for (const entry of entries) held.push({ manager, ...entry })
+    }
+    return held.sort((a, b) => a.receivedAt - b.receivedAt)
   }
 
   const emitCounts = (): void => {
@@ -286,6 +303,7 @@ export function createPiEventRouter(deps: PiEventRouterDeps): PiEventRouter {
     respond,
     flush,
     getPendingCounts,
+    listPending,
     handleActiveWorkspaceChanged: emitCounts,
   }
 }

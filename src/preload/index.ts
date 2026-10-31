@@ -65,6 +65,7 @@ import type {
   PermissionRulesRemoveResult,
   PendingPromptCounts,
   PiAskAnswer,
+  PendingPromptItem,
   WorkspaceActivityMap,
   WorkflowRunSummary,
   WorkflowRunDetail,
@@ -427,6 +428,7 @@ interface PiDesktopAPI {
      */
     flushPendingPrompts(workspaceId: string): Promise<void>
     getPendingPrompts(): Promise<PendingPromptCounts>
+    listPendingPrompts(): Promise<PendingPromptItem[]>
     /**
      * Mirror the editor pane's unsaved-changes state to main, which guards
      * quit, window close, and reload behind a discard confirmation.
@@ -732,6 +734,7 @@ const api: PiDesktopAPI = {
     respondAsk: (id, answers) => ipcRenderer.invoke(IPC_CHANNELS.UI_ASK_RESPONSE, id, answers),
     flushPendingPrompts: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.UI_PENDING_FLUSH, workspaceId),
     getPendingPrompts: () => ipcRenderer.invoke(IPC_CHANNELS.UI_PENDING_GET),
+    listPendingPrompts: () => ipcRenderer.invoke(IPC_CHANNELS.UI_PENDING_LIST),
     setEditorDirty: (dirty, fileName) =>
       ipcRenderer.send(
         IPC_CHANNELS.UI_EDITOR_DIRTY_SET,

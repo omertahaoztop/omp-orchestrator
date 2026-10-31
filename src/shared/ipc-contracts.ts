@@ -80,6 +80,7 @@ export const IPC_CHANNELS = {
   UI_ASK_RESPONSE: 'ui:ask-response',
   UI_PENDING_FLUSH: 'ui:pending-flush',
   UI_PENDING_GET: 'ui:pending-get',
+  UI_PENDING_LIST: 'ui:pending-list',
   UI_EDITOR_DIRTY_SET: 'ui:editor-dirty-set',
 
   // System
@@ -632,6 +633,16 @@ export interface PiExtensionUiRequest {
  * id. Zero entries are omitted, so an empty object means nothing is waiting.
  */
 export type PendingPromptCounts = Record<string, number>
+
+/** One blocking prompt held in main, listed for the Komuta inbox so it can be answered without switching sessions. */
+export interface PendingPromptItem {
+  request: PiExtensionUiRequest
+  workspaceId: string | null
+  runtimeId: string | null
+  sessionPath: string | null
+  /** Epoch ms when Pi asked. */
+  receivedAt: number
+}
 
 /**
  * Per-workspace background activity derived in the main process from every

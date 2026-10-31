@@ -840,6 +840,12 @@
   "missionControl": {
     "controlUnavailable": "control unavailable",
     "idle": "{{agent}} is idle",
+    "inbox": {
+      "deny": "Deny",
+      "empty": "Nothing is waiting for your answer.",
+      "title": "Waiting for you",
+      "waitingSince": "asked"
+    },
     "liveSessions": "Live sessions",
     "needsAttention_one": "{{count}} needs attention",
     "needsAttention_other": "{{count}} needs attention",
@@ -864,8 +870,8 @@
       "working": "working"
     },
     "startingSession": "Starting session",
-    "subtitle": "Background sessions and workflow runs, from every project.",
-    "title": "Mission Control",
+    "subtitle": "What waits for you, what runs, what finished, and what comes next, across every project.",
+    "title": "Command",
     "unknownProject": "Unknown project",
     "workflowActivity": "Workflow activity",
     "workflowStatus": {
@@ -1504,8 +1510,8 @@
     "nav": {
       "activitySection": "Activity",
       "chat": "Chat",
-      "missionControl": "Mission Control",
-      "missionControlTitle": "All background sessions and workflows",
+      "missionControl": "Command",
+      "missionControlTitle": "Questions, running and finished sessions, and todos from every project",
       "newTaskTitle": "Start a task in a new {{agent}} session",
       "sessions": "Sessions",
       "sessionsTitle": "Sessions in this project",

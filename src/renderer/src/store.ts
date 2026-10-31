@@ -81,6 +81,7 @@ import type {
   PermissionRule,
   PermissionRulesScope,
   PendingPromptCounts,
+  PendingPromptItem,
   WorkspaceActivityMap,
   WorkflowRunSummary,
   SessionRuntimeInfo,
@@ -370,6 +371,8 @@ interface AppState {
   extensionNotify: PiExtensionUiRequest | null
   // Blocking prompts held by main per workspace id (zero entries omitted).
   pendingPromptCounts: PendingPromptCounts
+  // Every held blocking prompt across sessions, for the Komuta inbox.
+  pendingPrompts: PendingPromptItem[]
   // Per-workspace background activity derived in main (idle entries omitted).
   workspaceActivity: WorkspaceActivityMap
   // Dynamic workflow runs read from the extension's persisted run journal.
@@ -605,6 +608,9 @@ interface AppActions {
   // Extension UI
   respondExtensionUi: (id: string, response: Record<string, unknown>) => void
   dismissExtensionUi: () => void
+  /** Answer a held prompt from any session; null cancels it like closing its dialog. */
+  answerPendingPrompt: (request: PiExtensionUiRequest, response: Record<string, unknown> | null) => void
+  refreshPendingPrompts: () => Promise<void>
   dismissExtensionNotify: () => void
 
   // App confirmation dialog (promise-based; resolves true on confirm)
@@ -742,6 +748,18 @@ let sessionLoadGeneration = 0
 let historyLoadId = 0
 let sessionStateRequestId = 0
 let historyLoadingRuntime: string | null = null
+let pendingPromptsSequence = 0
+
+/** One answer path for the dialog and the Komuta inbox; null is the cancel each method expects. */
+function sendExtensionUiAnswer(request: PiExtensionUiRequest, response: Record<string, unknown> | null): void {
+  if (request.method === 'confirm') {
+    window.piDesktop.ui.respondConfirm(request.id, !!response?.confirmed)
+  } else if (request.method === 'ask') {
+    window.piDesktop.ui.respondAsk(request.id, response ? response.answers as PiAskAnswer[] : null)
+  } else {
+    window.piDesktop.ui.respondInput(request.id, String(response?.value ?? ''))
+  }
+}
 
 /**
  * Texts of prompts this GUI just sent to Pi, awaiting their echo on the RPC
@@ -1182,6 +1200,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   extensionUiRequest: null,
   extensionNotify: null,
   pendingPromptCounts: {},
+  pendingPrompts: [],
   workspaceActivity: {},
   workflowRuns: [],
   extensionStatuses: {},
@@ -2829,30 +2848,30 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   respondExtensionUi: (id, response) => {
     const { extensionUiRequest } = get()
     if (!extensionUiRequest || extensionUiRequest.id !== id) return
-
-    if (extensionUiRequest.method === 'confirm') {
-      window.piDesktop.ui.respondConfirm(id, !!response.confirmed)
-    } else if (extensionUiRequest.method === 'ask') {
-      window.piDesktop.ui.respondAsk(id, response.answers as PiAskAnswer[])
-    } else if (extensionUiRequest.method === 'select' || extensionUiRequest.method === 'input' || extensionUiRequest.method === 'editor') {
-      window.piDesktop.ui.respondInput(id, String(response.value ?? ''))
-    }
-
+    sendExtensionUiAnswer(extensionUiRequest, response)
     set({ extensionUiRequest: null })
   },
 
   dismissExtensionUi: () => {
     const { extensionUiRequest } = get()
     if (extensionUiRequest) {
-      if (extensionUiRequest.method === 'confirm') {
-        window.piDesktop.ui.respondConfirm(extensionUiRequest.id, false)
-      } else if (extensionUiRequest.method === 'ask') {
-        window.piDesktop.ui.respondAsk(extensionUiRequest.id, null)
-      } else {
-        window.piDesktop.ui.respondInput(extensionUiRequest.id, '')
-      }
+      sendExtensionUiAnswer(extensionUiRequest, null)
       set({ extensionUiRequest: null })
     }
+  },
+
+  answerPendingPrompt: (request, response) => {
+    sendExtensionUiAnswer(request, response)
+    set((state) => ({
+      pendingPrompts: state.pendingPrompts.filter((item) => item.request.id !== request.id),
+      ...(state.extensionUiRequest?.id === request.id ? { extensionUiRequest: null } : {}),
+    }))
+  },
+
+  refreshPendingPrompts: async () => {
+    const sequence = ++pendingPromptsSequence
+    const items = await window.piDesktop.ui.listPendingPrompts()
+    if (sequence === pendingPromptsSequence) set({ pendingPrompts: items })
   },
 
   dismissExtensionNotify: () => {
@@ -2864,7 +2883,10 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     set({ extensionNotify: null })
   },
 
-  handlePendingPromptCounts: (counts) => set({ pendingPromptCounts: counts }),
+  handlePendingPromptCounts: (counts) => {
+    set({ pendingPromptCounts: counts })
+    void get().refreshPendingPrompts()
+  },
 
   handleWorkspaceActivity: (map) => {
     // Workspace activity aggregates sibling sessions; it cannot drive this

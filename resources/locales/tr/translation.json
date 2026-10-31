@@ -840,6 +840,12 @@
   "missionControl": {
     "controlUnavailable": "denetim kullanılamıyor",
     "idle": "{{agent}} boşta",
+    "inbox": {
+      "deny": "Reddet",
+      "empty": "Cevabınızı bekleyen bir şey yok.",
+      "title": "Sizi bekleyenler",
+      "waitingSince": "sordu:"
+    },
     "liveSessions": "Canlı oturumlar",
     "needsAttention_one": "{{count}} oturum ilgi bekliyor",
     "needsAttention_other": "{{count}} oturum ilgi bekliyor",
@@ -864,8 +870,8 @@
       "working": "çalışıyor"
     },
     "startingSession": "Oturum başlatılıyor",
-    "subtitle": "Tüm projelerdeki arka plan oturumları ve iş akışı çalıştırmaları.",
-    "title": "Görev Kontrolü",
+    "subtitle": "Tüm projelerde sizi bekleyenler, çalışanlar, bitenler ve sıradaki adımlar.",
+    "title": "Komuta",
     "unknownProject": "Bilinmeyen proje",
     "workflowActivity": "İş akışı etkinliği",
     "workflowStatus": {
@@ -1504,8 +1510,8 @@
     "nav": {
       "activitySection": "Etkinlik",
       "chat": "Sohbet",
-      "missionControl": "Görev Kontrolü",
-      "missionControlTitle": "Tüm arka plan oturumları ve iş akışları",
+      "missionControl": "Komuta",
+      "missionControlTitle": "Tüm projelerden sorular, çalışan ve biten oturumlar, yapılacaklar",
       "newTaskTitle": "Yeni bir {{agent}} oturumunda görev başlat",
       "sessions": "Oturumlar",
       "sessionsTitle": "Bu projedeki oturumlar",

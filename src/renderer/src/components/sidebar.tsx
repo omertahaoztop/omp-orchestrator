@@ -59,6 +59,7 @@ export function Sidebar(): React.JSX.Element {
   const { t } = useTranslation()
   const activeEngineLabel = useAppStore((state) => agentEngineLabel(state.piEngine) ?? DEFAULT_AGENT_ENGINE_LABEL)
   const currentView = useAppStore((state) => state.currentView)
+  const komutaBadge = useAppStore((state) => state.pendingPrompts.length)
   const setCurrentView = useAppStore((state) => state.setCurrentView)
   const toggleSidebar = useAppStore((state) => state.toggleSidebar)
   const sessionState = useAppStore((state) => state.sessionState)
@@ -549,6 +550,7 @@ export function Sidebar(): React.JSX.Element {
                 setCurrentView('mission-control')
               }}
               title={t('sidebar.nav.missionControlTitle')}
+              badge={komutaBadge}
             />
             <SidebarItem
               icon={<WorkflowIcon size={14} />}
@@ -949,6 +951,7 @@ function SidebarItem({
   onClick,
   compact = false,
   title,
+  badge,
 }: {
   icon: React.ReactNode
   label: string
@@ -956,6 +959,7 @@ function SidebarItem({
   onClick: () => void
   compact?: boolean
   title?: string
+  badge?: number
 }): React.JSX.Element {
   return (
     <button
@@ -972,6 +976,9 @@ function SidebarItem({
     >
       {icon}
       <span className="truncate">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="ml-auto shrink-0 rounded bg-warning-bg px-1.5 py-0.5 text-[10px] text-warning">{badge}</span>
+      )}
     </button>
   )
 }

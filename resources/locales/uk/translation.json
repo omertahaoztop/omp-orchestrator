@@ -872,6 +872,12 @@
   "missionControl": {
     "controlUnavailable": "керування недоступне",
     "idle": "{{agent}} простоює",
+    "inbox": {
+      "deny": "",
+      "empty": "",
+      "title": "",
+      "waitingSince": ""
+    },
     "liveSessions": "Активні сесії",
     "needsAttention_one": "Потребують уваги: {{count}}",
     "needsAttention_few": "Потребують уваги: {{count}}",
