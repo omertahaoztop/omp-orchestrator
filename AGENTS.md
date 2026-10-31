@@ -91,7 +91,7 @@ src/
 │   ├── index.ts                  # App lifecycle, window creation, hardening
 │   ├── i18n.ts                   # Main-process language: OS language list, pseudo-language gate, apply the setting
 │   ├── ipc-handlers.ts           # IPC composition root (creates context, calls ipc/ modules)
-│   ├── ipc/                      # Domain-specific IPC handler modules (pi, session, files, ...)
+│   ├── ipc/                      # Domain-specific IPC handler modules (pi, session, files, ...); `session-digest-wiring.ts` and `artifact-wiring.ts` feed Komuta
 │   ├── app-log.ts                # Main-process log: ring buffer + JSONL file in the GUI data dir
 │   ├── workspace-activity.ts     # Per-workspace activity state machine (working/approval/completed/failed)
 │   ├── notify-decision.ts        # Pure should-we-notify decision (focus/active-workspace aware)
@@ -112,7 +112,9 @@ src/
 │   ├── workspace-trust.ts        # Per-workspace trust registry (gates allow rules + preview)
 │   ├── workspace-manager.ts      # Multi-workspace management
 │   ├── git-conveyor.ts           # Validated commit, push, branch, and GitHub PR commands
-│   ├── commit-message-generator.ts # One-shot engine run that suggests a commit subject
+│   ├── commit-message-generator.ts # One-shot engine run that suggests a commit subject (also used for Komuta summaries)
+│   ├── session-digest.ts         # Per-runtime turn timing, todo progress and end-of-turn summary for Komuta
+│   ├── session-archive.ts        # Move a session file (and its subagent folder) to/from `<store>-archive/`
 │   ├── commit-message-service.ts # Commit message suggestions cached per workspace and diff
 │   ├── file-service.ts           # File tree, search, git status, read/write
 │   ├── terminal-service.ts       # node-pty PTY management
@@ -222,7 +224,7 @@ src/
             ├── sidebar-session-labels.ts # Session row label helpers
             ├── home-screen.tsx    # Full Home launcher (stats, recents, open folder / new session)
             ├── task-launcher.tsx  # New-task modal that starts a real background session
-            ├── mission-control.tsx # Global live-session and workflow inbox
+            ├── mission-control.tsx # Komuta: inbox, running/finished board, todos, focus mode, artifacts, cleanup
             ├── git-conveyor-actions.tsx # Git bar: Commit, Commit + Push, Push, PR / Open PR #N, commit dialog
             ├── project-branch-selector.tsx # Status-bar branch menu: switch branch, New branch
             ├── stats-panel.tsx    # Activity stats dashboard on Home
@@ -281,6 +283,11 @@ src/
             ├── context-menu.tsx   # Right-click context menu, themed confirm dialog
             ├── error-boundary.tsx # Renderer error boundary
             ├── extension-ui-dialog.tsx # Extension UI protocol + AppConfirmDialog
+            ├── ask-form.tsx       # OMP `ask` tool: all questions in one dialog (options, multi-select, custom answer)
+            ├── ask-form-helpers.ts # Pure ask wire-format helpers (answers[] / cancelled)
+            ├── pending-prompt-card.tsx # Komuta inbox card that answers a held prompt of any session
+            ├── session-cleanup.tsx # Komuta session cleanup: archive empty/old session files, restore from the archive
+            ├── session-cleanup-filter.ts # Pure cleanup filter + per-project grouping
             ├── chat-search.tsx    # Ctrl/Cmd+F find in conversation
             ├── chat-panel-widths.ts # Width math for the chat side panel
             ├── command-results.tsx # Grouped command rows (palette + inline slash popup)
@@ -337,7 +344,13 @@ resources/
 - Project tabs keep creation order until the user drags one to a new place; the custom order is saved (`utils/tab-navigation.ts`), and the project-tab shortcuts follow it
 - Switching to a session from a different project creates that project's workspace if needed
 - **Drag and drop a folder** onto the window to open it as a project (create the workspace if needed, switch, show Chat); this is the same path as File > Open Project
-- Mission Control summarizes all live session runtimes and workflow runs across projects; New Task sends a prompt to a dedicated background runtime
+- Komuta (Mission Control) is the central command screen across projects:
+  - Held questions/confirmations from every session are answered in place, without switching session
+  - Running and finished sessions show their turn times and a short summary by the `summaryModel` (Settings), plus each session's todo progress
+  - Desktop notifications fire only for questions by default (`notifyOnlyQuestions`); focus mode holds other sessions' finish/fail notifications and sends one summary when it ends
+  - `show_artifact` (omp-artifacts) files open in the side preview; recent artifacts are listed from `~/.omp/agent/artifact-library.json`. Agent runs get `OMP_ARTIFACTS_EXTERNAL_VIEWER=1`
+  - Session cleanup moves empty or old session files to `<store>-archive/` (e.g. `~/.omp/agent/sessions-archive/`) and restores them; it never deletes
+- New Task sends a prompt to a dedicated background runtime
 
 ### Session management
 

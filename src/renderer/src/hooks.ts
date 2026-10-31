@@ -9,6 +9,7 @@ import type { WorkspaceActivationIntent } from '../../shared/ipc-contracts'
 import type { ChatWidth } from '../../shared/chat-width'
 import { t } from '../../shared/i18n'
 import { isImeComposing } from './utils/ime-composing'
+import { openArtifact } from './components/chat-file-link'
 
 /**
  * Subscribes to Pi events from the main process and routes them to the store.
@@ -38,7 +39,12 @@ export function usePiEvents(): void {
     const setFocus = (notifyFocusRuntimeId: string | null): void => useAppStore.setState({ notifyFocusRuntimeId })
     const unsubscribeFocus = window.piDesktop.onNotifyFocus(setFocus)
     void window.piDesktop.workspace.getNotifyFocus().then(setFocus).catch(() => undefined)
-    const unsubscribeArtifacts = window.piDesktop.onArtifactShown((event) => useAppStore.getState().handleArtifactShown(event))
+    const unsubscribeArtifacts = window.piDesktop.onArtifactShown(({ runtimeId, artifact }) => {
+      const state = useAppStore.getState()
+      state.addArtifact(artifact)
+      // Only the session on screen opens its artifact; the others wait in Komuta's list.
+      if (runtimeId === state.activeSessionRuntimeId && state.currentView === 'chat') void openArtifact(artifact)
+    })
     void window.piDesktop.workspace.listArtifacts().then((artifacts) => useAppStore.setState({ artifacts })).catch(() => undefined)
 
     // A desktop-notification click hands the renderer the switch intent so the

@@ -1,4 +1,5 @@
 import { sidePanelHidesPreview, useAppStore, type PreviewTarget } from '../store'
+import type { ArtifactEntry } from '../../../shared/ipc-contracts'
 
 // Image extensions the viewer can render. png/jpg/jpeg/gif/webp/avif/bmp/ico
 // arrive as base64 from readAttachment; svg comes back as text and is rendered
@@ -88,6 +89,12 @@ export async function openFilePreview(file: Omit<PreviewTarget, 'kind'>): Promis
   if (sidePanelHidesPreview(current.chatSidePanel)) await current.setChatSidePanel(null)
   if (current.currentView !== 'chat') current.setCurrentView('chat')
   return true
+}
+
+/** A show_artifact entry: files open in the chat preview, URLs in the browser. */
+export async function openArtifact(artifact: ArtifactEntry): Promise<void> {
+  if (artifact.url) return window.piDesktop.system.openExternal(artifact.source)
+  await openFilePreview({ name: artifact.source.split(/[\\/]/).pop() ?? artifact.source, path: artifact.source })
 }
 
 function normalize(path: string): string {

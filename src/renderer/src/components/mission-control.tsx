@@ -4,6 +4,7 @@ import { AlertCircle, Archive, ArrowUpRight, CheckCircle2, Circle, Crosshair, Fi
 import { clsx } from 'clsx'
 import { useAppStore } from '../store'
 import { SessionCleanup } from './session-cleanup'
+import { openArtifact } from './chat-file-link'
 import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/agent-engine-label'
 import { getSessionTitle } from '../utils/session-title'
 import { pathsEqual } from '../../../shared/path-compare'
@@ -43,7 +44,6 @@ export function MissionControl(): React.JSX.Element {
   const notifyFocusRuntimeId = useAppStore((state) => state.notifyFocusRuntimeId)
   const focusRuntime = notifyFocusRuntimeId ? sessionRuntimes[notifyFocusRuntimeId] : undefined
   const artifacts = useAppStore((state) => state.artifacts)
-  const openArtifact = useAppStore((state) => state.openArtifact)
   const [cleanupOpen, setCleanupOpen] = useState(false)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
