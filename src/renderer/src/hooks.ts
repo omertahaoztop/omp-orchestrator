@@ -19,6 +19,7 @@ export function usePiEvents(): void {
   const handlePendingPromptCounts = useAppStore((state) => state.handlePendingPromptCounts)
   const handleWorkspaceActivity = useAppStore((state) => state.handleWorkspaceActivity)
   const handleSessionRuntime = useAppStore((state) => state.handleSessionRuntime)
+  const handleSessionDigests = useAppStore((state) => state.handleSessionDigests)
   const recoverPendingPrompts = useAppStore((state) => state.recoverPendingPrompts)
 
   useEffect(() => {
@@ -27,6 +28,13 @@ export function usePiEvents(): void {
     const unsubscribeCounts = window.piDesktop.onPendingPrompts(handlePendingPromptCounts)
     const unsubscribeActivity = window.piDesktop.onWorkspaceActivity(handleWorkspaceActivity)
     const unsubscribeSessionRuntime = window.piDesktop.onSessionRuntime(handleSessionRuntime)
+    const unsubscribeDigests = window.piDesktop.onSessionDigests(handleSessionDigests)
+    void window.piDesktop.workspace.getSessionDigests().then(handleSessionDigests).catch(() => undefined)
+    const unsubscribeDigestRead = useAppStore.subscribe((state, previous) => {
+      if (state.activeSessionRuntimeId !== previous.activeSessionRuntimeId || state.currentView !== previous.currentView) {
+        state.markActiveDigestRead()
+      }
+    })
 
     // A desktop-notification click hands the renderer the switch intent so the
     // usual streaming/dirty-editor confirms still run; landing on chat shows
@@ -86,8 +94,10 @@ export function usePiEvents(): void {
       unsubscribeActivity()
       unsubscribeSessionRuntime()
       unsubscribeActivate()
+      unsubscribeDigests()
+      unsubscribeDigestRead()
     }
-  }, [handlePiEvent, handlePendingPromptCounts, handleWorkspaceActivity, handleSessionRuntime, recoverPendingPrompts])
+  }, [handlePiEvent, handlePendingPromptCounts, handleWorkspaceActivity, handleSessionRuntime, handleSessionDigests, recoverPendingPrompts])
 }
 
 /**

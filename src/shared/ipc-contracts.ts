@@ -121,6 +121,8 @@ export const IPC_CHANNELS = {
   WORKSPACE_STOP_PI: 'workspace:stop-pi',
   WORKSPACE_CREATE_TAB: 'workspace:create-tab',
   WORKSPACE_ACTIVITY_GET: 'workspace:activity',
+  SESSION_DIGESTS_GET: 'session-digests:get',
+  SESSION_DIGEST_MARK_READ: 'session-digests:mark-read',
   WORKSPACE_TAKE_PENDING_ACTIVATION: 'workspace:take-pending-activation',
 
   // Repo sets and linked tasks (one task across several git repositories)
@@ -219,6 +221,7 @@ export const IPC_CHANNELS = {
   EVENT_PI: 'event:pi',
   EVENT_PENDING_PROMPTS: 'event:pending-prompts',
   EVENT_WORKSPACE_ACTIVITY: 'event:workspace-activity',
+  EVENT_SESSION_DIGESTS: 'event:session-digests',
   EVENT_SESSION_RUNTIME: 'event:session-runtime',
   EVENT_ACTIVATE_WORKSPACE: 'event:activate-workspace',
   EVENT_FILE_CHANGE: 'event:file-change',
@@ -643,6 +646,21 @@ export interface PendingPromptItem {
   /** Epoch ms when Pi asked. */
   receivedAt: number
 }
+
+/** What one live session is doing or last finished, for the Komuta board. Keyed by runtime id. */
+export interface SessionDigest {
+  runtimeId: string
+  workspaceId: string
+  /** Epoch ms of the current or last turn's start. */
+  startedAt: number | null
+  /** Epoch ms the last turn ended; null while it runs. */
+  finishedAt: number | null
+  /** Two sentences from the summary model, or the first line of the last answer when it failed. */
+  summary: string | null
+  read: boolean
+}
+
+export type SessionDigestMap = Record<string, SessionDigest>
 
 /**
  * Per-workspace background activity derived in the main process from every
@@ -1405,6 +1423,9 @@ export interface AppSettings {
   // missing tests, unverified work), shown as buttons under the reply.
   // Applies to agents started after the change.
   suggestNextSteps: boolean
+  // Model for the two-sentence end-of-turn summaries on Komuta, passed to
+  // `--model`; '@smol' is OMP's cheap-model role.
+  summaryModel: string
   // Interface language: 'system' (follow the OS language list) or a bundled
   // language code. Unknown values reset to 'system' on load.
   language: string

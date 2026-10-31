@@ -822,6 +822,15 @@
     "zoomOut": "缩小"
   },
   "missionControl": {
+    "board": {
+      "ended": "",
+      "finished": "",
+      "noneRunning": "",
+      "running": "",
+      "started": "",
+      "summarizing": "",
+      "unread": ""
+    },
     "controlUnavailable": "控制不可用",
     "idle": "{{agent}} 处于空闲状态",
     "inbox": {
@@ -830,7 +839,6 @@
       "title": "",
       "waitingSince": ""
     },
-    "liveSessions": "运行中的会话",
     "needsAttention_other": "{{count}} 项需要关注",
     "newTask": "新建任务",
     "noLiveRuntimes": "暂无活动的会话运行时。启动一个任务，让 Pi 在后台工作。",
@@ -1384,6 +1392,10 @@
     "suggestNextSteps": {
       "description": "每轮结束时，{{agent}} 可以建议最多三个后续步骤，例如缺少的测试或它无法检查的工作。点击某个步骤即可将其放入消息框。保存后新开始的会话生效。",
       "label": "建议后续步骤"
+    },
+    "summaryModel": {
+      "description": "",
+      "label": ""
     },
     "terminalFontSize": {
       "description": "终端面板的字体大小",

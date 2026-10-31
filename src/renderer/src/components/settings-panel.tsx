@@ -135,6 +135,7 @@ export function SettingsPanel(): React.JSX.Element {
   const [singleDollarMath, setSingleDollarMath] = useState(draft0.singleDollarMath ?? settings?.singleDollarMath ?? DEFAULT_SETTINGS.singleDollarMath)
   const [desktopNotifications, setDesktopNotifications] = useState(draft0.desktopNotifications ?? settings?.desktopNotifications ?? DEFAULT_SETTINGS.desktopNotifications)
   const [suggestNextSteps, setSuggestNextSteps] = useState(draft0.suggestNextSteps ?? settings?.suggestNextSteps ?? DEFAULT_SETTINGS.suggestNextSteps)
+  const [summaryModel, setSummaryModel] = useState(draft0.summaryModel ?? settings?.summaryModel ?? DEFAULT_SETTINGS.summaryModel)
   const [resumeLastSession, setResumeLastSession] = useState(draft0.resumeLastSession ?? settings?.resumeLastSession ?? DEFAULT_SETTINGS.resumeLastSession)
   const [openToHomeOnLaunch, setOpenToHomeOnLaunch] = useState(draft0.openToHomeOnLaunch ?? settings?.openToHomeOnLaunch ?? DEFAULT_SETTINGS.openToHomeOnLaunch)
   const [runOnStartup, setRunOnStartup] = useState(draft0.runOnStartup ?? settings?.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup)
@@ -322,6 +323,7 @@ export function SettingsPanel(): React.JSX.Element {
     setSingleDollarMath(draft.singleDollarMath ?? settings.singleDollarMath)
     setDesktopNotifications(draft.desktopNotifications ?? settings.desktopNotifications)
     setSuggestNextSteps(draft.suggestNextSteps ?? settings.suggestNextSteps)
+    setSummaryModel(draft.summaryModel ?? settings.summaryModel)
     setResumeLastSession(draft.resumeLastSession ?? settings.resumeLastSession)
     setOpenToHomeOnLaunch(draft.openToHomeOnLaunch ?? settings.openToHomeOnLaunch)
     setRunOnStartup(draft.runOnStartup ?? settings.runOnStartup)
@@ -581,6 +583,7 @@ export function SettingsPanel(): React.JSX.Element {
       singleDollarMath,
       desktopNotifications,
       suggestNextSteps,
+      summaryModel,
       resumeLastSession,
       openToHomeOnLaunch,
       runOnStartup,
@@ -655,6 +658,7 @@ export function SettingsPanel(): React.JSX.Element {
       singleDollarMath: DEFAULT_SETTINGS.singleDollarMath,
       desktopNotifications: DEFAULT_SETTINGS.desktopNotifications,
       suggestNextSteps: DEFAULT_SETTINGS.suggestNextSteps,
+      summaryModel: DEFAULT_SETTINGS.summaryModel,
       resumeLastSession: DEFAULT_SETTINGS.resumeLastSession,
       openToHomeOnLaunch: DEFAULT_SETTINGS.openToHomeOnLaunch,
       runOnStartup: DEFAULT_SETTINGS.runOnStartup,
@@ -680,6 +684,7 @@ export function SettingsPanel(): React.JSX.Element {
     setSingleDollarMath(defaults.singleDollarMath!)
     setDesktopNotifications(defaults.desktopNotifications!)
     setSuggestNextSteps(defaults.suggestNextSteps!)
+    setSummaryModel(defaults.summaryModel!)
     setResumeLastSession(defaults.resumeLastSession!)
     setOpenToHomeOnLaunch(defaults.openToHomeOnLaunch!)
     setRunOnStartup(defaults.runOnStartup!)
@@ -1097,6 +1102,16 @@ export function SettingsPanel(): React.JSX.Element {
             description={t('settings.suggestNextSteps.description', { agent: runningEngineLabel })}
           >
             <Toggle checked={suggestNextSteps} onChange={(v) => { setSuggestNextSteps(v); setSettingsDraft({ suggestNextSteps: v }) }} />
+          </SettingsRow>
+
+          <SettingsRow label={t('settings.summaryModel.label')} description={t('settings.summaryModel.description')}>
+            <input
+              type="text"
+              value={summaryModel}
+              placeholder={DEFAULT_SETTINGS.summaryModel}
+              onChange={(e) => { setSummaryModel(e.target.value); setSettingsDraft({ summaryModel: e.target.value }) }}
+              className="w-56 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm text-primary placeholder:text-faint focus:border-focus focus:outline-none"
+            />
           </SettingsRow>
 
           <SettingsRow

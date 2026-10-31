@@ -7,10 +7,10 @@ import { DEFAULT_AGENT_ENGINE_LABEL, agentEngineLabel } from '../../../shared/ag
 import { getSessionTitle } from '../utils/session-title'
 import { pathsEqual } from '../../../shared/path-compare'
 import { canResumeRun } from '../utils/workflow-runs'
-import { NowContext } from '../utils/relative-time'
+import { NowContext, RelativeTime } from '../utils/relative-time'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
 import { PendingPromptCard } from './pending-prompt-card'
-import type { SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
+import type { SessionDigest, SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
 import type { Translate } from '../../../shared/i18n'
 
 const WORKFLOW_STATUS_KEYS = {
@@ -38,6 +38,7 @@ export function MissionControl(): React.JSX.Element {
   const openWorkflowRunsForWorkspace = useAppStore((state) => state.openWorkflowRunsForWorkspace)
   const pendingPrompts = useAppStore((state) => state.pendingPrompts)
   const answerPendingPrompt = useAppStore((state) => state.answerPendingPrompt)
+  const sessionDigests = useAppStore((state) => state.sessionDigests)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
 
@@ -57,6 +58,10 @@ export function MissionControl(): React.JSX.Element {
       .sort((a, b) => Number(b.active) - Number(a.active)),
     [sessionRuntimes]
   )
+  const runningRuntimes = runtimes.filter(isRunning)
+  const finishedRuntimes = runtimes
+    .filter((runtime) => !isRunning(runtime))
+    .sort((a, b) => (sessionDigests[b.runtimeId]?.finishedAt ?? 0) - (sessionDigests[a.runtimeId]?.finishedAt ?? 0))
   const recentRuns = useMemo(
     () => [...workflowRuns].sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)).slice(0, 8),
     [workflowRuns]
@@ -166,64 +171,43 @@ export function MissionControl(): React.JSX.Element {
           )}
         </section>
 
-        <section className="mb-6">
-          <SectionHeading title={t('missionControl.liveSessions')} count={runtimes.length} />
-          {runtimes.length === 0 ? (
-            <EmptyState>{t('missionControl.noLiveRuntimes')}</EmptyState>
-          ) : (
-            <div className="grid gap-2 md:grid-cols-2">
-              {runtimes.map((runtime) => {
-                const workspace = workspaces.find((item) => item.id === runtime.workspaceId)
-                const session = runtime.sessionPath
-                  ? sessionList.find((item) => pathsEqual(item.path, runtime.sessionPath!))
-                  : undefined
-                const title = session
-                  ? getSessionTitle(session.name, session.sessionId, session.preview)
-                  : runtime.sessionId ?? t('missionControl.startingSession')
-                const canOpen = !!runtime.sessionPath && !!workspace
-                return (
-                  <div key={runtime.runtimeId} className="flex items-center gap-3 rounded-lg border border-border bg-surface/50 px-3 py-3">
-                    <SessionRuntimeIndicator runtime={runtime} />
-                    {!runtime.activity && runtime.status === 'running' && (
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full bg-success"
-                        title={t('missionControl.idle', {
-                          agent: agentEngineLabel(runtime.engine) ?? DEFAULT_AGENT_ENGINE_LABEL,
-                        })}
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
+          {([
+            [t('missionControl.board.running'), runningRuntimes, t('missionControl.board.noneRunning')],
+            [t('missionControl.board.finished'), finishedRuntimes, t('missionControl.noLiveRuntimes')],
+          ] as const).map(([heading, list, empty]) => (
+            <section key={heading}>
+              <SectionHeading title={heading} count={list.length} />
+              {list.length === 0 ? (
+                <EmptyState>{empty}</EmptyState>
+              ) : (
+                <div className="space-y-2">
+                  {list.map((runtime) => {
+                    const workspace = workspaces.find((item) => item.id === runtime.workspaceId)
+                    const session = runtime.sessionPath
+                      ? sessionList.find((item) => pathsEqual(item.path, runtime.sessionPath!))
+                      : undefined
+                    return (
+                      <RuntimeCard
+                        key={runtime.runtimeId}
+                        runtime={runtime}
+                        digest={sessionDigests[runtime.runtimeId]}
+                        title={session
+                          ? getSessionTitle(session.name, session.sessionId, session.preview)
+                          : runtime.sessionId ?? t('missionControl.startingSession')}
+                        projectName={workspace?.name ?? t('missionControl.unknownProject')}
+                        onOpen={runtime.sessionPath && workspace ? () => void openRuntime(runtime) : null}
+                        onReview={runtime.sessionPath && (runtime.activity === 'completed' || workspace?.kind === 'worktree')
+                          ? () => void reviewRuntime(runtime)
+                          : null}
                       />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm text-primary">{title}</div>
-                      <div className="truncate text-[11px] text-faint">
-                        {workspace?.name ?? t('missionControl.unknownProject')} · {runtimeState(runtime, t)}
-                      </div>
-                    </div>
-                    {canOpen && (
-                      <div className="flex shrink-0 items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => void openRuntime(runtime)}
-                          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted transition-colors hover:bg-highlight hover:text-primary"
-                        >
-                          {t('missionControl.open')} <ArrowUpRight size={11} />
-                        </button>
-                        {(runtime.activity === 'completed' || workspace?.kind === 'worktree') && (
-                          <button
-                            type="button"
-                            onClick={() => void reviewRuntime(runtime)}
-                            className="rounded border border-accent/40 px-2 py-1 text-[10px] text-accent-fg transition-colors hover:bg-accent-bg/20"
-                          >
-                            {t('missionControl.review')}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
 
         <section>
           <div className="mb-2 flex items-center justify-between">
@@ -259,6 +243,81 @@ export function MissionControl(): React.JSX.Element {
     </div>
     </NowContext.Provider>
   )
+}
+
+function RuntimeCard({
+  runtime,
+  digest,
+  title,
+  projectName,
+  onOpen,
+  onReview,
+}: {
+  runtime: SessionRuntimeInfo
+  digest: SessionDigest | undefined
+  title: string
+  projectName: string
+  onOpen: (() => void) | null
+  onReview: (() => void) | null
+}): React.JSX.Element {
+  const { t } = useTranslation()
+  const finishedAt = isRunning(runtime) ? null : digest?.finishedAt ?? null
+  const unread = finishedAt !== null && !digest?.read
+  return (
+    <div className={clsx('rounded-lg border bg-surface/50 px-3 py-3', unread ? 'border-accent/50' : 'border-border')}>
+      <div className="flex items-center gap-3">
+        <SessionRuntimeIndicator runtime={runtime} />
+        {!runtime.activity && runtime.status === 'running' && (
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full bg-success"
+            title={t('missionControl.idle', { agent: agentEngineLabel(runtime.engine) ?? DEFAULT_AGENT_ENGINE_LABEL })}
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            {unread && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" title={t('missionControl.board.unread')} />}
+            <span className="truncate text-sm text-primary">{title}</span>
+          </div>
+          <div className="truncate text-[11px] text-faint">
+            {projectName} · {runtimeState(runtime, t)}
+            {isRunning(runtime) && digest?.startedAt && (
+              <> · {t('missionControl.board.started')} <RelativeTime timestamp={digest.startedAt} /></>
+            )}
+            {finishedAt !== null && <> · {t('missionControl.board.ended')} <RelativeTime timestamp={finishedAt} /></>}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {onOpen && (
+            <button
+              type="button"
+              onClick={onOpen}
+              className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted transition-colors hover:bg-highlight hover:text-primary"
+            >
+              {t('missionControl.open')} <ArrowUpRight size={11} />
+            </button>
+          )}
+          {onReview && (
+            <button
+              type="button"
+              onClick={onReview}
+              className="rounded border border-accent/40 px-2 py-1 text-[10px] text-accent-fg transition-colors hover:bg-accent-bg/20"
+            >
+              {t('missionControl.review')}
+            </button>
+          )}
+        </div>
+      </div>
+      {finishedAt !== null && (
+        <p className="mt-2 line-clamp-3 whitespace-pre-wrap break-words text-xs text-muted">
+          {digest?.summary ?? t('missionControl.board.summarizing')}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function isRunning(runtime: SessionRuntimeInfo): boolean {
+  return runtime.activity === 'working' || runtime.activity === 'needs-approval'
 }
 
 function WorkflowRow({

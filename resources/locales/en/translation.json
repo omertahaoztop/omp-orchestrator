@@ -838,6 +838,15 @@
     "zoomOut": "Zoom Out"
   },
   "missionControl": {
+    "board": {
+      "ended": "finished",
+      "finished": "Finished",
+      "noneRunning": "No session is working right now.",
+      "running": "Running",
+      "started": "started",
+      "summarizing": "Writing the summary…",
+      "unread": "Finished, not read yet"
+    },
     "controlUnavailable": "control unavailable",
     "idle": "{{agent}} is idle",
     "inbox": {
@@ -846,7 +855,6 @@
       "title": "Waiting for you",
       "waitingSince": "asked"
     },
-    "liveSessions": "Live sessions",
     "needsAttention_one": "{{count}} needs attention",
     "needsAttention_other": "{{count}} needs attention",
     "newTask": "New task",
@@ -1411,6 +1419,10 @@
     "suggestNextSteps": {
       "description": "At the end of a turn, {{agent}} can suggest up to three next steps, such as missing tests or work it could not check. Click a step to put it in the message box. Applies to sessions that start after you save.",
       "label": "Suggest Next Steps"
+    },
+    "summaryModel": {
+      "description": "Writes the two-sentence summary on Komuta when a session finishes. \"@smol\" is the cheap model role of OMP; any model name works.",
+      "label": "Summary model"
     },
     "terminalFontSize": {
       "description": "Font size for the terminal panel",

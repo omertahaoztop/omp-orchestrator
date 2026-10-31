@@ -870,6 +870,15 @@
     "zoomOut": "Зменшити"
   },
   "missionControl": {
+    "board": {
+      "ended": "",
+      "finished": "",
+      "noneRunning": "",
+      "running": "",
+      "started": "",
+      "summarizing": "",
+      "unread": ""
+    },
     "controlUnavailable": "керування недоступне",
     "idle": "{{agent}} простоює",
     "inbox": {
@@ -878,7 +887,6 @@
       "title": "",
       "waitingSince": ""
     },
-    "liveSessions": "Активні сесії",
     "needsAttention_one": "Потребують уваги: {{count}}",
     "needsAttention_few": "Потребують уваги: {{count}}",
     "needsAttention_many": "Потребують уваги: {{count}}",
@@ -1465,6 +1473,10 @@
     "suggestNextSteps": {
       "description": "Наприкінці ходу {{agent}} може запропонувати до трьох наступних кроків: наприклад, додати тести або перевірити те, що не вдалося. Натисніть крок, щоб вставити його в поле повідомлення. Діє для сесій, запущених після збереження.",
       "label": "Пропонувати наступні кроки"
+    },
+    "summaryModel": {
+      "description": "",
+      "label": ""
     },
     "terminalFontSize": {
       "description": "Розмір шрифту панелі термінала",

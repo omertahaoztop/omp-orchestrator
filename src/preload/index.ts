@@ -67,6 +67,7 @@ import type {
   PiAskAnswer,
   PendingPromptItem,
   WorkspaceActivityMap,
+  SessionDigestMap,
   WorkflowRunSummary,
   WorkflowRunDetail,
   WorkflowControlAction,
@@ -211,6 +212,8 @@ interface PiDesktopAPI {
     stopPi(workspaceId: string): Promise<PiStatus>
     /** Snapshot of the per-workspace activity map (reload recovery). */
     getActivity(): Promise<WorkspaceActivityMap>
+    getSessionDigests(): Promise<SessionDigestMap>
+    markSessionDigestRead(runtimeId: string): Promise<void>
     /**
      * Consume the activation intent from a notification clicked while no
      * window existed (macOS closed-window case). Null when there is none.
@@ -440,6 +443,7 @@ interface PiDesktopAPI {
   onEvent(callback: (event: PiRpcEvent) => void): () => void
   onPendingPrompts(callback: (counts: PendingPromptCounts) => void): () => void
   onWorkspaceActivity(callback: (map: WorkspaceActivityMap) => void): () => void
+  onSessionDigests(callback: (map: SessionDigestMap) => void): () => void
   onSessionRuntime(callback: (runtime: SessionRuntimeInfo) => void): () => void
   onActivateWorkspace(callback: (payload: WorkspaceActivationIntent) => void): () => void
   onFileChange(callback: (event: FileChangeEvent) => void): () => void
@@ -547,6 +551,8 @@ const api: PiDesktopAPI = {
     stopPi: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_STOP_PI, workspaceId),
     createTab: (options) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_CREATE_TAB, options),
     getActivity: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ACTIVITY_GET),
+    getSessionDigests: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGESTS_GET),
+    markSessionDigestRead: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGEST_MARK_READ, runtimeId),
     takePendingActivation: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_TAKE_PENDING_ACTIVATION),
   },
 
@@ -764,6 +770,14 @@ const api: PiDesktopAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_WORKSPACE_ACTIVITY, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_WORKSPACE_ACTIVITY, handler)
+    }
+  },
+
+  onSessionDigests: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: SessionDigestMap) => callback(data)
+    ipcRenderer.on(IPC_CHANNELS.EVENT_SESSION_DIGESTS, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_SESSION_DIGESTS, handler)
     }
   },
 

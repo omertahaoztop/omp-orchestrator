@@ -870,6 +870,15 @@
     "zoomOut": "Уменьшить"
   },
   "missionControl": {
+    "board": {
+      "ended": "",
+      "finished": "",
+      "noneRunning": "",
+      "running": "",
+      "started": "",
+      "summarizing": "",
+      "unread": ""
+    },
     "controlUnavailable": "управление недоступно",
     "idle": "{{agent}} бездействует",
     "inbox": {
@@ -878,7 +887,6 @@
       "title": "",
       "waitingSince": ""
     },
-    "liveSessions": "Активные сессии",
     "needsAttention_one": "Требуют внимания: {{count}}",
     "needsAttention_few": "Требуют внимания: {{count}}",
     "needsAttention_many": "Требуют внимания: {{count}}",
@@ -1465,6 +1473,10 @@
     "suggestNextSteps": {
       "description": "В конце хода {{agent}} может предложить до трёх следующих шагов: например, добавить тесты или проверить то, что не удалось. Нажмите шаг, чтобы вставить его в поле сообщения. Действует для сессий, запущенных после сохранения.",
       "label": "Предлагать следующие шаги"
+    },
+    "summaryModel": {
+      "description": "",
+      "label": ""
     },
     "terminalFontSize": {
       "description": "Размер шрифта панели терминала",

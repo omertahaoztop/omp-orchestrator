@@ -82,6 +82,7 @@ import type {
   PermissionRulesScope,
   PendingPromptCounts,
   PendingPromptItem,
+  SessionDigestMap,
   WorkspaceActivityMap,
   WorkflowRunSummary,
   SessionRuntimeInfo,
@@ -375,6 +376,8 @@ interface AppState {
   pendingPrompts: PendingPromptItem[]
   // Per-workspace background activity derived in main (idle entries omitted).
   workspaceActivity: WorkspaceActivityMap
+  // Per-runtime turn timing and end-of-turn summary for the Komuta board.
+  sessionDigests: SessionDigestMap
   // Dynamic workflow runs read from the extension's persisted run journal.
   workflowRuns: WorkflowRunSummary[]
   // Extension status entries (setStatus fire-and-forget). Keyed by statusKey.
@@ -611,6 +614,9 @@ interface AppActions {
   /** Answer a held prompt from any session; null cancels it like closing its dialog. */
   answerPendingPrompt: (request: PiExtensionUiRequest, response: Record<string, unknown> | null) => void
   refreshPendingPrompts: () => Promise<void>
+  handleSessionDigests: (map: SessionDigestMap) => void
+  /** A finished turn counts as read once its session is open in the chat view. */
+  markActiveDigestRead: () => void
   dismissExtensionNotify: () => void
 
   // App confirmation dialog (promise-based; resolves true on confirm)
@@ -1202,6 +1208,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   pendingPromptCounts: {},
   pendingPrompts: [],
   workspaceActivity: {},
+  sessionDigests: {},
   workflowRuns: [],
   extensionStatuses: {},
   subagentTasks: [],
@@ -2886,6 +2893,18 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   handlePendingPromptCounts: (counts) => {
     set({ pendingPromptCounts: counts })
     void get().refreshPendingPrompts()
+  },
+
+  handleSessionDigests: (map) => {
+    set({ sessionDigests: map })
+    get().markActiveDigestRead()
+  },
+
+  markActiveDigestRead: () => {
+    const { activeSessionRuntimeId, currentView, sessionDigests } = get()
+    const digest = activeSessionRuntimeId ? sessionDigests[activeSessionRuntimeId] : undefined
+    if (currentView !== 'chat' || !digest?.finishedAt || digest.read) return
+    void window.piDesktop.workspace.markSessionDigestRead(digest.runtimeId).catch(() => undefined)
   },
 
   handleWorkspaceActivity: (map) => {

@@ -838,6 +838,15 @@
     "zoomOut": "Uzaklaştır"
   },
   "missionControl": {
+    "board": {
+      "ended": "bitti:",
+      "finished": "Bitti",
+      "noneRunning": "Şu an çalışan oturum yok.",
+      "running": "Çalışıyor",
+      "started": "başladı:",
+      "summarizing": "Özet yazılıyor…",
+      "unread": "Bitti, henüz okunmadı"
+    },
     "controlUnavailable": "denetim kullanılamıyor",
     "idle": "{{agent}} boşta",
     "inbox": {
@@ -846,7 +855,6 @@
       "title": "Sizi bekleyenler",
       "waitingSince": "sordu:"
     },
-    "liveSessions": "Canlı oturumlar",
     "needsAttention_one": "{{count}} oturum ilgi bekliyor",
     "needsAttention_other": "{{count}} oturum ilgi bekliyor",
     "newTask": "Yeni görev",
@@ -1411,6 +1419,10 @@
     "suggestNextSteps": {
       "description": "Bir turun sonunda {{agent}}, eksik testler veya denetleyemediği işler gibi en fazla üç sonraki adım önerebilir. Bir adıma tıklayınca mesaj kutusuna eklenir. Kaydettikten sonra başlayan oturumlarda geçerli olur.",
       "label": "Sonraki adımları öner"
+    },
+    "summaryModel": {
+      "description": "Bir oturum bitince Komuta'daki iki cümlelik özeti yazar. \"@smol\", OMP'nin ucuz model rolüdür; herhangi bir model adı da yazabilirsiniz.",
+      "label": "Özet modeli"
     },
     "terminalFontSize": {
       "description": "Terminal paneli yazı tipi boyutu",
