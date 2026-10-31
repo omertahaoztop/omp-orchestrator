@@ -48,7 +48,7 @@ export function wireWorkspaceActivity(
   ctx: IpcContext,
   windowControls: WindowControls,
   iconPath: string,
-): WorkspaceActivityTracker {
+): WorkspaceActivityTracker & { focusRuntimeId(): string | null } {
   const { workspaceManager } = ctx
   const { getWindow, showWindow } = windowControls
   // Activation intent from a notification clicked while no window existed;
@@ -209,5 +209,5 @@ export function wireWorkspaceActivity(
     return intent
   })
 
-  return tracker
+  return Object.assign(tracker, { focusRuntimeId: () => focusRuntimeId })
 }

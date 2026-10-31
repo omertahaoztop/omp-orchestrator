@@ -827,6 +827,19 @@
   "language": {
     "nativeName": "English"
   },
+  "matrix": {
+    "answerYesNo": "answer yes or no",
+    "failed": "Could not send the answer: {{error}}",
+    "finished": "{{project}} finished",
+    "howTo": "Reply to this message with a number, yes/no or text.",
+    "none": "No question is waiting.",
+    "notAnOption": "not an option: {{answer}}",
+    "pickOne": "pick one option",
+    "sent": "Your answer was sent.",
+    "severalParts": "this question has several parts; answer it in the window",
+    "waiting": "{{project}} is waiting for you",
+    "which": "Several questions are waiting; reply to the message of the one you mean."
+  },
   "menu": {
     "actualSize": "Actual Size",
     "close": "Close Window",

@@ -811,6 +811,19 @@
   "language": {
     "nativeName": "简体中文"
   },
+  "matrix": {
+    "answerYesNo": "请回答是或否",
+    "failed": "无法发送回答：{{error}}",
+    "finished": "{{project}} 已完成",
+    "howTo": "请用编号、是/否或文字回复此消息。",
+    "none": "没有等待中的问题。",
+    "notAnOption": "不是可选项：{{answer}}",
+    "pickOne": "请只选一项",
+    "sent": "您的回答已发送。",
+    "severalParts": "此问题包含多个部分；请在应用窗口中回答",
+    "waiting": "{{project}} 正在等待您",
+    "which": "有多个问题在等待；请回复对应问题的消息。"
+  },
   "menu": {
     "actualSize": "实际大小",
     "close": "关闭窗口",

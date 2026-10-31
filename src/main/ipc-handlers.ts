@@ -33,6 +33,7 @@ import { wireSessionDigests } from './ipc/session-digest-wiring'
 import { wireArtifacts } from './ipc/artifact-wiring'
 import { wirePlanReview } from './ipc/plan-review-wiring'
 import { registerRoutineHandlers } from './ipc/routine-handlers'
+import { wireMatrix } from './ipc/matrix-wiring'
 import type { WorkspaceTerminals } from './workspace-terminals'
 
 export { loadAppSettings, saveAppSettings } from './ipc/settings'
@@ -88,7 +89,20 @@ export function registerIpcHandlers(
   // Cross-workspace activity map + desktop notifications. Wired before the
   // router so it can observe the router's pending-prompt counts below.
   const workspaceActivity = wireWorkspaceActivity(ctx, windowControls, iconPath)
-  wireSessionDigests(ctx)
+  const router = createExtensionUiRouter({
+    workspace: workspaceManager,
+    broadcast: ctx.broadcast,
+    onPendingCounts: (counts) => {
+      workspaceActivity.handlePendingCounts(counts)
+      matrix?.syncQuestions()
+    },
+  })
+  const matrix = wireMatrix(ctx, {
+    router,
+    getWindow: windowControls.getWindow,
+    focusRuntimeId: workspaceActivity.focusRuntimeId,
+  })
+  wireSessionDigests(ctx, matrix?.handleDigests)
   wireArtifacts(ctx)
   wirePlanReview(ctx, windowControls.showWindow)
 
@@ -98,11 +112,7 @@ export function registerIpcHandlers(
   wireExtensionUiIpc<IpcMainInvokeEvent>({
     handle: (channel, handler) => ipcMain.handle(channel, handler),
     assertTrustedSender,
-    router: createExtensionUiRouter({
-      workspace: workspaceManager,
-      broadcast: ctx.broadcast,
-      onPendingCounts: (counts) => workspaceActivity.handlePendingCounts(counts),
-    }),
+    router,
     workspace: workspaceManager,
     broadcast: ctx.broadcast,
   })

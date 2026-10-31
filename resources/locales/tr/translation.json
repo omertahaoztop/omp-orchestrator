@@ -827,6 +827,19 @@
   "language": {
     "nativeName": "Türkçe"
   },
+  "matrix": {
+    "answerYesNo": "evet ya da hayır yazın",
+    "failed": "Cevap iletilemedi: {{error}}",
+    "finished": "{{project}} bitti",
+    "howTo": "Bu mesaja numara, evet/hayır ya da metinle yanıt verin.",
+    "none": "Bekleyen soru yok.",
+    "notAnOption": "seçeneklerden biri değil: {{answer}}",
+    "pickOne": "tek seçenek seçin",
+    "sent": "Cevabınız iletildi.",
+    "severalParts": "bu sorunun birden fazla bölümü var; pencereden cevaplayın",
+    "waiting": "{{project}} sizi bekliyor",
+    "which": "Birden fazla soru bekliyor; cevabınızı ilgili mesaja yanıt olarak yazın."
+  },
   "menu": {
     "actualSize": "Gerçek boyut",
     "close": "Pencereyi kapat",

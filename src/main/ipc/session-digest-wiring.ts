@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { IPC_CHANNELS } from '../../shared/ipc-contracts'
+import { IPC_CHANNELS, type SessionDigestMap } from '../../shared/ipc-contracts'
 import { i18n, languageNativeName } from '../../shared/i18n'
 import { createSessionDigests, summarizeRun } from '../session-digest'
 import { appLog } from '../app-log'
@@ -7,7 +7,7 @@ import { loadAppSettings } from './settings'
 import type { IpcContext } from './context'
 
 /** Feeds every session runtime's events into the Komuta digests and serves them to the renderer. */
-export function wireSessionDigests(ctx: IpcContext): void {
+export function wireSessionDigests(ctx: IpcContext, onChange?: (map: SessionDigestMap) => void): void {
   const { workspaceManager } = ctx
   const digests = createSessionDigests({
     now: () => Date.now(),
@@ -21,7 +21,10 @@ export function wireSessionDigests(ctx: IpcContext): void {
         throw error
       }
     },
-    onChange: (map) => ctx.broadcast(IPC_CHANNELS.EVENT_SESSION_DIGESTS, map),
+    onChange: (map) => {
+      ctx.broadcast(IPC_CHANNELS.EVENT_SESSION_DIGESTS, map)
+      onChange?.(map)
+    },
   })
 
   workspaceManager.onPiManager((manager) => {
