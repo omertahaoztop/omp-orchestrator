@@ -3,7 +3,7 @@ name: Build
 # Nothing builds on a normal push. A workflow dispatch (Actions tab / gh CLI)
 # builds the Linux packages and uploads them as artifacts — no release.
 # Pushing a version tag (e.g. v0.3.0), the deliberate "create a release"
-# step, builds them and publishes a GitHub prerelease.
+# step, builds them and publishes a GitHub release marked latest.
 on:
   push:
     tags:
@@ -89,7 +89,7 @@ jobs:
           retention-days: 14
 
   release:
-    name: Publish prerelease
+    name: Publish release
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
@@ -109,7 +109,7 @@ jobs:
       - name: Attach installers to the release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          prerelease: true
-          make_latest: false
+          prerelease: false
+          make_latest: true
           fail_on_unmatched_files: true
           files: dist/**/*

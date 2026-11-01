@@ -1,6 +1,6 @@
 {
   "name": "omp-orchestrator",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Desktop GUI for the Pi and oh-my-pi coding agents",
   "main": "out/main/index.js",
   "desktopName": "omp-orchestrator.desktop",
@@ -150,7 +150,21 @@
       "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}.${ext}"
     },
     "pacman": {
-      "depends": ["c-ares", "ffmpeg", "gtk3", "http-parser", "libevent", "libvpx", "libxslt", "libxss", "minizip", "nss", "re2", "snappy", "libnotify"]
+      "depends": [
+        "c-ares",
+        "ffmpeg",
+        "gtk3",
+        "http-parser",
+        "libevent",
+        "libvpx",
+        "libxslt",
+        "libxss",
+        "minizip",
+        "nss",
+        "re2",
+        "snappy",
+        "libnotify"
+      ]
     },
     "mac": {
       "target": [
