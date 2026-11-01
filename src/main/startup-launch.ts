@@ -7,7 +7,7 @@ import {
   linuxLaunchExec,
 } from './autostart-linux'
 
-// Cross-platform "Run on startup": launch Pi Desktop automatically at login.
+// Cross-platform "Run on startup": launch OMP Orchestrator automatically at login.
 //   - macOS / Windows: Electron's native login-item support.
 //   - Linux: a per-user freedesktop autostart entry (Electron has no Linux
 //     support for setLoginItemSettings).

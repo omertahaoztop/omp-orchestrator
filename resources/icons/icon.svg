@@ -1,27 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Charcoal rounded background -->
-  <rect width="512" height="512" rx="77" fill="#36454F"/>
+  <!-- Rounded background -->
+  <rect width="512" height="512" rx="77" fill="#111114"/>
 
-  <!-- Pi letterforms: official brand marks, scaled from 800 -> 512 -->
-  <g transform="translate(5.5, 5.5) scale(0.62625)">
-    <!-- P shape: outer boundary clockwise, inner hole counter-clockwise -->
-    <path fill="#e67e22" fill-rule="evenodd" d="
-      M165.29 165.29
-      H517.36
-      V400
-      H400
-      V517.36
-      H282.65
-      V634.72
-      H165.29
-      Z
-      M282.65 282.65
-      V400
-      H400
-      V282.65
-      Z
-    "/>
-    <!-- i dot -->
-    <path fill="#e67e22" d="M517.36 400 H634.72 V634.72 H517.36 Z"/>
+  <g transform="translate(0 38)">
+    <g stroke="#f3f4f6" stroke-width="26" stroke-linecap="round">
+      <line x1="256" y1="256" x2="256" y2="106"/>
+      <line x1="256" y1="256" x2="385.9" y2="331"/>
+      <line x1="256" y1="256" x2="126.1" y2="331"/>
+    </g>
+    <g fill="#f3f4f6">
+      <circle cx="256" cy="106" r="46"/>
+      <circle cx="385.9" cy="331" r="46"/>
+      <circle cx="126.1" cy="331" r="46"/>
+    </g>
+    <circle cx="256" cy="256" r="74" fill="#f9002f"/>
   </g>
 </svg>

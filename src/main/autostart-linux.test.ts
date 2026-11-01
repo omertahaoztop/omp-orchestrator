@@ -35,19 +35,19 @@ test('linuxLaunchExec falls back to execPath when APPIMAGE is absent', () => {
 })
 
 test('quoteDesktopExec wraps in double quotes and escapes special chars', () => {
-  assert.equal(quoteDesktopExec('/opt/Pi Desktop/app'), '"/opt/Pi Desktop/app"')
+  assert.equal(quoteDesktopExec('/opt/OMP Orchestrator/app'), '"/opt/OMP Orchestrator/app"')
   assert.equal(quoteDesktopExec('/a\\b'), '"/a\\\\b"')
   assert.equal(quoteDesktopExec('/a"b'), '"/a\\"b"')
 })
 
 test('buildLinuxDesktopEntry produces a valid, complete desktop entry', () => {
-  const entry = buildLinuxDesktopEntry({ exec: '/opt/Pi Desktop.AppImage', icon: '/opt/icon.png' })
+  const entry = buildLinuxDesktopEntry({ exec: '/opt/OMP Orchestrator.AppImage', icon: '/opt/icon.png' })
   const lines = entry.split('\n')
 
   assert.equal(lines[0], '[Desktop Entry]')
   assert.ok(lines.includes('Type=Application'))
-  assert.ok(lines.includes('Name=Pi Desktop'))
-  assert.ok(lines.includes('Exec="/opt/Pi Desktop.AppImage"'))
+  assert.ok(lines.includes('Name=OMP Orchestrator'))
+  assert.ok(lines.includes('Exec="/opt/OMP Orchestrator.AppImage"'))
   assert.ok(lines.includes('Icon=/opt/icon.png'))
   assert.ok(lines.includes('Terminal=false'))
   assert.ok(lines.includes('X-GNOME-Autostart-enabled=true'))

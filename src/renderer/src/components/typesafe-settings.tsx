@@ -13,7 +13,7 @@ const BUTTON_CLASS =
 /**
  * TypeSafe (Jev) settings: a saved API key that Pi and OMP receive on
  * start, the agent skill that teaches them to use it, and links to the docs.
- * Pi Desktop itself never calls TypeSafe.
+ * OMP Orchestrator itself never calls TypeSafe.
  */
 export function TypeSafeSettings(): React.JSX.Element {
   const { t } = useTranslation()

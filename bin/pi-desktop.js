@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * pi-desktop — CLI launcher for Pi Desktop GUI
+ * pi-desktop — CLI launcher for OMP Orchestrator GUI
  *
  * Usage:
  *   pi-desktop              # Launch the app
@@ -36,7 +36,7 @@ if (args.includes('--help') || args.includes('-h')) {
     pi-desktop .                # Launch with current directory
 
   Install:
-    See https://github.com/FaqFirebase/pi-desktop for releases
+    See https://github.com/omertahaoztop/pi-desktop for releases
     and build-from-source instructions.
 
   The app requires Pi to be installed:
@@ -151,7 +151,7 @@ function launch() {
   })
 
   child.on('error', (err) => {
-    console.error('Failed to start Pi Desktop:', err.message)
+    console.error('Failed to start OMP Orchestrator:', err.message)
     process.exit(1)
   })
 

@@ -15,12 +15,12 @@
     "errorBoundary": {
       "fallback": "İçerik görüntülenemedi"
     },
-    "quit": "Pi Desktop'tan çık",
+    "quit": "OMP Orchestrator'dan çık",
     "resizeHandle": {
       "title": "Boyutlandırmak için sürükle"
     },
     "updateBanner": {
-      "available": "Pi Desktop <strong>v{{latestVersion}}</strong> sürümü çıktı — kullanılan sürüm: v{{currentVersion}}.",
+      "available": "OMP Orchestrator <strong>v{{latestVersion}}</strong> sürümü çıktı — kullanılan sürüm: v{{currentVersion}}.",
       "dismissAriaLabel": "Güncelleme bildirimini kapat",
       "downloadButton": "İndir"
     }
@@ -609,7 +609,7 @@
       "refusedWrite": "Etkin çalışma alanı dışına yazma reddedildi"
     },
     "fs": {
-      "blockedWrite": "\"{{path}}\" yazılamadı ({{code}}). Windows'ta bunun nedeni genellikle değişikliği engelleyen Denetimli Klasör Erişimi'dir (Fidye yazılımı koruması). Ya Windows Güvenliği → Virüs ve tehdit koruması → Fidye yazılımı koruması → \"Bir uygulamaya Denetimli klasör erişimi üzerinden izin ver\" yolundan Pi Desktop'a izin verin ya da bu projeyi Belgeler/Masaüstü dışında korumasız bir klasöre taşıyın (örneğin C:\\dev)."
+      "blockedWrite": "\"{{path}}\" yazılamadı ({{code}}). Windows'ta bunun nedeni genellikle değişikliği engelleyen Denetimli Klasör Erişimi'dir (Fidye yazılımı koruması). Ya Windows Güvenliği → Virüs ve tehdit koruması → Fidye yazılımı koruması → \"Bir uygulamaya Denetimli klasör erişimi üzerinden izin ver\" yolundan OMP Orchestrator'a izin verin ya da bu projeyi Belgeler/Masaüstü dışında korumasız bir klasöre taşıyın (örneğin C:\\dev)."
     },
     "git": {
       "branchExists": "\"{{name}}\" adlı bir dal zaten var. Geçmek için dal menüsünden seçin",
@@ -729,9 +729,9 @@
       "unsupportedSchema": "desteklenmeyen $schema (beklenen: {{expected}})"
     },
     "typesafe": {
-      "skillChecksumMismatch": "{{file}} beklenen sağlama toplamıyla eşleşmedi, bu yüzden Pi Desktop onu kurmadı.",
+      "skillChecksumMismatch": "{{file}} beklenen sağlama toplamıyla eşleşmedi, bu yüzden OMP Orchestrator onu kurmadı.",
       "skillDownloadFailed": "{{file}} indirilemedi (HTTP {{status}}).",
-      "skillInstalledElsewhere": "Pi Desktop'ın kurmadığı bir TypeSafe skill'i zaten şurada: {{directory}}. Pi Desktop onu değiştirmedi."
+      "skillInstalledElsewhere": "OMP Orchestrator'ın kurmadığı bir TypeSafe skill'i zaten şurada: {{directory}}. OMP Orchestrator onu değiştirmedi."
     },
     "workflow": {
       "runNotFound": "İş akışı çalıştırması bulunamadı"
@@ -1418,7 +1418,7 @@
       "label": "Açık tema"
     },
     "minimizeToTrayOnClose": {
-      "description": "Pencere kapatıldığında Pi Desktop'tan çıkmak yerine sistem tepsisinde çalışmaya devam et (Windows ve Linux)",
+      "description": "Pencere kapatıldığında OMP Orchestrator'dan çıkmak yerine sistem tepsisinde çalışmaya devam et (Windows ve Linux)",
       "label": "Kapatınca sistem tepsisine küçült"
     },
     "notifyOnlyQuestions": {
@@ -1450,7 +1450,7 @@
       "label": "Son oturuma devam et"
     },
     "runOnStartup": {
-      "description": "Bilgisayarda oturum açılınca Pi Desktop'ı otomatik başlat (kurulu sürümlerde geçerli olur)",
+      "description": "Bilgisayarda oturum açılınca OMP Orchestrator'ı otomatik başlat (kurulu sürümlerde geçerli olur)",
       "label": "Başlangıçta çalıştır"
     },
     "sections": {
@@ -1523,7 +1523,7 @@
     },
     "typesafe": {
       "apiKey": {
-        "environment": "TYPESAFE_API_KEY, Pi Desktop'ın başlatıldığı ortamda zaten tanımlı. Pi ve OMP bu değeri kullanır.",
+        "environment": "TYPESAFE_API_KEY, OMP Orchestrator'ın başlatıldığı ortamda zaten tanımlı. Pi ve OMP bu değeri kullanır.",
         "invalid": "Bu geçerli bir API anahtarı değil. Boşluk olmadan yeniden yapıştırın.",
         "label": "API anahtarı",
         "nextSession": "Yeni oturumlar anahtarı alır. Açık bir oturumun anahtarı alması için oturumu yeniden başlatın.",
@@ -1532,7 +1532,7 @@
         "save": "Kaydet",
         "saved": "Kaydedildi. Yalnız bu kullanıcı hesabı okuyabilir."
       },
-      "intro": "Jev, TypeSafe'in değerlendirme modelidir. API anahtarınızı kaydedin ve Jev skill'ini buradan kurun. Pi ve OMP anahtarı sormadan kullanır. Pi Desktop TypeSafe'i kendisi çağırmaz.",
+      "intro": "Jev, TypeSafe'in değerlendirme modelidir. API anahtarınızı kaydedin ve Jev skill'ini buradan kurun. Pi ve OMP anahtarı sormadan kullanır. OMP Orchestrator TypeSafe'i kendisi çağırmaz.",
       "links": {
         "agentSkill": "Jev skill rehberi",
         "apiKeys": "API anahtarı al",
@@ -1541,7 +1541,7 @@
       "skill": {
         "install": "Kur",
         "installed": "Kurulu ({{version}})",
-        "installedElsewhere": "Pi Desktop dışında kurulmuş. Kurulduğu araçla yönet.",
+        "installedElsewhere": "OMP Orchestrator dışında kurulmuş. Kurulduğu araçla yönet.",
         "label": "Jev skill'i",
         "location": "Konum: {{directory}}",
         "notInstalled": "Kurulu değil. Pi ve OMP'ye TypeSafe'in nasıl kullanılacağını öğretir.",
@@ -1569,14 +1569,14 @@
       "getVersion": "{{version}} sürümünü al",
       "gpuUnnamed": "GPU",
       "install": "Kur",
-      "intro": "Mikrofona konuşun, Pi Desktop sesi bilgisayarınızda metne çevirsin. İndirmek için bir model seçin. Bir model seçilene kadar hiçbir şey indirilmez.",
+      "intro": "Mikrofona konuşun, OMP Orchestrator sesi bilgisayarınızda metne çevirsin. İndirmek için bir model seçin. Bir model seçilene kadar hiçbir şey indirilmez.",
       "multilingual": "Çok dilli",
       "precision": {
         "fp16": "GPU sürümü (fp16)",
         "int8": "CPU sürümü (int8)"
       },
       "remove": "Kaldır",
-      "restartRequired": "Bu değişikliği uygulamak için Pi Desktop'ı yeniden başlatın.",
+      "restartRequired": "Bu değişikliği uygulamak için OMP Orchestrator'ı yeniden başlatın.",
       "runOn": "Çalıştırma yeri",
       "runtimeCpu": "Her modelin CPU sürümüyle işlemcide (CPU) çalışır.",
       "runtimeCpuNoGpu": "Kullanılabilir ekran kartı bulunamadı; ses, her modelin CPU sürümüyle işlemcide (CPU) çalışır.",
@@ -2081,10 +2081,10 @@
     }
   },
   "tray": {
-    "show": "Pi Desktop'ı göster",
+    "show": "OMP Orchestrator'ı göster",
     "stillRunningBody": "Pencere sistem tepsisine gizlendi. Yeniden açmak için tepsi simgesine tıklayın ya da çıkmak için Çık'ı kullanın.",
-    "stillRunningTitle": "Pi Desktop hâlâ çalışıyor",
-    "unavailableBody": "Bu masaüstünde sistem tepsisi yok; Pi Desktop tepsiye küçülmek yerine normal şekilde kapanacak.",
+    "stillRunningTitle": "OMP Orchestrator hâlâ çalışıyor",
+    "unavailableBody": "Bu masaüstünde sistem tepsisi yok; OMP Orchestrator tepsiye küçülmek yerine normal şekilde kapanacak.",
     "unavailableTitle": "Sistem tepsisi kullanılamıyor"
   },
   "voice": {

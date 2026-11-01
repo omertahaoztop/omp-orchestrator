@@ -4,7 +4,7 @@ import { IPC_CHANNELS } from '../../shared/ipc-contracts'
 import { isNewerVersion } from '../../shared/version-compare'
 import { appLog } from '../app-log'
 
-const UPDATE_REPO = 'FaqFirebase/pi-desktop'
+const UPDATE_REPO = 'omertahaoztop/pi-desktop'
 const UPDATE_CHECK_TIMEOUT_MS = 8000
 
 interface GithubRelease {
@@ -24,7 +24,7 @@ async function checkForUpdate(): Promise<UpdateCheckResult> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), UPDATE_CHECK_TIMEOUT_MS)
     const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/releases?per_page=10`, {
-      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Pi-Desktop' },
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'OMP-Orchestrator' },
       signal: controller.signal,
     })
     clearTimeout(timer)

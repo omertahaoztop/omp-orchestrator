@@ -1,13 +1,13 @@
 #!/bin/bash
-# Pi Desktop — Quick Install Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/FaqFirebase/pi-desktop/master/install.sh | bash
+# OMP Orchestrator — Quick Install Script
+# Usage: curl -fsSL https://raw.githubusercontent.com/omertahaoztop/pi-desktop/master/install.sh | bash
 
 set -e
 
-REPO="FaqFirebase/pi-desktop"
+REPO="omertahaoztop/pi-desktop"
 RELEASES_PAGE="https://github.com/$REPO/releases"
 RELEASES_API="https://api.github.com/repos/$REPO/releases"
-BINARY_NAME="pi-desktop"
+BINARY_NAME="omp-orchestrator"
 INSTALL_DIR="${HOME}/.local/bin"
 BINARY_MODE=755
 # How many recent releases the asset lookup scans. More than one, so a release
@@ -26,7 +26,7 @@ print_build_from_source() {
 }
 
 echo "╔═══════════════════════════════════════╗"
-echo "║       Pi Desktop — Installer          ║"
+echo "║     OMP Orchestrator — Installer      ║"
 echo "╚═══════════════════════════════════════╝"
 echo ""
 
@@ -41,7 +41,7 @@ case "$OS" in
     # architecture with a published AppImage. Bail out here, before Pi is
     # installed as a side effect below, rather than after.
     if [ "$ARCH" != "x86_64" ]; then
-      echo "Error: No Pi Desktop build is published for $PLATFORM-$ARCH."
+      echo "Error: No OMP Orchestrator build is published for $PLATFORM-$ARCH."
       echo "Prebuilt Linux installers are x86_64 only."
       print_build_from_source "$PLATFORM"
       exit 1
@@ -86,18 +86,18 @@ if [ -n "$PI_PATH" ]; then
   echo "✓ Pi found: $PI_PATH"
 else
   # The Pi installer can put pi in a directory that this shell's PATH does not
-  # include yet. Pi Desktop locates Pi on its own, so this is not fatal.
+  # include yet. OMP Orchestrator locates Pi on its own, so this is not fatal.
   echo "⚠  Pi is not on the PATH of this shell."
   echo "   Open a new terminal, then run: pi --version"
 fi
 
 # Download the latest release artifact for this platform.
-# Pi Desktop is distributed as a packaged binary, not via npm — see MEMORY.md.
+# OMP Orchestrator is distributed as a packaged binary, not via npm — see MEMORY.md.
 if [ "$PLATFORM" = "linux" ]; then
   echo ""
   echo "Downloading AppImage..."
 
-  # Release assets are versioned (Pi-Desktop-<version>-<os>-<arch>.<ext>), so the
+  # Release assets are versioned (OMP-Orchestrator-<version>-<os>-<arch>.<ext>), so the
   # URL must be resolved from the release's asset list. /releases/latest excludes
   # pre-releases, so fall back to the newest releases when only pre-releases
   # exist. The list endpoint returns them newest-first and the pipeline below
@@ -130,7 +130,7 @@ if [ "$PLATFORM" = "linux" ]; then
 
   # Download to a temporary file in the install directory, then rename it into
   # place. A failed download cannot leave a broken binary, and the rename works
-  # while an older Pi Desktop is running.
+  # while an older OMP Orchestrator is running.
   DOWNLOAD_TMP="$(mktemp "$INSTALL_DIR/.$BINARY_NAME.XXXXXX")"
   trap 'rm -f "$DOWNLOAD_TMP"' EXIT
 
@@ -149,7 +149,7 @@ if [ "$PLATFORM" = "linux" ]; then
   fi
 
   echo ""
-  echo "✓ Pi Desktop installed to $OUTPUT"
+  echo "✓ OMP Orchestrator installed to $OUTPUT"
   echo ""
   echo "Run: $OUTPUT"
   echo ""

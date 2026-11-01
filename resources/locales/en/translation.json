@@ -15,12 +15,12 @@
     "errorBoundary": {
       "fallback": "Failed to render content"
     },
-    "quit": "Quit Pi Desktop",
+    "quit": "Quit OMP Orchestrator",
     "resizeHandle": {
       "title": "Drag to resize"
     },
     "updateBanner": {
-      "available": "Pi Desktop <strong>v{{latestVersion}}</strong> is available — you're on v{{currentVersion}}.",
+      "available": "OMP Orchestrator <strong>v{{latestVersion}}</strong> is available — you're on v{{currentVersion}}.",
       "dismissAriaLabel": "Dismiss update notification",
       "downloadButton": "Download"
     }
@@ -609,7 +609,7 @@
       "refusedWrite": "Refusing to write outside the active workspace"
     },
     "fs": {
-      "blockedWrite": "Could not write \"{{path}}\" ({{code}}). On Windows this is usually Controlled Folder Access (Ransomware protection) blocking the change. Either allow Pi Desktop in Windows Security → Virus & threat protection → Ransomware protection → \"Allow an app through Controlled folder access\", or move this project out of Documents/Desktop to an unprotected folder (for example C:\\dev)."
+      "blockedWrite": "Could not write \"{{path}}\" ({{code}}). On Windows this is usually Controlled Folder Access (Ransomware protection) blocking the change. Either allow OMP Orchestrator in Windows Security → Virus & threat protection → Ransomware protection → \"Allow an app through Controlled folder access\", or move this project out of Documents/Desktop to an unprotected folder (for example C:\\dev)."
     },
     "git": {
       "branchExists": "A branch named \"{{name}}\" already exists. Choose it in the branch menu to switch to it",
@@ -729,9 +729,9 @@
       "unsupportedSchema": "unsupported $schema (expected {{expected}})"
     },
     "typesafe": {
-      "skillChecksumMismatch": "{{file}} did not match its expected checksum, so Pi Desktop did not install it.",
+      "skillChecksumMismatch": "{{file}} did not match its expected checksum, so OMP Orchestrator did not install it.",
       "skillDownloadFailed": "Could not download {{file}} (HTTP {{status}}).",
-      "skillInstalledElsewhere": "A TypeSafe skill that Pi Desktop did not install is already at {{directory}}. Pi Desktop did not change it."
+      "skillInstalledElsewhere": "A TypeSafe skill that OMP Orchestrator did not install is already at {{directory}}. OMP Orchestrator did not change it."
     },
     "workflow": {
       "runNotFound": "Workflow run not found"
@@ -1418,7 +1418,7 @@
       "label": "Light Theme"
     },
     "minimizeToTrayOnClose": {
-      "description": "Keep Pi Desktop running in the system tray when you close the window instead of quitting (Windows and Linux)",
+      "description": "Keep OMP Orchestrator running in the system tray when you close the window instead of quitting (Windows and Linux)",
       "label": "Minimize to Tray on Close"
     },
     "notifyOnlyQuestions": {
@@ -1450,7 +1450,7 @@
       "label": "Resume Last Session"
     },
     "runOnStartup": {
-      "description": "Automatically start Pi Desktop when you log in to your computer (takes effect in installed builds)",
+      "description": "Automatically start OMP Orchestrator when you log in to your computer (takes effect in installed builds)",
       "label": "Run on Startup"
     },
     "sections": {
@@ -1523,7 +1523,7 @@
     },
     "typesafe": {
       "apiKey": {
-        "environment": "TYPESAFE_API_KEY is already set in the environment Pi Desktop started with. Pi and OMP use that value.",
+        "environment": "TYPESAFE_API_KEY is already set in the environment OMP Orchestrator started with. Pi and OMP use that value.",
         "invalid": "That is not a valid API key. Paste it again with no spaces.",
         "label": "API key",
         "nextSession": "New sessions get the key. Restart an open session to give it the key.",
@@ -1532,7 +1532,7 @@
         "save": "Save",
         "saved": "Saved. Only your user account can read it."
       },
-      "intro": "Jev is TypeSafe's judgment model. Save your API key and install the Jev skill here. Pi and OMP then use the key without asking for it. Pi Desktop does not call TypeSafe itself.",
+      "intro": "Jev is TypeSafe's judgment model. Save your API key and install the Jev skill here. Pi and OMP then use the key without asking for it. OMP Orchestrator does not call TypeSafe itself.",
       "links": {
         "agentSkill": "Jev skill guide",
         "apiKeys": "Get an API key",
@@ -1541,7 +1541,7 @@
       "skill": {
         "install": "Install",
         "installed": "Installed ({{version}})",
-        "installedElsewhere": "Installed outside Pi Desktop. Manage it with the tool you installed it with.",
+        "installedElsewhere": "Installed outside OMP Orchestrator. Manage it with the tool you installed it with.",
         "label": "Jev skill",
         "location": "Location: {{directory}}",
         "notInstalled": "Not installed. It teaches Pi and OMP how to use TypeSafe.",
@@ -1569,14 +1569,14 @@
       "getVersion": "Get {{version}}",
       "gpuUnnamed": "GPU",
       "install": "Install",
-      "intro": "Speak into the microphone and Pi Desktop turns your voice into text on your computer. Pick a model to download. No model is downloaded until you choose one.",
+      "intro": "Speak into the microphone and OMP Orchestrator turns your voice into text on your computer. Pick a model to download. No model is downloaded until you choose one.",
       "multilingual": "Many languages",
       "precision": {
         "fp16": "GPU version (fp16)",
         "int8": "CPU version (int8)"
       },
       "remove": "Remove",
-      "restartRequired": "Restart Pi Desktop to apply this change.",
+      "restartRequired": "Restart OMP Orchestrator to apply this change.",
       "runOn": "Run on",
       "runtimeCpu": "Runs on the processor (CPU) with the CPU version of each model.",
       "runtimeCpuNoGpu": "No usable graphics card found, so voice runs on the processor (CPU) with the CPU version of each model.",
@@ -2081,10 +2081,10 @@
     }
   },
   "tray": {
-    "show": "Show Pi Desktop",
+    "show": "Show OMP Orchestrator",
     "stillRunningBody": "The window was hidden to the system tray. Click the tray icon to reopen it, or use Quit to exit.",
-    "stillRunningTitle": "Pi Desktop is still running",
-    "unavailableBody": "This desktop has no system tray, so Pi Desktop will close normally instead of minimizing to the tray.",
+    "stillRunningTitle": "OMP Orchestrator is still running",
+    "unavailableBody": "This desktop has no system tray, so OMP Orchestrator will close normally instead of minimizing to the tray.",
     "unavailableTitle": "System tray unavailable"
   },
   "voice": {

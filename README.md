@@ -1,10 +1,10 @@
-# Pi Desktop
+# OMP Orchestrator
 
 A desktop GUI for the [Pi](https://pi.dev) and [oh-my-pi](https://github.com/can1357/oh-my-pi) coding agents. Chat, manage projects, browse files, run commands, and install packages in one window.
 
-![Pi Desktop Home launcher screen](docs/screenshots/home.png)
+![OMP Orchestrator Home launcher screen](docs/screenshots/home.png)
 
-Pi Desktop is in alpha, so expect rough edges.
+OMP Orchestrator is a fork of [Pi Desktop](https://github.com/FaqFirebase/pi-desktop) (Apache 2.0) and is in alpha, so expect rough edges.
 
 ## What it does
 
@@ -32,6 +32,12 @@ Pi Desktop is in alpha, so expect rough edges.
 - [Voice dictation](#voice-dictation) that runs on your machine with a model you pick (opt-in)
 - [Translatable interface](#languages) (English, Russian, Simplified Chinese, Turkish, and Ukrainian ship today)
 
+![Chat with a review table](docs/screenshots/chat.png)
+
+![Diff viewer next to the chat](docs/screenshots/diff.png)
+
+![Appearance settings with the Mono Dark theme](docs/screenshots/settings.png)
+
 ## Review panel
 
 The Review panel shows the permission mode, pending approvals, changed files, and session status while you chat with Pi. It is hidden by default. Open it from the right-edge tool rail or with `Ctrl/Cmd+Shift+U`.
@@ -49,7 +55,7 @@ Changed files use these status badges:
 
 ## Pi and OMP engines
 
-Pi Desktop speaks Pi's RPC protocol, so it can run either the standard `pi` CLI or the compatible `omp` binary from [oh-my-pi](https://github.com/can1357/oh-my-pi). **Settings > Agent Configuration > Agent Installation** finds installed engines and lets you pick one, or point it at a custom executable or install directory.
+OMP Orchestrator speaks Pi's RPC protocol, so it can run either the standard `pi` CLI or the compatible `omp` binary from [oh-my-pi](https://github.com/can1357/oh-my-pi). **Settings > Agent Configuration > Agent Installation** finds installed engines and lets you pick one, or point it at a custom executable or install directory.
 
 Each engine keeps its own sessions: Pi writes to `~/.pi/agent/sessions`, OMP to `~/.omp/agent/sessions`. The app reads both, so switching engines never hides your history. When sessions from both appear in one list, each row is tagged `Pi` or `OMP`, and opening one starts the engine that wrote it. Under OMP, package actions use OMP's plugin commands.
 
@@ -98,7 +104,7 @@ Example rules:
 
 ## Custom themes
 
-Pi Desktop ships 7 built-in themes (Dark, Light, Nord, Gruvbox, Breeze Dark, Breeze Light, Breeze Claudius) plus System, the default. You can also create your own in **Settings > Appearance**. With **System** selected, **Light Theme** and **Dark Theme** choose which installed theme each OS mode uses.
+OMP Orchestrator ships 7 built-in themes (Dark, Light, Nord, Gruvbox, Breeze Dark, Breeze Light, Breeze Claudius) plus System, the default. You can also create your own in **Settings > Appearance**. With **System** selected, **Light Theme** and **Dark Theme** choose which installed theme each OS mode uses.
 
 Click **Create theme** to fork the active theme, or **Edit theme** to keep editing one you created. Pick 7 seed colors (app background, surface, text, accent, success, warning, error) and a dark or light kind. The app derives every other color from those seeds, and the whole window previews your changes as you edit. Two sections give finer control:
 
@@ -167,10 +173,10 @@ To use it, type your request and click **Plan with Council** in the composer. Re
 
 Nothing happens until you set it up in **Settings > TypeSafe Jev**:
 
-- **API key**: paste a key from the [TypeSafe console](https://console.typesafe.ai/keys). The app saves it in its own file in the app's data folder, readable only by your user account, and never in `settings.json`. Every new Pi or OMP session gets it as `TYPESAFE_API_KEY`. If that variable is already set in the environment Pi Desktop started with, that value wins. Restart an open session to give it the key.
+- **API key**: paste a key from the [TypeSafe console](https://console.typesafe.ai/keys). The app saves it in its own file in the app's data folder, readable only by your user account, and never in `settings.json`. Every new Pi or OMP session gets it as `TYPESAFE_API_KEY`. If that variable is already set in the environment OMP Orchestrator started with, that value wins. Restart an open session to give it the key.
 - **Jev skill**: installs TypeSafe's official [agent skill](https://docs.typesafe.ai/agent-skill) into `~/.agents/skills`, where both Pi and OMP find it. The files come from a pinned release and are checked before install.
 
-Then ask the agent to use TypeSafe. Pi Desktop never calls TypeSafe itself.
+Then ask the agent to use TypeSafe. OMP Orchestrator never calls TypeSafe itself.
 
 To learn more, see the TypeSafe [quickstart](https://docs.typesafe.ai/introduction/quickstart), [models and pricing](https://docs.typesafe.ai/models), and [API reference](https://docs.typesafe.ai/api).
 
@@ -190,38 +196,15 @@ You need Pi installed first:
 npm install -g @earendil-works/pi-coding-agent
 ```
 
-On Linux, grab the AppImage from [Releases](https://github.com/FaqFirebase/pi-desktop/releases):
+On Linux, grab a package from [Releases](https://github.com/omertahaoztop/pi-desktop/releases):
 
 ```bash
-chmod +x Pi-Desktop-*.AppImage
-./Pi-Desktop-*.AppImage
+sudo pacman -U OMP-Orchestrator-*-linux-x64.pacman    # Arch
+sudo apt install ./OMP-Orchestrator-*-linux-amd64.deb # Debian / Ubuntu
+chmod +x OMP-Orchestrator-*.AppImage && ./OMP-Orchestrator-*.AppImage # any distro
 ```
 
-### macOS
-
-Download the `.dmg` (Apple Silicon / arm64) from [Releases](https://github.com/FaqFirebase/pi-desktop/releases), open it, and drag **Pi Desktop** to Applications.
-
-Builds are **ad-hoc signed, without an Apple-issued certificate, and not notarized**. macOS can quarantine the download, and on first launch Gatekeeper shows this dialog (this is macOS's wording, not our advice):
-
-> Pi Desktop is damaged and can't be opened. You should move it to the Trash.
-
-**Do not move it to the Trash.** The app is not damaged; Gatekeeper uses this wording to block any unsigned app. This dialog has no "Open Anyway" button, so clear the quarantine flag in Terminal instead:
-
-```bash
-xattr -dr com.apple.quarantine "/Applications/Pi Desktop.app"
-```
-
-Then open the app normally. You only need to do this once.
-
-> If macOS instead says the app **"cannot be opened because Apple cannot check it for malicious software,"** you can allow it without Terminal: open **System Settings > Privacy & Security**, scroll to the **Security** section, click **Open Anyway** next to the Pi Desktop notice, and confirm with Touch ID or your password.
-
-> To skip the unsigned-app warnings, build from source. Gatekeeper does not block a build you compile yourself, so there is no quarantine flag to clear. See [Build it yourself: Linux / macOS](#linux--macos) below.
-
-Local-network model providers also depend on macOS Local Network permission. The app declares why it needs that access and the release build signs it with Pi Desktop's own bundle identifier. Allow access when prompted, or check **System Settings > Privacy & Security > Local Network**. Apple's [TN3179](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy) explains how permission applies to agent and terminal child processes; it recommends an Apple-issued signing identity for reliable permission tracking across builds. Ad-hoc signing does not provide that publisher identity or notarization.
-
-### Windows
-
-Download the **installer** (`…-win-x64-setup.exe`, recommended) or the **portable** `…-win-x64.exe` from [Releases](https://github.com/FaqFirebase/pi-desktop/releases). Builds are unsigned, so SmartScreen may warn; choose **More info > Run anyway**. If file edits or saves fail, see the [Controlled Folder Access](#controlled-folder-access-ransomware-protection) note below. Windows is community-tested, so please [open a bug report](https://github.com/FaqFirebase/pi-desktop/issues) if you hit a problem.
+Releases ship Linux packages only. On macOS and Windows, [build it yourself](#build-it-yourself).
 
 ## Keyboard shortcuts
 
@@ -267,7 +250,7 @@ These shortcuts are fixed:
 ### Linux / macOS
 
 ```bash
-git clone https://github.com/FaqFirebase/pi-desktop.git
+git clone https://github.com/omertahaoztop/pi-desktop.git
 cd pi-desktop
 npm install --ignore-scripts=false
 npm run dev
@@ -300,7 +283,7 @@ Settings > Privacy & Security > Windows Security > Virus & threat protection > M
 #### 3. Clone and install
 
 ```powershell
-git clone https://github.com/FaqFirebase/pi-desktop.git
+git clone https://github.com/omertahaoztop/pi-desktop.git
 cd pi-desktop
 npm install --ignore-scripts=false
 ```
@@ -330,7 +313,7 @@ npm run dev
 | `MSB8040`: Spectre libs missing | VS Build Tools 2026 (v180 toolset) installed instead of 2022 (v143) | Uninstall 2026, install VS Build Tools 2022 with Spectre libs for v143 |
 | `electron-vite is not recognized` | `npm install` didn't complete | Run `npm install` again |
 | Electron binary missing after install | Electron's postinstall extraction left a partial or missing `dist` folder | Add the repo folder to Defender exclusions, then `npm install` again. If it still fails, use the manual download steps below |
-| `EPERM` / `EACCES` writing a project file | Controlled Folder Access (Ransomware protection) is blocking writes under Documents/Desktop | Keep the repo and your projects out of protected folders, or allow Pi Desktop through Controlled folder access (see below) |
+| `EPERM` / `EACCES` writing a project file | Controlled Folder Access (Ransomware protection) is blocking writes under Documents/Desktop | Keep the repo and your projects out of protected folders, or allow OMP Orchestrator through Controlled folder access (see below) |
 | Pi shows "error" in status popover | Pi not installed or PATH not updated | Run the install script above in a **new** terminal window |
 
 #### Controlled Folder Access (Ransomware protection)
@@ -341,12 +324,12 @@ The reliable fix is to keep code out of protected folders. Clone the repo and ke
 
 ```powershell
 # Not C:\Users\<you>\Documents\...; use an unprotected path:
-git clone https://github.com/FaqFirebase/pi-desktop.git C:\dev\pi-desktop
+git clone https://github.com/omertahaoztop/pi-desktop.git C:\dev\pi-desktop
 ```
 
 If your code must stay under Documents or Desktop, allow the app instead:
 
-**Windows Security > Virus & threat protection > Ransomware protection > Manage ransomware protection > Allow an app through Controlled folder access > Add an allowed app**, then add the installed `Pi Desktop.exe` (and, for development, `node.exe`, `git.exe`, and `electron.exe`).
+**Windows Security > Virus & threat protection > Ransomware protection > Manage ransomware protection > Allow an app through Controlled folder access > Add an allowed app**, then add the installed `OMP Orchestrator.exe` (and, for development, `node.exe`, `git.exe`, and `electron.exe`).
 
 > The portable `.exe` extracts to a new temporary folder on each launch, so an allow-list entry for it does not last. Use the **installer** (`Pi-Desktop-<version>-win-x64-setup.exe`) if you rely on the allow list.
 
@@ -369,7 +352,7 @@ Expand-Archive -Path $zip -DestinationPath node_modules\electron\dist -Force
 
 After this, `npm run dev` should work.
 
-> **Note:** Windows builds are community-tested. If you hit a problem not listed above, please [open a bug report](https://github.com/FaqFirebase/pi-desktop/issues).
+> **Note:** Windows builds are community-tested. If you hit a problem not listed above, please [open a bug report](https://github.com/omertahaoztop/pi-desktop/issues).
 
 ## License
 
@@ -377,7 +360,7 @@ Apache 2.0
 
 ## Links
 
-- [pi-desktop.com](https://pi-desktop.com)
+- [Pi Desktop (upstream)](https://github.com/FaqFirebase/pi-desktop)
 - [pi.dev](https://pi.dev)
 - [Packages](https://pi.dev/packages)
-- [Issues](https://github.com/FaqFirebase/pi-desktop/issues)
+- [Issues](https://github.com/omertahaoztop/pi-desktop/issues)

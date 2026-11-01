@@ -1,10 +1,9 @@
 name: Build
 
-# Nothing builds on a normal push. Builds are manual: a workflow dispatch
-# (Actions tab / gh CLI) builds all three platforms and uploads the
-# installers as artifacts — no release. Pushing a version tag (e.g.
-# v0.0.3-alpha), the deliberate "create a release" step, builds all three
-# and publishes a GitHub prerelease.
+# Nothing builds on a normal push. A workflow dispatch (Actions tab / gh CLI)
+# builds the Linux packages and uploads them as artifacts — no release.
+# Pushing a version tag (e.g. v0.3.0), the deliberate "create a release"
+# step, builds them and publishes a GitHub prerelease.
 on:
   push:
     tags:
@@ -44,33 +43,13 @@ jobs:
         run: npx --no-install tsx --test $(find src resources -name '*.test.ts')
 
   build:
-    name: Build (${{ matrix.os }})
+    name: Build (Linux)
     needs: verify
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Pinned, not ubuntu-latest: node-pty's native module is compiled on
-          # the runner, and glibc 2.42+ (Ubuntu 26.04) gives it versioned
-          # cfsetispeed/cfsetospeed symbols, so the AppImage would not start on
-          # distros with an older glibc. Raise this only with that in mind.
-          - os: ubuntu-24.04
-            eb_args: '--linux AppImage'
-            artifacts: |
-              release/*.AppImage
-          - os: windows-latest
-            eb_args: '--win nsis portable'
-            artifacts: |
-              release/*.exe
-          # macOS 26 ships Xcode 26, whose actool compiles the Icon Composer
-          # asset (resources/icons/Icon.icon) that package.json uses as the app icon.
-          - os: macos-26
-            eb_args: '--mac dmg zip -c.mac.identity=-'
-            artifacts: |
-              release/*.dmg
-              release/*.zip
-
+    # Pinned, not ubuntu-latest: node-pty's native module is compiled on
+    # the runner, and glibc 2.42+ (Ubuntu 26.04) gives it versioned
+    # cfsetispeed/cfsetospeed symbols, so the AppImage would not start on
+    # distros with an older glibc. Raise this only with that in mind.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -82,18 +61,12 @@ jobs:
           cache: 'npm'
 
       # Runs postinstall, which rebuilds native modules (node-pty) for Electron.
-      # NOTE: confirmed (2026-06-08) that the windows-latest runner's bundled
-      # Visual Studio already includes the Spectre-mitigated MSVC libs node-pty
-      # needs — it compiles here with no explicit install step. An earlier
-      # vs_installer step worked but added ~4 min for nothing, so it was removed.
-      # (People building from source on their own machines may still need those
-      # libs — see README.)
       - name: Install dependencies
         run: npm ci
 
-      - name: Select Xcode for Icon Composer assets
-        if: runner.os == 'macOS'
-        run: sudo xcode-select --switch /Applications/Xcode_26.3.app/Contents/Developer
+      # fpm, which electron-builder uses for the pacman target, needs bsdtar.
+      - name: Install pacman packaging tools
+        run: sudo apt-get install -y --no-install-recommends libarchive-tools
 
       - name: Type-check
         run: npm run typecheck
@@ -102,31 +75,16 @@ jobs:
         run: npm run build
 
       - name: Package with electron-builder
-        shell: bash
-        run: npx --no-install electron-builder ${{ matrix.eb_args }} --publish never
-        env:
-          # No Apple-issued certificates in alpha. The macOS matrix explicitly
-          # uses ad-hoc signing so the app gets its own identifier, not Electron's.
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-
-      - name: Verify macOS local-network metadata and signature
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          apps=(release/mac*/"Pi Desktop.app")
-          test "${#apps[@]}" -eq 1
-          app_bundle="${apps[0]}"
-          /usr/libexec/PlistBuddy -c 'Print :NSLocalNetworkUsageDescription' "$app_bundle/Contents/Info.plist"
-          app_id=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_bundle/Contents/Info.plist")
-          codesign --verify --deep --strict "$app_bundle"
-          codesign -dv "$app_bundle" 2> signing-info.txt
-          grep -Fx "Identifier=$app_id" signing-info.txt
+        run: npx --no-install electron-builder --linux AppImage deb pacman --publish never
 
       - name: Upload installers
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: installers-${{ matrix.os }}
-          path: ${{ matrix.artifacts }}
+          name: installers-linux
+          path: |
+            release/*.AppImage
+            release/*.deb
+            release/*.pacman
           if-no-files-found: error
           retention-days: 14
 

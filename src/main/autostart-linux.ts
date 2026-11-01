@@ -11,8 +11,8 @@ import { join } from 'path'
 // old entry is reused (not duplicated) after an update.
 export const LINUX_AUTOSTART_FILENAME = 'pi-desktop.desktop'
 
-const APP_DISPLAY_NAME = 'Pi Desktop'
-const APP_COMMENT = 'Automatically start Pi Desktop at login'
+const APP_DISPLAY_NAME = 'OMP Orchestrator'
+const APP_COMMENT = 'Automatically start OMP Orchestrator at login'
 
 /**
  * Absolute path to the per-user autostart entry, honoring `$XDG_CONFIG_HOME`

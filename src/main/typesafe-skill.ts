@@ -30,7 +30,7 @@ export const TYPESAFE_SKILL_FILES: readonly SkillFile[] = [
   { name: 'LICENSE', sha256: '835f233f1d6ed84a9b9a351aba0689b47644a4137d6316911fc7957bde523b02' },
 ]
 
-// Written into the skill folder so Pi Desktop only ever replaces or removes a
+// Written into the skill folder so OMP Orchestrator only ever replaces or removes a
 // copy it put there itself. Neither engine loads .json files as skills.
 const INSTALL_MARKER_FILE = '.pi-desktop-install.json'
 const INSTALLED_BY = 'pi-desktop'
@@ -101,7 +101,7 @@ function refuseForeignCopy(status: TypeSafeSkillStatus): void {
   }
 }
 
-/** Download, verify and install the skill, replacing an older Pi Desktop copy. */
+/** Download, verify and install the skill, replacing an older OMP Orchestrator copy. */
 export async function installTypeSafeSkill(deps: InstallTypeSafeSkillDeps): Promise<TypeSafeSkillStatus> {
   const { homeDir, fetchImpl = fetch, files = TYPESAFE_SKILL_FILES } = deps
   const current = await getTypeSafeSkillStatus(homeDir)
@@ -129,7 +129,7 @@ export async function installTypeSafeSkill(deps: InstallTypeSafeSkillDeps): Prom
   return getTypeSafeSkillStatus(homeDir)
 }
 
-/** Remove the skill, but only a copy Pi Desktop installed. */
+/** Remove the skill, but only a copy OMP Orchestrator installed. */
 export async function removeTypeSafeSkill(homeDir: string): Promise<TypeSafeSkillStatus> {
   const current = await getTypeSafeSkillStatus(homeDir)
   refuseForeignCopy(current)

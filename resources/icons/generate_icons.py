@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Generate Pi desktop GUI icons from the original geometric design.
+"""Generate OMP Orchestrator icons: an accent hub wired to three agent nodes.
 
 Colors:
-  - Background: Charcoal #36454F
-  - Foreground: Tangerine #e67e22
+  - Background: #111114
+  - Hub: #f9002f, nodes and links: #f3f4f6
 """
 
 from pathlib import Path
@@ -16,40 +16,33 @@ OUTPUT_SIZES = [16, 32, 48, 64, 128, 256, 512]
 # ICO entries this size and larger are stored as PNG instead of a bitmap.
 ICO_PNG_ENTRY_SIZE = 256
 
-BACKGROUND_COLOR = "#36454F"
-FOREGROUND_COLOR = "#e67e22"
+BACKGROUND_COLOR = "#111114"
+FOREGROUND_COLOR = "#f3f4f6"
+ACCENT_COLOR = "#f9002f"
 SVG_SIZE = 512
 SVG_CORNER_RADIUS = 77
 
-# Shared by SVG and MAC_SVG so the letterform path data exists once.
-PI_LETTERFORMS = f'''  <!-- Pi letterforms: official brand marks, scaled from 800 -> 512 -->
-  <g transform="translate(5.5, 5.5) scale(0.62625)">
-    <!-- P shape: outer boundary clockwise, inner hole counter-clockwise -->
-    <path fill="{FOREGROUND_COLOR}" fill-rule="evenodd" d="
-      M165.29 165.29
-      H517.36
-      V400
-      H400
-      V517.36
-      H282.65
-      V634.72
-      H165.29
-      Z
-      M282.65 282.65
-      V400
-      H400
-      V282.65
-      Z
-    "/>
-    <!-- i dot -->
-    <path fill="{FOREGROUND_COLOR}" d="M517.36 400 H634.72 V634.72 H517.36 Z"/>
+# Shared by SVG and MAC_SVG so the mark exists once.
+# The nodes span y 60-377, so shift down 38 to center them optically.
+MARK = f'''  <g transform="translate(0 38)">
+    <g stroke="{FOREGROUND_COLOR}" stroke-width="26" stroke-linecap="round">
+      <line x1="256" y1="256" x2="256" y2="106"/>
+      <line x1="256" y1="256" x2="385.9" y2="331"/>
+      <line x1="256" y1="256" x2="126.1" y2="331"/>
+    </g>
+    <g fill="{FOREGROUND_COLOR}">
+      <circle cx="256" cy="106" r="46"/>
+      <circle cx="385.9" cy="331" r="46"/>
+      <circle cx="126.1" cy="331" r="46"/>
+    </g>
+    <circle cx="256" cy="256" r="74" fill="{ACCENT_COLOR}"/>
   </g>'''
 
 SVG = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {SVG_SIZE} {SVG_SIZE}" fill="none">
-  <!-- Charcoal rounded background -->
+  <!-- Rounded background -->
   <rect width="{SVG_SIZE}" height="{SVG_SIZE}" rx="{SVG_CORNER_RADIUS}" fill="{BACKGROUND_COLOR}"/>
 
-{PI_LETTERFORMS}
+{MARK}
 </svg>'''
 
 # macOS app icon grid: an 824x824 tile centered on a 1024x1024 canvas.
@@ -64,7 +57,7 @@ MAC_TILE_SCALE = MAC_TILE_SIZE / SVG_SIZE
 MAC_SVG = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {MAC_CANVAS_SIZE} {MAC_CANVAS_SIZE}" fill="none">
   <rect x="{MAC_TILE_INSET}" y="{MAC_TILE_INSET}" width="{MAC_TILE_SIZE}" height="{MAC_TILE_SIZE}" rx="{MAC_TILE_RADIUS}" fill="{BACKGROUND_COLOR}"/>
   <g transform="translate({MAC_TILE_INSET}, {MAC_TILE_INSET}) scale({MAC_TILE_SCALE})">
-{PI_LETTERFORMS}
+{MARK}
   </g>
 </svg>'''
 
@@ -118,7 +111,7 @@ def svg_to_png(svg_path: Path, size: int, out_path: Path):
 
 
 def main():
-    print("Generating Pi icons (tangerine #e67e22 on charcoal #36454F)...")
+    print("Generating OMP Orchestrator icons...")
 
     # Write SVG
     svg_path = ICON_DIR / "icon.svg"

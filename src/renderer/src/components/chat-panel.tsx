@@ -39,7 +39,7 @@ import { createMeasureRef } from '../utils/element-measure'
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { clsx } from 'clsx'
-import piLogo from '../assets/pi-logo.svg'
+import appLogo from '../assets/app-logo.svg'
 import { X, ChevronDown, Loader2 } from 'lucide-react'
 
 // Fallback padding when the composer has not measured yet (~idle pill + gradient).
@@ -315,7 +315,7 @@ export function ChatPanel(): React.JSX.Element {
                   <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10">
                     <div className="mb-8 text-center">
                       <img
-                        src={piLogo}
+                        src={appLogo}
                         alt={PI_DESKTOP_PRODUCT_NAME}
                         className="mx-auto mb-4 block h-14 w-14"
                       />

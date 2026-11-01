@@ -23,7 +23,7 @@ body:
       label: Steps to reproduce
       description: Tell us how to make the bug happen again.
       placeholder: |
-        1. Open Pi Desktop
+        1. Open OMP Orchestrator
         2. Click '...'
         3. See error
     validations:
@@ -61,7 +61,7 @@ body:
   - type: input
     id: pi-desktop-version
     attributes:
-      label: Pi Desktop version
+      label: OMP Orchestrator version
       description: "Open Diagnostics and copy the App version line. Example: 0.2.1-alpha"
     validations:
       required: true
@@ -95,5 +95,5 @@ body:
       options:
         - label: I searched existing issues and didn't find a duplicate.
           required: true
-        - label: I'm on the latest release listed at https://github.com/FaqFirebase/pi-desktop/releases
+        - label: I'm on the latest release listed at https://github.com/omertahaoztop/pi-desktop/releases
           required: true

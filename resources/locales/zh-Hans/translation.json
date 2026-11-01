@@ -15,12 +15,12 @@
     "errorBoundary": {
       "fallback": "内容渲染失败"
     },
-    "quit": "退出 Pi Desktop",
+    "quit": "退出 OMP Orchestrator",
     "resizeHandle": {
       "title": "拖动以调整大小"
     },
     "updateBanner": {
-      "available": "Pi Desktop <strong>v{{latestVersion}}</strong> 已发布 — 当前版本为 v{{currentVersion}}。",
+      "available": "OMP Orchestrator <strong>v{{latestVersion}}</strong> 已发布 — 当前版本为 v{{currentVersion}}。",
       "dismissAriaLabel": "关闭更新通知",
       "downloadButton": "下载"
     }
@@ -595,7 +595,7 @@
       "refusedWrite": "拒绝写入当前工作区之外的内容"
     },
     "fs": {
-      "blockedWrite": "无法写入“{{path}}”（{{code}}）。在 Windows 上这通常是受控文件夹访问（勒索软件保护）阻止了更改。你可以在 Windows 安全中心 → 病毒和威胁防护 → 勒索软件保护 →“通过受控文件夹访问允许应用”中允许 Pi Desktop，或者把本项目移出“文档”/“桌面”到不受保护的文件夹（例如 C:\\dev）。"
+      "blockedWrite": "无法写入“{{path}}”（{{code}}）。在 Windows 上这通常是受控文件夹访问（勒索软件保护）阻止了更改。你可以在 Windows 安全中心 → 病毒和威胁防护 → 勒索软件保护 →“通过受控文件夹访问允许应用”中允许 OMP Orchestrator，或者把本项目移出“文档”/“桌面”到不受保护的文件夹（例如 C:\\dev）。"
     },
     "git": {
       "branchExists": "名为“{{name}}”的分支已存在。请在分支菜单中选择它以切换过去",
@@ -715,9 +715,9 @@
       "unsupportedSchema": "不支持的 $schema（应为 {{expected}}）"
     },
     "typesafe": {
-      "skillChecksumMismatch": "{{file}} 与预期的校验和不符，因此 Pi Desktop 没有安装它。",
+      "skillChecksumMismatch": "{{file}} 与预期的校验和不符，因此 OMP Orchestrator 没有安装它。",
       "skillDownloadFailed": "无法下载 {{file}}（HTTP {{status}}）。",
-      "skillInstalledElsewhere": "{{directory}} 处已存在一个并非由 Pi Desktop 安装的 TypeSafe 技能。Pi Desktop 没有改动它。"
+      "skillInstalledElsewhere": "{{directory}} 处已存在一个并非由 OMP Orchestrator 安装的 TypeSafe 技能。OMP Orchestrator 没有改动它。"
     },
     "workflow": {
       "runNotFound": "未找到工作流运行"
@@ -1389,7 +1389,7 @@
       "label": "浅色主题"
     },
     "minimizeToTrayOnClose": {
-      "description": "关闭窗口时让 Pi Desktop 继续在系统托盘中运行而不是退出（Windows 和 Linux）",
+      "description": "关闭窗口时让 OMP Orchestrator 继续在系统托盘中运行而不是退出（Windows 和 Linux）",
       "label": "关闭时最小化到托盘"
     },
     "notifyOnlyQuestions": {
@@ -1421,7 +1421,7 @@
       "label": "恢复上次会话"
     },
     "runOnStartup": {
-      "description": "登录计算机时自动启动 Pi Desktop（在已安装的版本中生效）",
+      "description": "登录计算机时自动启动 OMP Orchestrator（在已安装的版本中生效）",
       "label": "开机启动"
     },
     "sections": {
@@ -1494,7 +1494,7 @@
     },
     "typesafe": {
       "apiKey": {
-        "environment": "启动 Pi Desktop 的环境中已经设置了 TYPESAFE_API_KEY。Pi 和 OMP 会使用那个值。",
+        "environment": "启动 OMP Orchestrator 的环境中已经设置了 TYPESAFE_API_KEY。Pi 和 OMP 会使用那个值。",
         "invalid": "这不是有效的 API 密钥。请重新粘贴，不要带空格。",
         "label": "API 密钥",
         "nextSession": "新会话会带上密钥；重启已打开的会话可让它也拿到密钥。",
@@ -1503,7 +1503,7 @@
         "save": "保存",
         "saved": "已保存。只有你的用户账号能读取它。"
       },
-      "intro": "Jev 是 TypeSafe 的判断模型。在这里保存你的 API 密钥并安装 Jev 技能，之后 Pi 和 OMP 会直接使用它，不再询问。Pi Desktop 本身不调用 TypeSafe。",
+      "intro": "Jev 是 TypeSafe 的判断模型。在这里保存你的 API 密钥并安装 Jev 技能，之后 Pi 和 OMP 会直接使用它，不再询问。OMP Orchestrator 本身不调用 TypeSafe。",
       "links": {
         "agentSkill": "Jev 技能指南",
         "apiKeys": "获取 API 密钥",
@@ -1512,7 +1512,7 @@
       "skill": {
         "install": "安装",
         "installed": "已安装（{{version}}）",
-        "installedElsewhere": "已在 Pi Desktop 之外安装。请用你当初安装它的工具来管理。",
+        "installedElsewhere": "已在 OMP Orchestrator 之外安装。请用你当初安装它的工具来管理。",
         "label": "Jev 技能",
         "location": "位置：{{directory}}",
         "notInstalled": "未安装。它教会 Pi 和 OMP 如何使用 TypeSafe。",
@@ -1540,14 +1540,14 @@
       "getVersion": "获取{{version}}",
       "gpuUnnamed": "GPU",
       "install": "安装",
-      "intro": "对着麦克风说话，Pi Desktop 会把你的语音转成这台电脑上的文字。选择一个模型下载。在你选择之前不会下载任何模型。",
+      "intro": "对着麦克风说话，OMP Orchestrator 会把你的语音转成这台电脑上的文字。选择一个模型下载。在你选择之前不会下载任何模型。",
       "multilingual": "多种语言",
       "precision": {
         "fp16": "GPU 版本（fp16）",
         "int8": "CPU 版本（int8）"
       },
       "remove": "移除",
-      "restartRequired": "重启 Pi Desktop 以应用此更改。",
+      "restartRequired": "重启 OMP Orchestrator 以应用此更改。",
       "runOn": "运行设备",
       "runtimeCpu": "在处理器（CPU）上运行，使用每个模型的 CPU 版本。",
       "runtimeCpuNoGpu": "未找到可用的显卡，因此语音在处理器（CPU）上运行，使用每个模型的 CPU 版本。",
@@ -2026,10 +2026,10 @@
     }
   },
   "tray": {
-    "show": "显示 Pi Desktop",
+    "show": "显示 OMP Orchestrator",
     "stillRunningBody": "窗口已隐藏到系统托盘。点击托盘图标可重新打开，或选择退出以关闭。",
-    "stillRunningTitle": "Pi Desktop 仍在运行",
-    "unavailableBody": "此桌面环境没有系统托盘，Pi Desktop 将正常关闭，而不是最小化到托盘。",
+    "stillRunningTitle": "OMP Orchestrator 仍在运行",
+    "unavailableBody": "此桌面环境没有系统托盘，OMP Orchestrator 将正常关闭，而不是最小化到托盘。",
     "unavailableTitle": "系统托盘不可用"
   },
   "voice": {

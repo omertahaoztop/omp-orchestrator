@@ -1,7 +1,7 @@
 /**
  * TypeSafe (Jev) values shared by both processes.
  *
- * Pi Desktop never calls TypeSafe itself. It stores the user's API key, hands
+ * OMP Orchestrator never calls TypeSafe itself. It stores the user's API key, hands
  * it to Pi and OMP through this environment variable, and installs the
  * TypeSafe agent skill that tells the agent how to use it.
  */

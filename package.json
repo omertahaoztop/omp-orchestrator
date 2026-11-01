@@ -1,15 +1,15 @@
 {
-  "name": "pi-desktop",
-  "version": "0.2.2-alpha",
+  "name": "omp-orchestrator",
+  "version": "0.3.0",
   "description": "Desktop GUI for the Pi and oh-my-pi coding agents",
   "main": "out/main/index.js",
-  "desktopName": "pi-desktop.desktop",
-  "author": "Pi Desktop GUI Contributors",
+  "desktopName": "omp-orchestrator.desktop",
+  "author": "Ömer Taha Öztop <omertahaoztop@gmail.com>",
   "license": "Apache-2.0",
-  "homepage": "https://pi-desktop.com",
+  "homepage": "https://github.com/omertahaoztop/pi-desktop",
   "repository": {
     "type": "git",
-    "url": "https://github.com/FaqFirebase/pi-desktop"
+    "url": "https://github.com/omertahaoztop/pi-desktop"
   },
   "keywords": [
     "pi",
@@ -23,7 +23,7 @@
     "ide"
   ],
   "bin": {
-    "pi-desktop": "./bin/pi-desktop.js"
+    "omp-orchestrator": "./bin/pi-desktop.js"
   },
   "scripts": {
     "dev": "electron-vite build && electron-vite preview -- --no-sandbox",
@@ -110,9 +110,9 @@
     "vite": "^6.3.5"
   },
   "build": {
-    "appId": "dev.pi.desktop-gui",
-    "productName": "Pi Desktop",
-    "copyright": "Copyright 2026 Pi Desktop GUI Contributors. Licensed under the Apache License, Version 2.0.",
+    "appId": "io.github.omertahaoztop.omp-orchestrator",
+    "productName": "OMP Orchestrator",
+    "copyright": "Copyright 2026 Ömer Taha Öztop. Based on Pi Desktop, Copyright 2026 Pi Desktop GUI Contributors. Licensed under the Apache License, Version 2.0.",
     "files": [
       "out/**/*",
       "bin/**/*"
@@ -132,15 +132,17 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb",
+        "pacman"
       ],
       "syncDesktopName": true,
       "category": "Development",
       "icon": "resources/icons",
-      "synopsis": "Desktop GUI for the Pi coding agent",
-      "description": "An Electron desktop application that provides a GUI frontend for the Pi coding agent.",
-      "maintainer": "Pi Desktop GUI Contributors",
-      "artifactName": "Pi-Desktop-${version}-${os}-${arch}.${ext}"
+      "synopsis": "Desktop GUI for the Pi and oh-my-pi coding agents",
+      "description": "An Electron desktop application that provides a GUI frontend for the Pi and oh-my-pi coding agents. Fork of Pi Desktop.",
+      "maintainer": "Ömer Taha Öztop <omertahaoztop@gmail.com>",
+      "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}.${ext}"
     },
     "mac": {
       "target": [
@@ -151,11 +153,11 @@
       "icon": "resources/icons/Icon.icon",
       "darkModeSupport": true,
       "extendInfo": {
-        "NSLocalNetworkUsageDescription": "Pi Desktop connects to AI providers and development services on your local network."
+        "NSLocalNetworkUsageDescription": "OMP Orchestrator connects to AI providers and development services on your local network."
       },
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "artifactName": "Pi-Desktop-${version}-${os}-${arch}.${ext}"
+      "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}.${ext}"
     },
     "win": {
       "target": [
@@ -163,17 +165,17 @@
         "portable"
       ],
       "icon": "resources/icons/icon.ico",
-      "artifactName": "Pi-Desktop-${version}-${os}-${arch}.${ext}"
+      "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Pi Desktop",
+      "shortcutName": "OMP Orchestrator",
       "installerIcon": "resources/icons/icon.ico",
       "uninstallerIcon": "resources/icons/icon.ico",
-      "artifactName": "Pi-Desktop-${version}-${os}-${arch}-setup.${ext}"
+      "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}-setup.${ext}"
     }
   }
 }

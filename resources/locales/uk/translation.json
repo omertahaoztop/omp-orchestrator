@@ -15,12 +15,12 @@
     "errorBoundary": {
       "fallback": "Не вдалося відобразити вміст"
     },
-    "quit": "Вийти з Pi Desktop",
+    "quit": "Вийти з OMP Orchestrator",
     "resizeHandle": {
       "title": "Потягніть, щоб змінити розмір"
     },
     "updateBanner": {
-      "available": "Доступна Pi Desktop <strong>v{{latestVersion}}</strong> — у вас v{{currentVersion}}.",
+      "available": "Доступна OMP Orchestrator <strong>v{{latestVersion}}</strong> — у вас v{{currentVersion}}.",
       "dismissAriaLabel": "Приховати сповіщення про оновлення",
       "downloadButton": "Завантажити"
     }
@@ -637,7 +637,7 @@
       "refusedWrite": "Запис за межами активного проєкту заборонений"
     },
     "fs": {
-      "blockedWrite": "Не вдалося записати «{{path}}» ({{code}}). У Windows запис зазвичай блокує контрольований доступ до папок (захист від програм-вимагачів). Дозвольте Pi Desktop у розділі «Безпека у Windows → Захист від вірусів і загроз → Захист від програм-вимагачів → Дозволити програмі контрольований доступ до папок» або перенесіть проєкт із папки «Документи»/«Робочий стіл» до незахищеної папки (наприклад, C:\\dev)."
+      "blockedWrite": "Не вдалося записати «{{path}}» ({{code}}). У Windows запис зазвичай блокує контрольований доступ до папок (захист від програм-вимагачів). Дозвольте OMP Orchestrator у розділі «Безпека у Windows → Захист від вірусів і загроз → Захист від програм-вимагачів → Дозволити програмі контрольований доступ до папок» або перенесіть проєкт із папки «Документи»/«Робочий стіл» до незахищеної папки (наприклад, C:\\dev)."
     },
     "git": {
       "branchExists": "Гілка «{{name}}» уже існує. Виберіть її в меню гілок для переходу",
@@ -757,9 +757,9 @@
       "unsupportedSchema": "Непідтримувана $schema (очікується {{expected}})"
     },
     "typesafe": {
-      "skillChecksumMismatch": "Контрольна сума {{file}} не збіглася з очікуваною. Pi Desktop не встановив файл.",
+      "skillChecksumMismatch": "Контрольна сума {{file}} не збіглася з очікуваною. OMP Orchestrator не встановив файл.",
       "skillDownloadFailed": "Не вдалося завантажити {{file}} (HTTP {{status}}).",
-      "skillInstalledElsewhere": "У {{directory}} уже є навичка TypeSafe, установлена не через Pi Desktop. Pi Desktop не змінював її."
+      "skillInstalledElsewhere": "У {{directory}} уже є навичка TypeSafe, установлена не через OMP Orchestrator. OMP Orchestrator не змінював її."
     },
     "workflow": {
       "runNotFound": "Запуск процесу не знайдено"
@@ -1476,7 +1476,7 @@
       "label": "Світла тема"
     },
     "minimizeToTrayOnClose": {
-      "description": "Після закриття вікна залишати Pi Desktop у системному треї (Windows і Linux)",
+      "description": "Після закриття вікна залишати OMP Orchestrator у системному треї (Windows і Linux)",
       "label": "Згортати до трея після закриття"
     },
     "notifyOnlyQuestions": {
@@ -1508,7 +1508,7 @@
       "label": "Продовжувати останню сесію"
     },
     "runOnStartup": {
-      "description": "Запускати Pi Desktop під час входу в систему (діє у встановлених збірках)",
+      "description": "Запускати OMP Orchestrator під час входу в систему (діє у встановлених збірках)",
       "label": "Запускати під час входу"
     },
     "sections": {
@@ -1581,7 +1581,7 @@
     },
     "typesafe": {
       "apiKey": {
-        "environment": "TYPESAFE_API_KEY уже задана в середовищі, з яким запущено Pi Desktop. Pi та OMP використовують це значення.",
+        "environment": "TYPESAFE_API_KEY уже задана в середовищі, з яким запущено OMP Orchestrator. Pi та OMP використовують це значення.",
         "invalid": "Некоректний API-ключ. Вставте його знову без пробілів.",
         "label": "API-ключ",
         "nextSession": "Ключ отримають нові сесії. Перезапустіть відкриту сесію, щоб передати їй ключ.",
@@ -1590,7 +1590,7 @@
         "save": "Зберегти",
         "saved": "Збережено. Читати ключ може лише ваш обліковий запис."
       },
-      "intro": "Jev — модель TypeSafe для оцінювання рішень. Збережіть API-ключ і встановіть навичку Jev тут. Pi та OMP використовуватимуть ключ без повторного запиту. Сам Pi Desktop не звертається до TypeSafe.",
+      "intro": "Jev — модель TypeSafe для оцінювання рішень. Збережіть API-ключ і встановіть навичку Jev тут. Pi та OMP використовуватимуть ключ без повторного запиту. Сам OMP Orchestrator не звертається до TypeSafe.",
       "links": {
         "agentSkill": "Посібник із навички Jev",
         "apiKeys": "Отримати API-ключ",
@@ -1599,7 +1599,7 @@
       "skill": {
         "install": "Установити",
         "installed": "Установлено ({{version}})",
-        "installedElsewhere": "Установлено поза Pi Desktop. Керуйте через інструмент установлення.",
+        "installedElsewhere": "Установлено поза OMP Orchestrator. Керуйте через інструмент установлення.",
         "label": "Навичка Jev",
         "location": "Розташування: {{directory}}",
         "notInstalled": "Не встановлено. Навчає Pi та OMP роботі з TypeSafe.",
@@ -1627,14 +1627,14 @@
       "getVersion": "Завантажити {{version}}",
       "gpuUnnamed": "GPU",
       "install": "Установити",
-      "intro": "Говоріть у мікрофон, і Pi Desktop перетворить мовлення на текст на вашому комп’ютері. Виберіть модель для завантаження. Без вашого вибору моделі не завантажуються.",
+      "intro": "Говоріть у мікрофон, і OMP Orchestrator перетворить мовлення на текст на вашому комп’ютері. Виберіть модель для завантаження. Без вашого вибору моделі не завантажуються.",
       "multilingual": "Багато мов",
       "precision": {
         "fp16": "Версія для GPU (fp16)",
         "int8": "Версія для CPU (int8)"
       },
       "remove": "Видалити",
-      "restartRequired": "Перезапустіть Pi Desktop, щоб застосувати зміну.",
+      "restartRequired": "Перезапустіть OMP Orchestrator, щоб застосувати зміну.",
       "runOn": "Виконувати на",
       "runtimeCpu": "Працює на процесорі (CPU) з версією кожної моделі для CPU.",
       "runtimeCpuNoGpu": "Відповідну відеокарту не знайдено. Розпізнавання працює на процесорі (CPU) з версією кожної моделі для CPU.",
@@ -2191,10 +2191,10 @@
     }
   },
   "tray": {
-    "show": "Показати Pi Desktop",
+    "show": "Показати OMP Orchestrator",
     "stillRunningBody": "Вікно згорнуто до системного трея. Натисніть значок у треї, щоб відкрити його, або виберіть «Вийти» для завершення роботи.",
-    "stillRunningTitle": "Pi Desktop продовжує працювати",
-    "unavailableBody": "У цьому середовищі немає системного трея, тому Pi Desktop завершить роботу після закриття вікна.",
+    "stillRunningTitle": "OMP Orchestrator продовжує працювати",
+    "unavailableBody": "У цьому середовищі немає системного трея, тому OMP Orchestrator завершить роботу після закриття вікна.",
     "unavailableTitle": "Системний трей недоступний"
   },
   "voice": {

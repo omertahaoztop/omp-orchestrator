@@ -1453,7 +1453,7 @@ export interface AppSettings {
   // instead of booting straight into Chat. When false, boot into Chat (empty
   // chat is the Codex-style center prompt with project picker).
   openToHomeOnLaunch: boolean
-  // Launch Pi Desktop automatically when the user logs in to their computer.
+  // Launch OMP Orchestrator automatically when the user logs in to their computer.
   // Applied at the OS level: login items on macOS/Windows, a freedesktop
   // autostart entry on Linux. Only effective in packaged builds.
   runOnStartup: boolean
@@ -1527,14 +1527,14 @@ export interface VoiceProgressEvent {
 
 /**
  * Where the TypeSafe agent skill stands in the shared `~/.agents/skills` root.
- * `installed-elsewhere` means a copy exists that Pi Desktop did not put there
- * (for example from `npx skills add`); Pi Desktop leaves it alone.
+ * `installed-elsewhere` means a copy exists that OMP Orchestrator did not put there
+ * (for example from `npx skills add`); OMP Orchestrator leaves it alone.
  */
 export type TypeSafeSkillState = 'not-installed' | 'installed' | 'installed-elsewhere'
 
 export interface TypeSafeSkillStatus {
   state: TypeSafeSkillState
-  /** Release tag of a copy Pi Desktop installed; null otherwise. */
+  /** Release tag of a copy OMP Orchestrator installed; null otherwise. */
   installedVersion: string | null
   /** The pinned release tag this build downloads and installs. */
   pinnedVersion: string
