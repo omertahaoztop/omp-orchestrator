@@ -1,10 +1,10 @@
 #!/bin/bash
 # OMP Orchestrator — Quick Install Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/omertahaoztop/pi-desktop/master/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/omertahaoztop/omp-orchestrator/master/install.sh | bash
 
 set -e
 
-REPO="omertahaoztop/pi-desktop"
+REPO="omertahaoztop/omp-orchestrator"
 RELEASES_PAGE="https://github.com/$REPO/releases"
 RELEASES_API="https://api.github.com/repos/$REPO/releases"
 BINARY_NAME="omp-orchestrator"

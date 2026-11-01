@@ -1,15 +1,15 @@
 {
   "name": "omp-orchestrator",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Desktop GUI for the Pi and oh-my-pi coding agents",
   "main": "out/main/index.js",
   "desktopName": "omp-orchestrator.desktop",
   "author": "Ömer Taha Öztop <omertahaoztop@gmail.com>",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/omertahaoztop/pi-desktop",
+  "homepage": "https://github.com/omertahaoztop/omp-orchestrator",
   "repository": {
     "type": "git",
-    "url": "https://github.com/omertahaoztop/pi-desktop"
+    "url": "https://github.com/omertahaoztop/omp-orchestrator"
   },
   "keywords": [
     "pi",
@@ -111,7 +111,7 @@
   },
   "build": {
     "appId": "io.github.omertahaoztop.omp-orchestrator",
-    "productName": "OMP Orchestrator",
+    "productName": "OMP-Orchestrator",
     "copyright": "Copyright 2026 Ömer Taha Öztop. Based on Pi Desktop, Copyright 2026 Pi Desktop GUI Contributors. Licensed under the Apache License, Version 2.0.",
     "files": [
       "out/**/*",
@@ -137,12 +137,20 @@
         "pacman"
       ],
       "syncDesktopName": true,
+      "desktop": {
+        "entry": {
+          "Name": "OMP Orchestrator"
+        }
+      },
       "category": "Development",
       "icon": "resources/icons",
       "synopsis": "Desktop GUI for the Pi and oh-my-pi coding agents",
       "description": "An Electron desktop application that provides a GUI frontend for the Pi and oh-my-pi coding agents. Fork of Pi Desktop.",
       "maintainer": "Ömer Taha Öztop <omertahaoztop@gmail.com>",
       "artifactName": "OMP-Orchestrator-${version}-${os}-${arch}.${ext}"
+    },
+    "pacman": {
+      "depends": ["c-ares", "ffmpeg", "gtk3", "http-parser", "libevent", "libvpx", "libxslt", "libxss", "minizip", "nss", "re2", "snappy", "libnotify"]
     },
     "mac": {
       "target": [

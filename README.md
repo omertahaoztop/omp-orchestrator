@@ -196,7 +196,7 @@ You need Pi installed first:
 npm install -g @earendil-works/pi-coding-agent
 ```
 
-On Linux, grab a package from [Releases](https://github.com/omertahaoztop/pi-desktop/releases):
+On Linux, grab a package from [Releases](https://github.com/omertahaoztop/omp-orchestrator/releases):
 
 ```bash
 sudo pacman -U OMP-Orchestrator-*-linux-x64.pacman    # Arch
@@ -250,8 +250,8 @@ These shortcuts are fixed:
 ### Linux / macOS
 
 ```bash
-git clone https://github.com/omertahaoztop/pi-desktop.git
-cd pi-desktop
+git clone https://github.com/omertahaoztop/omp-orchestrator.git
+cd omp-orchestrator
 npm install --ignore-scripts=false
 npm run dev
 ```
@@ -283,8 +283,8 @@ Settings > Privacy & Security > Windows Security > Virus & threat protection > M
 #### 3. Clone and install
 
 ```powershell
-git clone https://github.com/omertahaoztop/pi-desktop.git
-cd pi-desktop
+git clone https://github.com/omertahaoztop/omp-orchestrator.git
+cd omp-orchestrator
 npm install --ignore-scripts=false
 ```
 
@@ -324,7 +324,7 @@ The reliable fix is to keep code out of protected folders. Clone the repo and ke
 
 ```powershell
 # Not C:\Users\<you>\Documents\...; use an unprotected path:
-git clone https://github.com/omertahaoztop/pi-desktop.git C:\dev\pi-desktop
+git clone https://github.com/omertahaoztop/omp-orchestrator.git C:\dev\omp-orchestrator
 ```
 
 If your code must stay under Documents or Desktop, allow the app instead:
@@ -352,7 +352,7 @@ Expand-Archive -Path $zip -DestinationPath node_modules\electron\dist -Force
 
 After this, `npm run dev` should work.
 
-> **Note:** Windows builds are community-tested. If you hit a problem not listed above, please [open a bug report](https://github.com/omertahaoztop/pi-desktop/issues).
+> **Note:** Windows builds are community-tested. If you hit a problem not listed above, please [open a bug report](https://github.com/omertahaoztop/omp-orchestrator/issues).
 
 ## License
 
@@ -363,4 +363,4 @@ Apache 2.0
 - [Pi Desktop (upstream)](https://github.com/FaqFirebase/pi-desktop)
 - [pi.dev](https://pi.dev)
 - [Packages](https://pi.dev/packages)
-- [Issues](https://github.com/omertahaoztop/pi-desktop/issues)
+- [Issues](https://github.com/omertahaoztop/omp-orchestrator/issues)

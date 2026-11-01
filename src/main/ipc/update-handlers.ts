@@ -4,7 +4,7 @@ import { IPC_CHANNELS } from '../../shared/ipc-contracts'
 import { isNewerVersion } from '../../shared/version-compare'
 import { appLog } from '../app-log'
 
-const UPDATE_REPO = 'omertahaoztop/pi-desktop'
+const UPDATE_REPO = 'omertahaoztop/omp-orchestrator'
 const UPDATE_CHECK_TIMEOUT_MS = 8000
 
 interface GithubRelease {

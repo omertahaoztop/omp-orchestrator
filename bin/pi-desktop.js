@@ -36,7 +36,7 @@ if (args.includes('--help') || args.includes('-h')) {
     pi-desktop .                # Launch with current directory
 
   Install:
-    See https://github.com/omertahaoztop/pi-desktop for releases
+    See https://github.com/omertahaoztop/omp-orchestrator for releases
     and build-from-source instructions.
 
   The app requires Pi to be installed:

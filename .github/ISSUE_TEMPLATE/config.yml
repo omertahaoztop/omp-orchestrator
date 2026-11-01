@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/earendil-works/pi/issues
     about: If the bug is in Pi itself (the agent we wrap), report it upstream here.
   - name: OMP Orchestrator releases
-    url: https://github.com/omertahaoztop/pi-desktop/releases
+    url: https://github.com/omertahaoztop/omp-orchestrator/releases
     about: Grab the latest build before opening a bug.
