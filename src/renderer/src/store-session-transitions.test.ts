@@ -182,6 +182,7 @@ const piDesktopStub = {
       if (pendingPromptsFailure) throw new Error(pendingPromptsFailure)
       return pendingPromptsSnapshot
     },
+    listPendingPrompts: async () => [],
     setEditorDirty: (dirty: boolean, fileName: string | null) => {
       calls.push(`editorDirtyMirror:${dirty}:${fileName ?? ''}`)
     },

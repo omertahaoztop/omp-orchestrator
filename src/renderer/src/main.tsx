@@ -6,6 +6,7 @@ import { i18n } from '../../shared/i18n'
 import { applyBootLanguage } from './i18n'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/jetbrains-mono'
+import 'katex/dist/katex.min.css'
 import './index.css'
 
 // OpenMoji COLRv1 color emoji font (vendored woff2, @font-face in index.css) —
