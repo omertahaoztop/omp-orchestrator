@@ -204,6 +204,8 @@ sudo apt install ./OMP-Orchestrator-*-linux-amd64.deb # Debian / Ubuntu
 chmod +x OMP-Orchestrator-*.AppImage && ./OMP-Orchestrator-*.AppImage # any distro
 ```
 
+AUR packaging lives in [`aur/`](aur): `omp-orchestrator-bin` repackages the release `.deb`, `omp-orchestrator` builds from the tagged source. Build either locally with `makepkg -si` inside its folder.
+
 Releases ship Linux packages only. On macOS and Windows, [build it yourself](#build-it-yourself).
 
 ## Keyboard shortcuts

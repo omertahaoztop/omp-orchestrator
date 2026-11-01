@@ -1,0 +1,22 @@
+# Maintainer: Ömer Taha Öztop <omertahaoztop at gmail dot com>
+pkgname=omp-orchestrator-bin
+_pkgname=omp-orchestrator
+pkgver=0.3.1
+pkgrel=1
+pkgdesc='Desktop orchestrator for the oh-my-pi (omp) and Pi coding agents'
+arch=('x86_64')
+url='https://github.com/omertahaoztop/omp-orchestrator'
+license=('Apache-2.0')
+depends=('alsa-lib' 'gtk3' 'libnotify' 'libxss' 'nss')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+options=('!strip' '!debug')
+source=("$_pkgname-$pkgver.deb::$url/releases/download/v$pkgver/OMP-Orchestrator-$pkgver-linux-amd64.deb")
+sha256sums=('a4d0c563a78b54eca9c99e28d8227af6dd47ca671e53320a0ae23e4b5ccfe9cf')
+
+package() {
+  bsdtar -xf data.tar.xz -C "$pkgdir"
+  chmod 755 "$pkgdir/opt/OMP-Orchestrator/chrome-sandbox"
+  install -d "$pkgdir/usr/bin"
+  ln -s /opt/OMP-Orchestrator/omp-orchestrator "$pkgdir/usr/bin/$_pkgname"
+}

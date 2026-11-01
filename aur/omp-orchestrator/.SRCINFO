@@ -1,0 +1,23 @@
+pkgbase = omp-orchestrator
+	pkgdesc = Desktop orchestrator for the oh-my-pi (omp) and Pi coding agents
+	pkgver = 0.3.1
+	pkgrel = 1
+	url = https://github.com/omertahaoztop/omp-orchestrator
+	arch = x86_64
+	license = Apache-2.0
+	makedepends = git
+	makedepends = nodejs
+	makedepends = npm
+	makedepends = python
+	depends = alsa-lib
+	depends = gtk3
+	depends = libnotify
+	depends = libxss
+	depends = nss
+	conflicts = omp-orchestrator-bin
+	options = !strip
+	options = !debug
+	source = omp-orchestrator-0.3.1.tar.gz::https://github.com/omertahaoztop/omp-orchestrator/archive/refs/tags/v0.3.1.tar.gz
+	sha256sums = 85c701d08e948082715c11b48fa2937edff763538c03cf38c5e4811502972bf5
+
+pkgname = omp-orchestrator

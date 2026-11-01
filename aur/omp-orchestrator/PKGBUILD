@@ -1,0 +1,47 @@
+# Maintainer: Ömer Taha Öztop <omertahaoztop at gmail dot com>
+pkgname=omp-orchestrator
+pkgver=0.3.1
+pkgrel=1
+pkgdesc='Desktop orchestrator for the oh-my-pi (omp) and Pi coding agents'
+arch=('x86_64')
+url='https://github.com/omertahaoztop/omp-orchestrator'
+license=('Apache-2.0')
+depends=('alsa-lib' 'gtk3' 'libnotify' 'libxss' 'nss')
+makedepends=('git' 'nodejs' 'npm' 'python')
+conflicts=("$pkgname-bin")
+options=('!strip' '!debug')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('85c701d08e948082715c11b48fa2937edff763538c03cf38c5e4811502972bf5')
+
+build() {
+  cd "$pkgname-$pkgver"
+  export npm_config_cache="$srcdir/npm-cache"
+  npm ci
+  npm run build
+  npx electron-builder --linux dir --publish never
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -d "$pkgdir/opt/OMP-Orchestrator" "$pkgdir/usr/bin"
+  cp -a release/linux-unpacked/. "$pkgdir/opt/OMP-Orchestrator/"
+  chmod 755 "$pkgdir/opt/OMP-Orchestrator/chrome-sandbox"
+  ln -s /opt/OMP-Orchestrator/omp-orchestrator "$pkgdir/usr/bin/$pkgname"
+
+  for size in 16 32 48 64 128 256 512; do
+    install -Dm644 "resources/icons/icon-$size.png" \
+      "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/$pkgname.png"
+  done
+
+  install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/$pkgname.desktop" <<EOF
+[Desktop Entry]
+Name=OMP Orchestrator
+Exec=/opt/OMP-Orchestrator/omp-orchestrator %U
+Terminal=false
+Type=Application
+Icon=$pkgname
+StartupWMClass=$pkgname
+Comment=Desktop orchestrator for the oh-my-pi and Pi coding agents
+Categories=Development;
+EOF
+}
