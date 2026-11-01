@@ -10,6 +10,8 @@ import { existsSync } from 'fs'
 import type { IpcContext } from './context'
 import { appLog } from '../app-log'
 import { t } from '../../shared/i18n'
+import { posix } from 'path'
+import { resolveRemoteDirectory } from '../ssh-remote'
 
 function validateWorkspaceTabOptions(value: unknown): WorkspaceTabOptions {
   if (value === undefined || value === null) return {}
@@ -69,9 +71,13 @@ export function registerWorkspaceHandlers(ctx: IpcContext): void {
     return workspaceManager.createWorkspace(name, path)
   })
 
-  ipcMain.handle(IPC_CHANNELS.WORKSPACE_REMOVE, async (_event, workspaceId: unknown) => {
+  ipcMain.handle(IPC_CHANNELS.WORKSPACE_REMOVE, async (_event, workspaceId: unknown, options: unknown) => {
     if (!isString(workspaceId)) throw new Error('workspaceId must be a string')
-    const result = await workspaceManager.removeWorkspace(workspaceId)
+    if (options !== undefined && (!isObject(options) || !isOptionalBoolean(options.keepWorktree))) {
+      throw new Error('options.keepWorktree must be an optional boolean')
+    }
+    const keepWorktree = isObject(options) && options.keepWorktree === true
+    const result = await workspaceManager.removeWorkspace(workspaceId, { keepWorktree })
     // Notes scoped to the removed workspace fall back to global so they survive.
     await notesManager.reassignToGlobal(workspaceId)
     return result
@@ -88,6 +94,22 @@ export function registerWorkspaceHandlers(ctx: IpcContext): void {
     if (!isString(newPath)) throw new Error('newPath must be a string')
     await workspaceManager.changeWorkspacePath(workspaceId, newPath)
     ctx.terminalService.stop(workspaceId)
+  })
+
+  // Creates a remote workspace, or repoints `workspaceId` at one, saved as the absolute path `cd <path> && pwd -P` resolves.
+  ipcMain.handle(IPC_CHANNELS.WORKSPACE_SAVE_REMOTE, async (_event, host: unknown, path: unknown, workspaceId: unknown): Promise<Workspace> => {
+    if (!isString(host)) throw new Error('host must be a string')
+    if (!isString(path) || !path.trim()) throw new Error('path must be a non-empty string')
+    if (!isOptionalString(workspaceId)) throw new Error('workspaceId must be a string')
+    const remoteHost = host.trim()
+    const remotePath = path.trim()
+    if (workspaceId) {
+      await workspaceManager.changeWorkspacePath(workspaceId, remotePath, remoteHost)
+      ctx.terminalService.stop(workspaceId)
+      return workspaceManager.getWorkspaces().find((workspace) => workspace.id === workspaceId)!
+    }
+    const absolutePath = await resolveRemoteDirectory(remoteHost, remotePath)
+    return workspaceManager.createWorkspace(posix.basename(absolutePath) || remoteHost, absolutePath, remoteHost)
   })
 
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_PATH_EXISTS, async (): Promise<boolean> => {

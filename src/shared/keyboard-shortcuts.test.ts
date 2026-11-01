@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
-  captureShortcut, duplicateShortcutOwner, matchesShortcut, formatShortcut, releasesShortcut, shortcutAccelerator, shortcutProblem,
+  captureShortcut, duplicateShortcutOwner, matchesShortcut, formatShortcut, releasesShortcut, sessionNumberIndex, shortcutAccelerator, shortcutProblem,
   type ShortcutKeyEvent,
 } from './keyboard-shortcuts'
 import { DEFAULT_SETTINGS } from './default-settings'
@@ -45,6 +45,18 @@ test('conflicts account for primary-modifier aliases and reserved native/editor 
   assert.equal(shortcutProblem({ ...defaults, diff: 'G' }, 'darwin')?.kind, 'invalid')
   assert.equal(shortcutProblem({ ...defaults, diff: 'Mod+Ctrl+G' }, 'darwin')?.kind, 'invalid')
   assert.equal(shortcutProblem({ ...defaults, diff: null }, 'darwin'), null)
+})
+
+test('Alt alone binds only digits: Alt+N opens the Nth session tab and can be re-recorded', () => {
+  const altOne: ShortcutKeyEvent = { key: '1', code: 'Digit1', metaKey: false, ctrlKey: false, altKey: true, shiftKey: false }
+  assert.equal(matchesShortcut(altOne, DEFAULT_SETTINGS.shortcuts.session1, 'linux'), true)
+  assert.equal(matchesShortcut({ ...altOne, key: '¡' }, DEFAULT_SETTINGS.shortcuts.session1, 'darwin'), true)
+  assert.equal(matchesShortcut(altOne, DEFAULT_SETTINGS.shortcuts.session2, 'linux'), false)
+  assert.equal(captureShortcut({ ...altOne, key: '3', code: 'Digit3' }, 'linux'), 'Alt+3')
+  assert.equal(captureShortcut({ ...altOne, key: 'g', code: 'KeyG' }, 'linux'), null)
+  assert.equal(shortcutProblem({ ...DEFAULT_SETTINGS.shortcuts, diff: 'Alt+G' }, 'linux')?.kind, 'invalid')
+  assert.equal(sessionNumberIndex('session9'), 8)
+  assert.equal(sessionNumberIndex('nextSession'), null)
 })
 
 test('Commit + Push uses the platform primary modifier, never the Super/Windows key', () => {

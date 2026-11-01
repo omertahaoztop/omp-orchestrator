@@ -263,15 +263,11 @@ function ModelLegend({
 }
 
 /**
- * Home-screen activity dashboard, backed by the persisted stats store (survives
- * session deletion). Renders nothing until there is activity, so a fresh install
- * stays uncluttered.
+ * Stats view, backed by the persisted stats store (survives session deletion).
  */
-export function StatsPanel(): React.JSX.Element | null {
-  const { t, i18n } = useTranslation()
+export function StatsPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const [data, setData] = useState<ActivityStatsResult | null>(null)
-  const [tab, setTab] = useState<Tab>('overview')
-  const [range, setRange] = useState<ActivityRangeKey>('365')
 
   useEffect(() => {
     let cancelled = false
@@ -282,13 +278,26 @@ export function StatsPanel(): React.JSX.Element | null {
     return () => { cancelled = true }
   }, [])
 
-  const rangedDays = useMemo(() => {
-    if (!data) return []
-    return data.days.slice(-RANGE_DAYS[range])
-  }, [data, range])
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <div className="mx-auto max-w-[952px] px-8 py-8">
+        <h1 className="text-lg font-semibold text-primary">{t('stats.title')}</h1>
+        <p className="mb-6 mt-1 text-xs text-dim">{t('stats.subtitle')}</p>
+        {data && data.ranges['365'].messages > 0 ? (
+          <StatsBody data={data} />
+        ) : (
+          <div className="rounded-lg border border-dashed border-border px-4 py-5 text-center text-xs text-faint">{t('stats.empty')}</div>
+        )}
+      </div>
+    </div>
+  )
+}
 
-  // Nothing to show on a fresh install.
-  if (!data || data.ranges['365'].messages === 0) return null
+function StatsBody({ data }: { data: ActivityStatsResult }): React.JSX.Element {
+  const { t, i18n } = useTranslation()
+  const [tab, setTab] = useState<Tab>('overview')
+  const [range, setRange] = useState<ActivityRangeKey>('365')
+  const rangedDays = useMemo(() => data.days.slice(-RANGE_DAYS[range]), [data, range])
 
   const stats = data.ranges[range]
   const favoriteModel = stats.models[0] ? modelLabel(stats.models[0]) : '—'
@@ -301,7 +310,7 @@ export function StatsPanel(): React.JSX.Element | null {
   )
 
   return (
-    <div className="mb-8 rounded-lg border border-border bg-surface/50 p-4">
+    <div className="rounded-lg border border-border bg-surface/50 p-4">
       {/* Tabs + range toggle */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-1">

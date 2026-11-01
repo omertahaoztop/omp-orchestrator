@@ -85,6 +85,7 @@ export function DiffViewer({ onClose }: DiffViewerProps = {}): React.JSX.Element
   }, [shortcutActive, shortcutRequest])
   const workspaceId = useAppStore((state) => state.activeWorkspace?.id)
   const workspacePath = useAppStore((state) => state.activeWorkspace?.path)
+  const workspaceHost = useAppStore((state) => state.activeWorkspace?.host)
   // The chat's diff pane stays mounted while another view hides the chat; the
   // Diff view page is mounted only while it is the current view.
   const visible = useAppStore((state) => onClose ? isChatVisible(state) : !isGlobalWorkflowOpen(state))
@@ -233,6 +234,9 @@ export function DiffViewer({ onClose }: DiffViewerProps = {}): React.JSX.Element
           </div>
         </div>
         <div className="flex min-h-8 min-w-0 flex-col justify-center border-t border-border px-4 py-0.5">
+          {workspaceHost ? (
+            <p className="text-[11px] text-dim">{t('remoteWorkspace.gitActionsUnavailable')}</p>
+          ) : (
           <GitConveyorActions key={workspaceId} onChanged={reloadDiff} selection={commitSelection} shortcutActive={shortcutActive && !loading && !loadError} watchDisk={visible}>
             <button
               type="button"
@@ -240,12 +244,14 @@ export function DiffViewer({ onClose }: DiffViewerProps = {}): React.JSX.Element
               disabled={loading || discarding || stagedMode || visibleFiles.length === 0 || visibleFiles.some((file) => !canDiscardGitPatch(file.patch))}
               title={stagedMode ? t('diff.discard.workingOnly') : t('diff.discard.all')}
               aria-label={t('diff.discard.all')}
-              className="flex shrink-0 items-center gap-1 rounded border border-border px-2 py-1 text-[10px] text-muted transition-colors hover:bg-error-bg hover:text-error disabled:cursor-not-allowed disabled:opacity-40"
+              // mr-auto pushes Commit/Push to the far side so the destructive action is never their neighbour.
+              className="mr-auto flex shrink-0 items-center gap-1 rounded border border-border px-2 py-1 text-[10px] text-muted transition-colors hover:bg-error-bg hover:text-error disabled:cursor-not-allowed disabled:opacity-40"
             >
               {discarding ? <Loader2 size={11} className="animate-spin" /> : <Undo2 size={11} />}
               {t('diff.discard.confirm')}
             </button>
           </GitConveyorActions>
+          )}
         </div>
       </div>
 
@@ -453,7 +459,7 @@ function DiffHunk({ lines }: { lines: DiffLine[] }): React.JSX.Element {
           className={clsx(
             line.type === 'add' && 'bg-success-bg',
             line.type === 'remove' && 'bg-error-bg',
-            line.type === 'hunk' && 'bg-accent-bg',
+            line.type === 'hunk' && 'bg-surface',
           )}
         >
           <td className="w-10 px-2 py-0.5 text-right text-faint select-none border-r border-border">
@@ -466,9 +472,9 @@ function DiffHunk({ lines }: { lines: DiffLine[] }): React.JSX.Element {
             {line.type === 'add' && <span className="text-success">+</span>}
             {line.type === 'remove' && <span className="text-error">-</span>}
             {line.type === 'context' && <span className="text-ghost"> </span>}
-            {line.type === 'hunk' && <span className="text-accent-fg">@</span>}
+            {line.type === 'hunk' && <span className="text-muted">@</span>}
           </td>
-          <td className="px-2 py-0.5 whitespace-pre text-secondary">
+          <td className={clsx('px-2 py-0.5 whitespace-pre', line.type === 'hunk' ? 'text-muted' : 'text-secondary')}>
             {line.content}
           </td>
         </tr>

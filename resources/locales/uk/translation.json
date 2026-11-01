@@ -25,6 +25,12 @@
       "downloadButton": "Завантажити"
     }
   },
+  "budget": {
+    "continue": "",
+    "hitMessage": "",
+    "hitTitle": "",
+    "stop": ""
+  },
   "chat": {
     "activity": {
       "stalled": "Модель не відповідає вже {{silent}}. Можлива затримка у провайдера.",
@@ -400,12 +406,21 @@
       "branchPushed": "Гілку надіслано.",
       "committed": "Створено коміт {{sha}}.",
       "committedAndPushed": "Створено коміт {{sha}}, гілку надіслано.",
+      "merged": "",
       "openLinkTitle": "Відкрити в браузері",
       "prCreated": "Пул-реквест створено.",
       "pushedCommits_one": "Надіслано {{count}} коміт.",
       "pushedCommits_few": "Надіслано {{count}} коміти.",
       "pushedCommits_many": "Надіслано {{count}} комітів.",
       "pushedCommits_other": "Надіслано {{count}} коміту."
+    },
+    "merge": {
+      "buttonLabel": "",
+      "buttonTitle": "",
+      "commitFirstTitle": "",
+      "confirmLabel": "",
+      "confirmMessage": "",
+      "confirmTitle": ""
     },
     "openPrButtonLabel": "Відкрити PR #{{number}}",
     "openPrButtonTitle": "Відкрити пул-реквест #{{number}} цієї гілки на GitHub",
@@ -652,9 +667,18 @@
       "commitSelectionEmpty": "Не вибрано файли для коміту",
       "commitSelectionOutsideWorkspace": "Файли для коміту мають бути в активному проєкті",
       "detachedHeadCommit": "Не можна створити коміт за від’єднаного HEAD",
+      "detachedHeadMerge": "",
       "detachedHeadPush": "Не можна надіслати зміни за від’єднаного HEAD",
       "ignoredFilesBlockSwitch": "Перехід на {{branch}} перезапише або видалить ці локальні файли, які Git не показує як зміни. Перемістіть їх і повторіть перехід:\n{{files}}",
       "localBranchRequired": "Виберіть наявну локальну гілку",
+      "mergeBaseMissing": "",
+      "mergeCommitFirst": "",
+      "mergeConflicts": "",
+      "mergeMainDirty": "",
+      "mergeMainNotOnBase": "",
+      "mergeManagedWorktreeOnly": "",
+      "mergeNothingToMerge": "",
+      "mergeOperationInProgress": "",
       "namedBranchRequired": "Для пул-реквесту потрібна іменована гілка",
       "newFileNotCommittable": "Не можна додати {{path}} до коміту: файл не є новим у вибраних змінах або ігнорується Git",
       "noTrackedChanges": "У проєкті немає відстежуваних змін для коміту. Спочатку додайте нові файли до індексу, щоб включити їх.",
@@ -712,6 +736,15 @@
       "startupTimeoutBusyWithStderr": "{{message}}\n\nВивід stderr Pi під час запуску:\n{{detail}}",
       "startupTimeoutSilentNoOutput": "Pi нічого не вивів за {{seconds}} с.\n\nВивід не отримано. Знайдіть точну команду запуску в журналі застосунку та спробуйте виконати `pi --mode rpc` у терміналі.",
       "startupTimeoutSilentWithStderr": "Pi нічого не вивів за {{seconds}} с.\n\nВивід stderr Pi під час запуску:\n{{detail}}"
+    },
+    "remote": {
+      "connectFailed": "",
+      "folderMissing": "",
+      "invalidHost": "",
+      "permissionModeUnsupported": "",
+      "sshMissing": "",
+      "timeout": "",
+      "unsupported": ""
     },
     "routines": {
       "badCron": "Неправильний розклад \"{{cron}}\". Вкажіть п'ять полів: хвилина година день місяць день тижня.",
@@ -813,15 +846,15 @@
   "home": {
     "actions": {
       "linkedTask": {
-        "description": "Одне завдання в кількох репозиторіях",
         "title": "Пов’язане завдання"
       },
+      "new": "",
+      "newMenu": "",
       "newSession": {
         "inWorkspace": "У {{project}}",
         "pickFolderFirst": "Спочатку виберіть папку"
       },
       "newTask": {
-        "description": "Почати роботу в новій сесії {{agent}}",
         "title": "Нове завдання"
       },
       "openFolder": {
@@ -829,12 +862,21 @@
         "title": "Відкрити папку"
       }
     },
+    "activeSessions": {
+      "empty": "",
+      "hostTitle": "",
+      "title": "",
+      "usageTitle": ""
+    },
+    "attention": {
+      "empty": "",
+      "title": ""
+    },
     "changedFiles": {
       "moreOpenDiff_one": "Ще +{{count}} — відкрити зміни",
       "moreOpenDiff_few": "Ще +{{count}} — відкрити зміни",
       "moreOpenDiff_many": "Ще +{{count}} — відкрити зміни",
-      "moreOpenDiff_other": "Ще +{{count}} — відкрити зміни",
-      "noWorkspace": "Проєкт не вибрано."
+      "moreOpenDiff_other": "Ще +{{count}} — відкрити зміни"
     },
     "errorBanner": {
       "checkInstalled": "Переконайтеся, що {{agent}} встановлений і шлях до нього вказаний правильно.",
@@ -939,6 +981,8 @@
     "inbox": {
       "deny": "",
       "empty": "",
+      "keyHint": "",
+      "remoteHost": "",
       "title": "",
       "waitingSince": ""
     },
@@ -980,7 +1024,6 @@
       "failed": "помилка",
       "idle": "простоює",
       "needsApproval": "потрібне схвалення",
-      "stopped": "зупинено",
       "working": "у роботі"
     },
     "startingSession": "Запуск сесії",
@@ -1065,6 +1108,8 @@
     "viewNoteTitle": "Переглянути нотатку"
   },
   "notifications": {
+    "budgetHit": "",
+    "budgetTitle": "",
     "completed": "Pi завершив роботу.",
     "failed": "Pi зупинився з помилкою.",
     "focusSummary": "",
@@ -1181,6 +1226,20 @@
       "target": "Ціль: {{path}}",
       "title": "Дозволити {{tool}}?"
     }
+  },
+  "remoteWorkspace": {
+    "badgeTitle": "",
+    "dialog": {
+      "addTitle": "",
+      "checking": "",
+      "connect": "",
+      "editTitle": "",
+      "hostLabel": "",
+      "hostPlaceholder": "",
+      "intro": "",
+      "pathLabel": ""
+    },
+    "gitActionsUnavailable": ""
   },
   "repoSets": {
     "bar": {
@@ -1520,6 +1579,12 @@
       "typesafe": "TypeSafe Jev",
       "voiceDictation": "Голосове диктування"
     },
+    "sessionBudget": {
+      "description": "",
+      "label": "",
+      "tokensPlaceholder": "",
+      "usdPlaceholder": ""
+    },
     "shortcuts": {
       "actionWithShortcut": "{{action}} ({{shortcut}})",
       "commandPalette": "Палітра команд",
@@ -1543,7 +1608,8 @@
       "pushToTalk": "Диктування: утримуйте, щоб говорити",
       "reserved": "Це сполучення зайняте дією системного меню або редактора.",
       "reset": "Скинути сполучення",
-      "sidebar": "Бічна панель"
+      "sidebar": "Бічна панель",
+      "switchToSession": ""
     },
     "showThinking": {
       "description": "Показувати блоки міркування моделі у відповідях",
@@ -1674,12 +1740,13 @@
       "workspaceSection": "Проєкт"
     },
     "newSessionButton": {
+      "inWorktreeLabel": "",
+      "inWorktreeTitle": "",
       "label": "Нова сесія",
       "openProjectToBegin": "Відкрийте проєкт для початку",
-      "shortcutKbd": "Ctrl N",
       "startsIn": "Запускається в {{project}}",
-      "titleNoProject": "Спочатку відкрийте проєкт",
-      "titleWithShortcut": "Почати нову сесію в цьому проєкті (Ctrl/Cmd+N)"
+      "title": "",
+      "titleNoProject": "Спочатку відкрийте проєкт"
     },
     "openProjectFolder": {
       "ariaLabel": "Відкрити папку проєкту",
@@ -1708,17 +1775,20 @@
       "diagnostics": "Діагностика",
       "notes": "Нотатки",
       "packages": "Пакети",
-      "sectionLabel": "Інструменти"
+      "sectionLabel": "Інструменти",
+      "stats": ""
     },
     "workflowRunsForSession": "Запуски процесів цієї сесії",
     "workspaceMenu": {
       "changeFolder": "Змінити папку…",
+      "editRemote": "",
       "rename": "Перейменувати"
     },
     "workspaceSwitcher": {
       "namePlaceholder": "Назва проєкту",
       "noWorkspace": "Немає проєкту",
       "openProjectEllipsis": "Відкрити проєкт…",
+      "openRemoteEllipsis": "",
       "triggerTitle": "Клацання — перемкнути · подвійне — перейменувати · правою кнопкою — параметри"
     }
   },
@@ -1752,6 +1822,7 @@
     "selectPrompt": "Виберіть навичку для перегляду SKILL.md"
   },
   "stats": {
+    "empty": "",
     "heatmap": {
       "dayTooltip_one": "{{date}} — повідомлень: {{count}}",
       "dayTooltip_few": "{{date}} — повідомлень: {{count}}",
@@ -1783,10 +1854,12 @@
       "thirtyDays": "30 дн.",
       "threeMonths": "3 міс."
     },
+    "subtitle": "",
     "tabs": {
       "models": "моделі",
       "overview": "огляд"
     },
+    "title": "",
     "tokenChart": {
       "barTooltip": "{{label}} — токенів: {{tokens}}",
       "empty": "За цей період токени не використовувалися."
@@ -1873,6 +1946,10 @@
     "piRunning": "{{agent}} працює (PID: {{pid}})",
     "piStarting": "{{agent}} запускається",
     "piStopped": "{{agent}} зупинений",
+    "projectUsage": "",
+    "projectUsageShort": "",
+    "sessionBudget": "",
+    "sessionUsage": "",
     "showTerminal": "Показати термінал",
     "steerQueued_one": "Вказівок у черзі: {{count}}",
     "steerQueued_few": "Вказівок у черзі: {{count}}",
@@ -1905,6 +1982,7 @@
       "keepWorkingLabel": "Продовжити роботу",
       "newMessage": "Pi ще відповідає в цій сесії. Нова сесія зупинить його: записана частина відповіді збережеться, решту, включно з поточними викликами інструментів, буде відкинуто.",
       "okLabel": "OK",
+      "removeCleanWorktreeOption": "",
       "removeWorkspaceMessage": "Прибрати «{{name}}» з бічної панелі? Процес Pi буде зупинено; файли на диску збережуться.",
       "removeWorkspaceTitle": "Прибрати проєкт",
       "startAnywayLabel": "Усе одно запустити",
@@ -2367,7 +2445,6 @@
     "newSessionAriaLabel": "Нова сесія в цьому проєкті",
     "newSessionFallback": "Нова сесія",
     "removeWorkspaceAriaLabel": "Прибрати {{name}}",
-    "sessions": "Сесії",
-    "tools": "Інструменти"
+    "sessions": "Сесії"
   }
 }

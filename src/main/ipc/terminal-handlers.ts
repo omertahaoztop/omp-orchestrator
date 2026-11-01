@@ -33,6 +33,7 @@ export function registerTerminalHandlers(ctx: IpcContext): void {
       project.id,
       {
         cwd: project.path,
+        host: project.host,
         cols: dimension(opts.cols, DEFAULT_TERMINAL_COLS),
         rows: dimension(opts.rows, DEFAULT_TERMINAL_ROWS),
       },

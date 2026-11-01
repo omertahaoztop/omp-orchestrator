@@ -25,6 +25,12 @@
       "downloadButton": "下载"
     }
   },
+  "budget": {
+    "continue": "",
+    "hitMessage": "",
+    "hitTitle": "",
+    "stop": ""
+  },
   "chat": {
     "activity": {
       "stalled": "模型已有 {{silent}} 没有回复。服务商可能较慢。",
@@ -373,9 +379,18 @@
       "branchPushed": "分支已推送。",
       "committed": "已提交 {{sha}}。",
       "committedAndPushed": "已提交 {{sha}} 并推送分支。",
+      "merged": "",
       "openLinkTitle": "在浏览器中打开",
       "prCreated": "PR 已创建。",
       "pushedCommits_other": "已推送 {{count}} 个提交。"
+    },
+    "merge": {
+      "buttonLabel": "",
+      "buttonTitle": "",
+      "commitFirstTitle": "",
+      "confirmLabel": "",
+      "confirmMessage": "",
+      "confirmTitle": ""
     },
     "openPrButtonLabel": "打开 PR #{{number}}",
     "openPrButtonTitle": "在 GitHub 上打开此分支的 PR #{{number}}",
@@ -610,9 +625,18 @@
       "commitSelectionEmpty": "没有选择要提交的文件",
       "commitSelectionOutsideWorkspace": "要提交的文件必须位于当前工作区内",
       "detachedHeadCommit": "无法在分离 HEAD 状态下提交",
+      "detachedHeadMerge": "",
       "detachedHeadPush": "无法在分离 HEAD 状态下推送",
       "ignoredFilesBlockSwitch": "切换到 {{branch}} 会覆盖或删除以下本地文件（Git 不会把它们显示为更改）。请先将它们移走，然后再切换：\n{{files}}",
       "localBranchRequired": "请选择一个现有的本地分支",
+      "mergeBaseMissing": "",
+      "mergeCommitFirst": "",
+      "mergeConflicts": "",
+      "mergeMainDirty": "",
+      "mergeMainNotOnBase": "",
+      "mergeManagedWorktreeOnly": "",
+      "mergeNothingToMerge": "",
+      "mergeOperationInProgress": "",
       "namedBranchRequired": "创建 PR 需要一个具名分支",
       "newFileNotCommittable": "无法提交 {{path}}：它不是所选更改中的新文件，或被 Git 忽略",
       "noTrackedChanges": "本工作区没有可提交的已跟踪更改。请先暂存未跟踪的文件以将其包含进来。",
@@ -670,6 +694,15 @@
       "startupTimeoutBusyWithStderr": "{{message}}\n\n启动期间捕获的 Pi stderr：\n{{detail}}",
       "startupTimeoutSilentNoOutput": "Pi 在 {{seconds}} 秒内没有产生任何输出。\n\n没有捕获到输出。请在应用日志中查看确切的启动命令，并尝试在终端中直接运行 `pi --mode rpc`。",
       "startupTimeoutSilentWithStderr": "Pi 在 {{seconds}} 秒内没有产生任何输出。\n\n启动期间捕获的 Pi stderr：\n{{detail}}"
+    },
+    "remote": {
+      "connectFailed": "",
+      "folderMissing": "",
+      "invalidHost": "",
+      "permissionModeUnsupported": "",
+      "sshMissing": "",
+      "timeout": "",
+      "unsupported": ""
     },
     "routines": {
       "badCron": "无效的计划 \"{{cron}}\"。请使用五个字段：分 时 日 月 星期。",
@@ -768,15 +801,15 @@
   "home": {
     "actions": {
       "linkedTask": {
-        "description": "一个任务跨多个仓库",
         "title": "关联任务"
       },
+      "new": "",
+      "newMenu": "",
       "newSession": {
         "inWorkspace": "在 {{project}} 中",
         "pickFolderFirst": "请先选择文件夹"
       },
       "newTask": {
-        "description": "在全新的 {{agent}} 会话中开始工作",
         "title": "新建任务"
       },
       "openFolder": {
@@ -784,9 +817,18 @@
         "title": "打开文件夹"
       }
     },
+    "activeSessions": {
+      "empty": "",
+      "hostTitle": "",
+      "title": "",
+      "usageTitle": ""
+    },
+    "attention": {
+      "empty": "",
+      "title": ""
+    },
     "changedFiles": {
-      "moreOpenDiff_other": "+{{count}} 更多 — 打开差异审查",
-      "noWorkspace": "未选择工作区。"
+      "moreOpenDiff_other": "+{{count}} 更多 — 打开差异审查"
     },
     "errorBanner": {
       "checkInstalled": "请检查 {{agent}} 是否已安装且路径正确。",
@@ -885,6 +927,8 @@
     "inbox": {
       "deny": "",
       "empty": "",
+      "keyHint": "",
+      "remoteHost": "",
       "title": "",
       "waitingSince": ""
     },
@@ -923,7 +967,6 @@
       "failed": "失败",
       "idle": "空闲",
       "needsApproval": "待批准",
-      "stopped": "已停止",
       "working": "工作中"
     },
     "startingSession": "正在启动会话",
@@ -1008,6 +1051,8 @@
     "viewNoteTitle": "查看笔记"
   },
   "notifications": {
+    "budgetHit": "",
+    "budgetTitle": "",
     "completed": "Pi 已完成工作。",
     "failed": "Pi 因错误而停止。",
     "focusSummary": "",
@@ -1121,6 +1166,20 @@
       "target": "目标：{{path}}",
       "title": "允许 {{tool}}？"
     }
+  },
+  "remoteWorkspace": {
+    "badgeTitle": "",
+    "dialog": {
+      "addTitle": "",
+      "checking": "",
+      "connect": "",
+      "editTitle": "",
+      "hostLabel": "",
+      "hostPlaceholder": "",
+      "intro": "",
+      "pathLabel": ""
+    },
+    "gitActionsUnavailable": ""
   },
   "repoSets": {
     "bar": {
@@ -1433,6 +1492,12 @@
       "typesafe": "TypeSafe Jev",
       "voiceDictation": "语音听写"
     },
+    "sessionBudget": {
+      "description": "",
+      "label": "",
+      "tokensPlaceholder": "",
+      "usdPlaceholder": ""
+    },
     "shortcuts": {
       "actionWithShortcut": "{{action}}（{{shortcut}}）",
       "commandPalette": "命令面板",
@@ -1456,7 +1521,8 @@
       "pushToTalk": "语音听写：按住说话",
       "reserved": "此组合键已被原生菜单或编辑器操作占用。",
       "reset": "重置快捷键",
-      "sidebar": "侧边栏"
+      "sidebar": "侧边栏",
+      "switchToSession": ""
     },
     "showThinking": {
       "description": "在回复中显示模型思考块",
@@ -1584,12 +1650,13 @@
       "workspaceSection": "工作区"
     },
     "newSessionButton": {
+      "inWorktreeLabel": "",
+      "inWorktreeTitle": "",
       "label": "新建会话",
       "openProjectToBegin": "打开一个项目以开始",
-      "shortcutKbd": "Ctrl N",
       "startsIn": "在 {{project}} 中开始",
-      "titleNoProject": "请先打开一个项目",
-      "titleWithShortcut": "在此项目中开始新会话（Ctrl/Cmd+N）"
+      "title": "",
+      "titleNoProject": "请先打开一个项目"
     },
     "openProjectFolder": {
       "ariaLabel": "打开项目文件夹",
@@ -1615,17 +1682,20 @@
       "diagnostics": "诊断",
       "notes": "笔记",
       "packages": "包",
-      "sectionLabel": "工具"
+      "sectionLabel": "工具",
+      "stats": ""
     },
     "workflowRunsForSession": "此会话的工作流运行",
     "workspaceMenu": {
       "changeFolder": "更改文件夹…",
+      "editRemote": "",
       "rename": "重命名"
     },
     "workspaceSwitcher": {
       "namePlaceholder": "工作区名称",
       "noWorkspace": "无工作区",
       "openProjectEllipsis": "打开项目…",
+      "openRemoteEllipsis": "",
       "triggerTitle": "点击切换 · 双击重命名 · 右键查看选项"
     }
   },
@@ -1659,6 +1729,7 @@
     "selectPrompt": "选择一个技能以查看其 SKILL.md"
   },
   "stats": {
+    "empty": "",
     "heatmap": {
       "dayTooltip_other": "{{date}} — {{count}} 条消息"
     },
@@ -1684,10 +1755,12 @@
       "thirtyDays": "30 天",
       "threeMonths": "3 个月"
     },
+    "subtitle": "",
     "tabs": {
       "models": "模型",
       "overview": "概览"
     },
+    "title": "",
     "tokenChart": {
       "barTooltip": "{{label}} — {{tokens}} token",
       "empty": "此范围内没有 token 使用记录。"
@@ -1771,6 +1844,10 @@
     "piRunning": "{{agent}} 运行中（PID: {{pid}}）",
     "piStarting": "{{agent}} 启动中",
     "piStopped": "{{agent}} 已停止",
+    "projectUsage": "",
+    "projectUsageShort": "",
+    "sessionBudget": "",
+    "sessionUsage": "",
     "showTerminal": "显示终端",
     "steerQueued_other": "{{count}} 条引导已排队",
     "streaming": "流式输出中",
@@ -1797,6 +1874,7 @@
       "keepWorkingLabel": "让它继续工作",
       "newMessage": "Pi 在此会话中尚未完成响应。启动新会话会中止它：Pi 已写入会话的内容会保留，但响应的其余部分（包括仍在运行的工具调用）将被丢弃。",
       "okLabel": "确定",
+      "removeCleanWorktreeOption": "",
       "removeWorkspaceMessage": "从侧边栏移除“{{name}}”？其 Pi 进程会停止；磁盘上的文件不受影响。",
       "removeWorkspaceTitle": "移除工作区",
       "startAnywayLabel": "仍然启动",
@@ -2175,7 +2253,6 @@
     "newSessionAriaLabel": "在此项目中新建会话",
     "newSessionFallback": "新建会话",
     "removeWorkspaceAriaLabel": "移除 {{name}}",
-    "sessions": "会话",
-    "tools": "工具"
+    "sessions": "会话"
   }
 }

@@ -319,6 +319,30 @@ test('session navigation uses open sessions in the active project, supports rema
   assert.equal(selected.length, 4)
 })
 
+test('Alt+N opens the Nth visible session tab, ignores missing tabs and leaves Alt+N in the terminal to the shell', async () => {
+  const selected: string[] = []
+  useAppStore.setState({
+    sessionRuntimes: { first: sessionRuntime('first'), starting: sessionRuntime('starting', 'project', null), last: sessionRuntime('last') },
+    activeSessionRuntimeId: 'last',
+    switchSession: async (path) => { selected.push(path) },
+  })
+  const alt = (digit: string, change: Record<string, unknown> = {}) =>
+    keyEvent({ key: digit, code: `Digit${digit}`, metaKey: false, altKey: true, ...change })
+  handleAppShortcut(alt('2'))
+  await settle()
+  assert.deepEqual(selected, ['/first'])
+  handleAppShortcut(alt('1'))
+  handleAppShortcut(alt('3'))
+  await settle()
+  assert.deepEqual(selected, ['/first'])
+  const inTerminal = alt('2', { target: new Target([TERMINAL]) })
+  handleAppShortcut(inTerminal)
+  assert.equal(inTerminal.defaultPrevented, false)
+  const numpad = alt('2', { code: 'Numpad2' })
+  handleAppShortcut(numpad)
+  assert.equal(numpad.defaultPrevented, false)
+})
+
 test('push to talk holds while its keys are down and releases on its own key-up or a lost focus', () => {
   const commands: VoiceShortcutCommand[] = []
   const unsubscribe = onVoiceShortcut((command) => commands.push(command))

@@ -1,10 +1,17 @@
 export const SHORTCUT_ACTIONS = [
   'modelSelector', 'sidebar', 'files', 'diff', 'terminal', 'review',
   'newSession', 'previousProject', 'nextProject', 'previousSession', 'nextSession',
+  'session1', 'session2', 'session3', 'session4', 'session5', 'session6', 'session7', 'session8', 'session9',
   'commitPush', 'settings', 'commandPalette', 'notes', 'pushToTalk', 'globalDictation',
 ] as const
 export type ShortcutAction = typeof SHORTCUT_ACTIONS[number]
 export type KeyboardShortcuts = Record<ShortcutAction, string | null>
+
+/** The 0-based session tab a `sessionN` action switches to, or null for any other action. */
+export function sessionNumberIndex(action: ShortcutAction): number | null {
+  const match = /^session([1-9])$/.exec(action)
+  return match ? Number(match[1]) - 1 : null
+}
 
 export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcuts = {
   diff: 'Mod+G',
@@ -24,6 +31,15 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcuts = {
   nextProject: 'Mod+Shift+BracketRight',
   previousSession: 'Mod+BracketLeft',
   nextSession: 'Mod+BracketRight',
+  session1: 'Alt+1',
+  session2: 'Alt+2',
+  session3: 'Alt+3',
+  session4: 'Alt+4',
+  session5: 'Alt+5',
+  session6: 'Alt+6',
+  session7: 'Alt+7',
+  session8: 'Alt+8',
+  session9: 'Alt+9',
   // Hold to dictate into the composer while the app has focus.
   pushToTalk: 'Mod+Shift+T',
   // Off until the user picks one: a system-wide key is taken from every other app.
@@ -63,7 +79,8 @@ function parseShortcut(value: unknown): string[] | null {
   const modifiers = parts.slice(0, -1)
   if (!KEY_PATTERN.test(key) || !modifiers.length || new Set(parts).size !== parts.length) return null
   if (modifiers.some((part) => !MODIFIERS.includes(part))) return null
-  if (!modifiers.some((part) => ['Mod', 'Ctrl', 'Meta'].includes(part))) return null
+  // Alt alone is allowed only with a digit, for tab switching; Alt+letter types characters on many layouts.
+  if (!modifiers.some((part) => ['Mod', 'Ctrl', 'Meta'].includes(part)) && !(modifiers.includes('Alt') && /^[0-9]$/.test(key))) return null
   if (modifiers.includes('Mod') && (modifiers.includes('Ctrl') || modifiers.includes('Meta'))) return null
   return [...MODIFIERS.filter((part) => modifiers.includes(part)), key]
 }
@@ -84,6 +101,8 @@ export function matchesShortcut(event: ShortcutKeyEvent, binding: string | null,
   const parts = parseShortcut(binding)
   if (!parts) return false
   const resolved = resolvedShortcut(binding, platform).split('+')
+  // Alt-only bindings are the top-row digits; numpad keys and Alt+code entry must not switch tabs.
+  if (!resolved.includes('Ctrl') && !resolved.includes('Meta') && !/^Digit[0-9]$/.test(event.code ?? '')) return false
   return event.ctrlKey === resolved.includes('Ctrl') && event.metaKey === resolved.includes('Meta')
     && event.altKey === resolved.includes('Alt') && event.shiftKey === resolved.includes('Shift')
     && eventKey(event) === resolved.at(-1)
@@ -107,9 +126,9 @@ export function shortcutAccelerator(binding: string): string | null {
 
 /** Store the platform's primary modifier portably, but keep Ctrl distinct on macOS. */
 export function captureShortcut(event: ShortcutKeyEvent, platform: string): string | null {
-  if (event.isComposing || event.keyCode === 229 || (!event.ctrlKey && !event.metaKey)) return null
+  if (event.isComposing || event.keyCode === 229) return null
   const key = eventKey(event)
-  if (!KEY_PATTERN.test(key)) return null
+  if (!KEY_PATTERN.test(key) || (!event.ctrlKey && !event.metaKey && !(event.altKey && /^[0-9]$/.test(key)))) return null
   const primary = platform === 'darwin' ? event.metaKey : event.ctrlKey
   const secondary = platform === 'darwin' ? event.ctrlKey : event.metaKey
   const parts = primary && !secondary ? ['Mod'] : [event.ctrlKey ? 'Ctrl' : '', event.metaKey ? 'Meta' : ''].filter(Boolean)

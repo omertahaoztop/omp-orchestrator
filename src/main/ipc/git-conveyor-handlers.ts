@@ -6,13 +6,14 @@ import type {
   GitConveyorCommitOptions,
   GitConveyorPullRequestOptions,
   GitConveyorStatus,
+  GitMergeToBaseResult,
 } from '../../shared/ipc-contracts'
 import {
   assertTrustedSender, isObject, isOptionalBoolean, isOptionalString, isOptionalStringArray, isString,
 } from './validation'
 import {
-  GitSwitchRefusal, commitAll, createLocalBranch, createPullRequest, getGitConveyorStatus, listLocalBranches, pushBranch,
-  readCommitDiff, switchLocalBranch,
+  GitSwitchRefusal, commitAll, createLocalBranch, createPullRequest, getGitConveyorStatus, listLocalBranches,
+  mergeBranchIntoBase, pushBranch, readCommitDiff, switchLocalBranch,
 } from '../git-conveyor'
 import { CommitMessageService } from '../commit-message-service'
 import { generateCommitMessage, sessionCommitMessageModel, type CommitMessageModel } from '../commit-message-generator'
@@ -25,6 +26,7 @@ import { t } from '../../shared/i18n'
 function activeCwd(ctx: IpcContext): string {
   const cwd = ctx.workspaceManager.getActivePanelRoot()
   if (!cwd) throw new Error(t('errors.workspace.noneActive'))
+  if (ctx.workspaceManager.getActiveWorkspace()?.host) throw new Error(t('errors.remote.unsupported'))
   return cwd
 }
 
@@ -143,5 +145,20 @@ export function registerGitConveyorHandlers(ctx: IpcContext): void {
       ...(typeof input.draft === 'boolean' ? { draft: input.draft } : {}),
     }
     return createPullRequest(activeCwd(ctx), options)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.GIT_CONVEYOR_MERGE_TO_BASE, async (event, workspaceId: unknown): Promise<GitMergeToBaseResult> => {
+    assertTrustedSender(event)
+    if (!isString(workspaceId)) throw new Error('workspaceId must be a string')
+    const workspace = ctx.workspaceManager.getWorkspaces().find((item) => item.id === workspaceId)
+    if (workspace?.kind !== 'worktree' || workspace.managed === false || !workspace.repoRoot) {
+      return { ok: false, error: t('errors.git.mergeManagedWorktreeOnly') }
+    }
+    try {
+      return { ok: true, ...await mergeBranchIntoBase(workspace.repoRoot, workspace.path) }
+    } catch (err) {
+      if (err instanceof GitSwitchRefusal) return { ok: false, error: err.message }
+      throw err
+    }
   })
 }

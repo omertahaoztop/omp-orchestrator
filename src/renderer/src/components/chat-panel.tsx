@@ -73,6 +73,7 @@ export function ChatPanel(): React.JSX.Element {
   const streamingToolCalls = useAppStore((state) => state.streamingToolCalls)
   const piStatus = useAppStore((state) => state.piStatus)
   const piStartupPhase = useAppStore((state) => state.piStartupPhase)
+  const piError = useAppStore((state) => state.piError)
   const engineLabel = useAppStore((state) => agentEngineLabel(state.piEngine) ?? 'Pi')
   const fileSearchOpen = useAppStore((state) => state.fileSearchOpen)
   const toggleFileSearch = useAppStore((state) => state.toggleFileSearch)
@@ -333,6 +334,9 @@ export function ChatPanel(): React.JSX.Element {
                               ? t('chat.emptyState.startFailed', { agent: engineLabel })
                               : t('chat.emptyState.chooseProject', { agent: engineLabel })}
                       </p>
+                      {piStatus === 'error' && piError && (
+                        <p className="mx-auto mt-2 max-w-xl whitespace-pre-wrap break-words text-xs text-error/80">{piError}</p>
+                      )}
                     </div>
                     <div className={clsx('w-full', messageColumn)}>
                       {piStatus === 'running' && (

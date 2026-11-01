@@ -12,8 +12,9 @@ import { canResumeRun } from '../utils/workflow-runs'
 import { NowContext, RelativeTime } from '../utils/relative-time'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
 import { PendingPromptCard } from './pending-prompt-card'
+import { SESSION_RUNTIME_STATE_KEYS, isSessionRunning, sessionRuntimeState } from '../session-runtime-state'
+import { clampQueueSelection, moveQueueSelection, quickApprovalAnswer } from '../approval-queue'
 import type { Routine, SessionDigest, SessionRuntimeInfo, WorkflowRunStatus, WorkflowRunSummary } from '../../../shared/ipc-contracts'
-import type { Translate } from '../../../shared/i18n'
 
 const WORKFLOW_STATUS_KEYS = {
   pending: 'missionControl.workflowStatus.pending',
@@ -47,6 +48,19 @@ export function MissionControl(): React.JSX.Element {
   const [cleanupOpen, setCleanupOpen] = useState(false)
   const [controlBusy, setControlBusy] = useState<string | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
+  // Selection follows the prompt id; the index is only the fallback slot once that prompt is gone.
+  const [inboxSelection, setInboxSelection] = useState<{ id: string | null; index: number }>({ id: null, index: 0 })
+  const selectedById = inboxSelection.id === null ? -1 : pendingPrompts.findIndex((item) => item.request.id === inboxSelection.id)
+  const selectedPrompt = selectedById >= 0 ? selectedById : clampQueueSelection(inboxSelection.index, pendingPrompts.length)
+  const selectInboxPrompt = (index: number): void =>
+    setInboxSelection({ id: pendingPrompts[index]?.request.id ?? null, index })
+  const selectedPromptId = pendingPrompts[selectedPrompt]?.request.id ?? null
+  useEffect(() => {
+    // Re-pin to whichever prompt the fallback slot landed on, and keep the slot current as earlier prompts go.
+    if (selectedPromptId !== inboxSelection.id || selectedPrompt !== inboxSelection.index) {
+      setInboxSelection({ id: selectedPromptId, index: selectedPrompt })
+    }
+  }, [selectedPromptId, selectedPrompt, inboxSelection.id, inboxSelection.index])
 
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
@@ -64,9 +78,9 @@ export function MissionControl(): React.JSX.Element {
       .sort((a, b) => Number(b.active) - Number(a.active)),
     [sessionRuntimes]
   )
-  const runningRuntimes = runtimes.filter(isRunning)
+  const runningRuntimes = runtimes.filter(isSessionRunning)
   const finishedRuntimes = runtimes
-    .filter((runtime) => !isRunning(runtime))
+    .filter((runtime) => !isSessionRunning(runtime))
     .sort((a, b) => (sessionDigests[b.runtimeId]?.finishedAt ?? 0) - (sessionDigests[a.runtimeId]?.finishedAt ?? 0))
   // Sessions with an open step come first, then by how much is left.
   const todoRuntimes = runtimes
@@ -126,6 +140,33 @@ export function MissionControl(): React.JSX.Element {
   const reviewRuntime = async (runtime: SessionRuntimeInfo): Promise<void> => {
     await openRuntime(runtime)
     if (useAppStore.getState().activeSessionRuntimeId === runtime.runtimeId) setCurrentView('diff')
+  }
+
+  const onInboxKeyDown = (event: React.KeyboardEvent<HTMLElement>): void => {
+    const target = event.target as HTMLElement
+    if (event.ctrlKey || event.metaKey || event.altKey || event.nativeEvent.isComposing) return
+    const { extensionUiRequest, confirmRequest } = useAppStore.getState()
+    if (extensionUiRequest || confirmRequest) return
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) return
+    const item = pendingPrompts[selectedPrompt]
+    if (!item) return
+    if (event.key === 'j' || event.key === 'k') {
+      selectInboxPrompt(moveQueueSelection(selectedPrompt, event.key === 'j' ? 1 : -1, pendingPrompts.length))
+    } else if (event.key === 'a' || event.key === 'd') {
+      if (event.repeat) return
+      const answer = quickApprovalAnswer(item.request, event.key === 'a')
+      if (!answer) return
+      // The answered card unmounts; keep focus in the inbox so the next key still lands here.
+      event.currentTarget.focus()
+      answerPendingPrompt(item.request, answer)
+    } else if (event.key === 'Enter') {
+      // A focused button inside the card handles Enter itself.
+      if (target.tagName === 'BUTTON') return
+      const runtime = item.runtimeId ? sessionRuntimes[item.runtimeId] : undefined
+      if (!runtime) return
+      void openRuntime(runtime)
+    } else return
+    event.preventDefault()
   }
 
   return (
@@ -199,26 +240,37 @@ export function MissionControl(): React.JSX.Element {
           </div>
         )}
 
-        <section className="mb-6">
+        <section
+          className="mb-6 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          tabIndex={pendingPrompts.length > 0 ? 0 : undefined}
+          onKeyDown={onInboxKeyDown}
+          aria-label={t('missionControl.inbox.title')}
+        >
           <SectionHeading title={t('missionControl.inbox.title')} count={pendingPrompts.length} />
           {pendingPrompts.length === 0 ? (
             <EmptyState>{t('missionControl.inbox.empty')}</EmptyState>
           ) : (
+            <>
+            <p className="mb-2 text-[11px] text-faint">{t('missionControl.inbox.keyHint')}</p>
             <div className="space-y-2">
-              {pendingPrompts.map((item) => {
+              {pendingPrompts.map((item, index) => {
                 const runtime = item.runtimeId ? sessionRuntimes[item.runtimeId] : undefined
                 return (
-                  <PendingPromptCard
-                    key={item.request.id}
-                    item={item}
-                    sessionTitle={sessionTitleFor(item.sessionPath, runtime?.sessionId ?? null)}
-                    projectName={projectNameFor(item.workspaceId)}
-                    onAnswer={(response) => answerPendingPrompt(item.request, response)}
-                    onOpen={runtime ? () => void openRuntime(runtime) : null}
-                  />
+                  <div key={item.request.id} onFocusCapture={() => selectInboxPrompt(index)} onMouseDown={() => selectInboxPrompt(index)}>
+                    <PendingPromptCard
+                      item={item}
+                      sessionTitle={sessionTitleFor(item.sessionPath, runtime?.sessionId ?? null)}
+                      projectName={projectNameFor(item.workspaceId)}
+                      onAnswer={(response) => answerPendingPrompt(item.request, response)}
+                      onOpen={runtime ? () => void openRuntime(runtime) : null}
+                      host={workspaces.find((workspace) => workspace.id === item.workspaceId)?.host}
+                      selected={index === selectedPrompt}
+                    />
+                  </div>
                 )
               })}
             </div>
+            </>
           )}
         </section>
 
@@ -370,7 +422,7 @@ function RuntimeCard({
   onToggleFocus: () => void
 }): React.JSX.Element {
   const { t } = useTranslation()
-  const finishedAt = isRunning(runtime) ? null : digest?.finishedAt ?? null
+  const finishedAt = isSessionRunning(runtime) ? null : digest?.finishedAt ?? null
   const unread = finishedAt !== null && !digest?.read
   return (
     <div className={clsx('rounded-lg border bg-surface/50 px-3 py-3', focused || unread ? 'border-accent/50' : 'border-border')}>
@@ -388,8 +440,8 @@ function RuntimeCard({
             <span className="truncate text-sm text-primary">{title}</span>
           </div>
           <div className="truncate text-[11px] text-faint">
-            {projectName} · {runtimeState(runtime, t)}
-            {isRunning(runtime) && digest?.startedAt && (
+            {projectName} · {t(SESSION_RUNTIME_STATE_KEYS[sessionRuntimeState(runtime)])}
+            {isSessionRunning(runtime) && digest?.startedAt && (
               <> · {t('missionControl.board.started')} <RelativeTime timestamp={digest.startedAt} /></>
             )}
             {finishedAt !== null && <> · {t('missionControl.board.ended')} <RelativeTime timestamp={finishedAt} /></>}
@@ -435,10 +487,6 @@ function RuntimeCard({
       )}
     </div>
   )
-}
-
-function isRunning(runtime: SessionRuntimeInfo): boolean {
-  return runtime.activity === 'working' || runtime.activity === 'needs-approval'
 }
 
 function WorkflowRow({
@@ -651,13 +699,4 @@ function SectionHeading({ title, count }: { title: string; count: number }): Rea
 
 function EmptyState({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <div className="rounded-lg border border-dashed border-border px-4 py-5 text-center text-xs text-faint">{children}</div>
-}
-
-function runtimeState(runtime: SessionRuntimeInfo, t: Translate): string {
-  if (runtime.activity === 'needs-approval') return t('missionControl.runtimeState.needsApproval')
-  if (runtime.activity === 'working' || runtime.status === 'starting') return t('missionControl.runtimeState.working')
-  if (runtime.activity === 'failed' || runtime.status === 'error') return t('missionControl.runtimeState.failed')
-  if (runtime.activity === 'completed') return t('missionControl.runtimeState.completed')
-  if (runtime.status === 'running') return t('missionControl.runtimeState.idle')
-  return t('missionControl.runtimeState.stopped')
 }

@@ -80,7 +80,7 @@ export function registerPiHandlers(ctx: IpcContext): void {
     }
 
     pi.stop()
-    return pi.start(startOptions)
+    return pi.start({ ...startOptions, host: activeWs.host })
   })
 
   ipcMain.handle(IPC_CHANNELS.PI_STATUS, async () => {

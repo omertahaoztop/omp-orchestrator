@@ -12,6 +12,7 @@ import type {
   AgentInstallationsResult,
   Workspace,
   WorkspaceTabOptions,
+  WorkspaceRemoveOptions,
   WorkspaceRemoveResult,
   InstalledPackage,
   InstalledSkill,
@@ -85,6 +86,7 @@ import type {
   RepoSet,
   RepoSetDraft,
   GitBranchSwitchResult,
+  GitMergeToBaseResult,
   GitConveyorStatus,
   GitCommitMessageRequest,
   GitCommitMessageSuggestion,
@@ -100,6 +102,7 @@ import type {
 } from '../shared/ipc-contracts'
 import type { ThemeFile } from '../shared/theme/theme-file'
 import type { SubagentListResult, SubagentTranscriptRef, SubagentTranscriptResult } from '../shared/subagent-task'
+import type { SessionUsageMap } from '../shared/session-usage'
 import { IPC_CHANNELS } from '../shared/ipc-contracts'
 
 // ─── Type Definitions for the Exposed API ────────────────────────────────────
@@ -213,9 +216,11 @@ interface PiDesktopAPI {
     list(): Promise<Workspace[]>
     create(name: string, path: string): Promise<Workspace>
     createTab(options?: WorkspaceTabOptions): Promise<Workspace>
-    remove(workspaceId: string): Promise<WorkspaceRemoveResult>
+    remove(workspaceId: string, options?: WorkspaceRemoveOptions): Promise<WorkspaceRemoveResult>
     rename(workspaceId: string, name: string): Promise<void>
     changePath(workspaceId: string, newPath: string): Promise<void>
+    /** Create a remote workspace, or repoint `workspaceId` at one; rejects when `ssh <host> test -d <path>` fails. */
+    saveRemote(host: string, path: string, workspaceId?: string): Promise<Workspace>
     pathExists(): Promise<boolean>
     setActive(workspaceId: string): Promise<Workspace>
     getActive(): Promise<Workspace | null>
@@ -225,6 +230,9 @@ interface PiDesktopAPI {
     getActivity(): Promise<WorkspaceActivityMap>
     getSessionDigests(): Promise<SessionDigestMap>
     markSessionDigestRead(runtimeId: string): Promise<void>
+    getSessionUsage(): Promise<SessionUsageMap>
+    /** Raise the session's budget past its current spend; resumes a turn the budget stopped. */
+    raiseSessionBudget(runtimeId: string): Promise<void>
     /** The session in focus mode (others' finished/failed notifications are held), or null. */
     getNotifyFocus(): Promise<string | null>
     setNotifyFocus(runtimeId: string | null): Promise<void>
@@ -338,6 +346,7 @@ interface PiDesktopAPI {
     commit(options: GitConveyorCommitOptions): Promise<GitConveyorStatus>
     push(): Promise<GitConveyorStatus>
     createPullRequest(options: GitConveyorPullRequestOptions): Promise<GitConveyorPullRequestResult>
+    mergeToBase(workspaceId: string): Promise<GitMergeToBaseResult>
   }
 
   // Notes (reusable prompts / commands)
@@ -468,6 +477,7 @@ interface PiDesktopAPI {
   onPendingPrompts(callback: (counts: PendingPromptCounts) => void): () => void
   onWorkspaceActivity(callback: (map: WorkspaceActivityMap) => void): () => void
   onSessionDigests(callback: (map: SessionDigestMap) => void): () => void
+  onSessionUsage(callback: (map: SessionUsageMap) => void): () => void
   onNotifyFocus(callback: (runtimeId: string | null) => void): () => void
   onArtifactShown(callback: (event: ArtifactShownEvent) => void): () => void
   onPlanReview(callback: (event: PlanReviewEvent) => void): () => void
@@ -572,9 +582,10 @@ const api: PiDesktopAPI = {
   workspace: {
     list: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_LIST),
     create: (name, path) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_CREATE, name, path),
-    remove: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_REMOVE, workspaceId),
+    remove: (workspaceId, options) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_REMOVE, workspaceId, options),
     rename: (workspaceId, name) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_RENAME, workspaceId, name),
     changePath: (workspaceId, newPath) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_CHANGE_PATH, workspaceId, newPath),
+    saveRemote: (host, path, workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_SAVE_REMOTE, host, path, workspaceId),
     pathExists: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_PATH_EXISTS),
     setActive: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_SET_ACTIVE, workspaceId),
     getActive: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_GET_ACTIVE),
@@ -584,6 +595,8 @@ const api: PiDesktopAPI = {
     getActivity: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ACTIVITY_GET),
     getSessionDigests: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGESTS_GET),
     markSessionDigestRead: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_DIGEST_MARK_READ, runtimeId),
+    getSessionUsage: () => ipcRenderer.invoke(IPC_CHANNELS.SESSION_USAGE_GET),
+    raiseSessionBudget: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_USAGE_RAISE_BUDGET, runtimeId),
     getNotifyFocus: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_GET),
     setNotifyFocus: (runtimeId) => ipcRenderer.invoke(IPC_CHANNELS.NOTIFY_FOCUS_SET, runtimeId),
     listArtifacts: () => ipcRenderer.invoke(IPC_CHANNELS.ARTIFACTS_LIST),
@@ -688,6 +701,7 @@ const api: PiDesktopAPI = {
     commit: (options) => ipcRenderer.invoke(IPC_CHANNELS.GIT_CONVEYOR_COMMIT, options),
     push: () => ipcRenderer.invoke(IPC_CHANNELS.GIT_CONVEYOR_PUSH),
     createPullRequest: (options) => ipcRenderer.invoke(IPC_CHANNELS.GIT_CONVEYOR_CREATE_PR, options),
+    mergeToBase: (workspaceId) => ipcRenderer.invoke(IPC_CHANNELS.GIT_CONVEYOR_MERGE_TO_BASE, workspaceId),
   },
 
   notes: {
@@ -812,6 +826,14 @@ const api: PiDesktopAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_WORKSPACE_ACTIVITY, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_WORKSPACE_ACTIVITY, handler)
+    }
+  },
+
+  onSessionUsage: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: SessionUsageMap) => callback(data)
+    ipcRenderer.on(IPC_CHANNELS.EVENT_SESSION_USAGE, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_SESSION_USAGE, handler)
     }
   },
 

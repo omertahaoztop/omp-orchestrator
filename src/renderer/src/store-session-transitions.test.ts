@@ -764,8 +764,8 @@ test('pending prompt counts land in state and sum over non-active workspaces', (
   assert.deepEqual(useAppStore.getState().pendingPromptCounts, { 'ws-2': 2, 'ws-9': 1 })
   assert.equal(countPromptsWaitingElsewhere({ 'ws-2': 2, 'ws-9': 1 }, 'ws-2'), 1)
   assert.equal(countPromptsWaitingElsewhere({ 'ws-2': 2, 'ws-9': 1 }, null), 3)
-  assert.equal(formatPromptsWaiting(1), '1 Pi prompt waiting')
-  assert.equal(formatPromptsWaiting(3), '3 Pi prompts waiting')
+  assert.equal(formatPromptsWaiting(1), '1 agent prompt waiting')
+  assert.equal(formatPromptsWaiting(3), '3 agent prompts waiting')
 })
 
 test('removing the workspace flushes prompts only when a new one is promoted', async () => {

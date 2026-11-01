@@ -1,6 +1,6 @@
 import { useAppStore } from '../store'
 import { activeShortcuts } from '../utils/app-shortcuts'
-import { formatShortcut } from '../../../shared/keyboard-shortcuts'
+import { formatShortcut, type ShortcutAction } from '../../../shared/keyboard-shortcuts'
 import { useTranslation } from 'react-i18next'
 import { clsx } from 'clsx'
 import { ClipboardCheck, FolderTree, GitCompare, ListChecks, Terminal, ShieldCheck } from 'lucide-react'
@@ -11,7 +11,6 @@ export function ChatToolRail(): React.JSX.Element {
   const reviewOpen = useAppStore((state) => state.reviewOpen)
   const terminalOpen = useAppStore((state) => state.terminalOpen)
   const sidePanel = useAppStore((state) => state.chatSidePanel)
-  const diffShortcut = useAppStore((state) => activeShortcuts(state).diff)
   const setSidePanel = useAppStore((state) => state.setChatSidePanel)
   const runningSubagents = useAppStore((state) => countRunningSubagentTasks(state.subagentTasks))
   const hasPlanReview = useAppStore((state) => state.planReview !== null && state.planReview.workspaceId === state.activeWorkspace?.id)
@@ -23,20 +22,21 @@ export function ChatToolRail(): React.JSX.Element {
         active={reviewOpen}
         onClick={() => useAppStore.getState().toggleReview()}
         title={t('chat.toolbar.reviewPanel')}
+        shortcutAction="review"
       />
       <RailButton
         icon={<FolderTree size={16} />}
         active={sidePanel === 'files'}
         onClick={() => void setSidePanel(sidePanel === 'files' ? null : 'files')}
         title={t('chat.toolbar.fileTree')}
+        shortcutAction="files"
       />
       <RailButton
         icon={<GitCompare size={16} />}
         active={sidePanel === 'diff'}
         onClick={() => void setSidePanel(sidePanel === 'diff' ? null : 'diff')}
-        title={diffShortcut
-          ? t('settings.shortcuts.actionWithShortcut', { action: t('chat.toolbar.diffViewer'), shortcut: formatShortcut(diffShortcut, window.piDesktop.system.platform) })
-          : t('chat.toolbar.diffViewer')}
+        title={t('chat.toolbar.diffViewer')}
+        shortcutAction="diff"
       />
       <RailButton
         icon={<ListChecks size={16} />}
@@ -59,6 +59,7 @@ export function ChatToolRail(): React.JSX.Element {
         active={terminalOpen}
         onClick={() => useAppStore.getState().toggleTerminal()}
         title={t('chat.toolbar.terminal')}
+        shortcutAction="terminal"
       />
     </nav>
   )
@@ -69,6 +70,7 @@ function RailButton({
   active,
   onClick,
   title,
+  shortcutAction,
   badge,
   badgeLabel,
 }: {
@@ -76,10 +78,16 @@ function RailButton({
   active: boolean
   onClick: () => void
   title: string
+  shortcutAction?: ShortcutAction
   badge?: number
   /** Spoken instead of `title` while the badge shows, so the count is not visual only. */
   badgeLabel?: string
 }): React.JSX.Element {
+  const { t } = useTranslation()
+  const shortcut = useAppStore((state) => shortcutAction ? activeShortcuts(state)[shortcutAction] : null)
+  const tooltip = shortcut
+    ? t('settings.shortcuts.actionWithShortcut', { action: title, shortcut: formatShortcut(shortcut, window.piDesktop.system.platform) })
+    : title
   const showBadge = badge !== undefined && badge > 0
   return (
     <button
@@ -93,7 +101,7 @@ function RailButton({
           ? 'bg-card text-primary before:absolute before:-right-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-full before:bg-accent'
           : 'text-dim hover:bg-highlight hover:text-secondary'
       )}
-      title={title}
+      title={tooltip}
     >
       {icon}
       {showBadge && (

@@ -123,7 +123,7 @@ async function realpathDeepest(p: string): Promise<string> {
  * Provides: file tree, file search, git status, file watching.
  */
 
-const IGNORED_DIRS = new Set([
+export const IGNORED_DIRS: ReadonlySet<string> = new Set([
   'node_modules', '.git', '.next', 'dist', 'build', 'out',
   '.cache', '__pycache__', '.venv', 'venv', '.tox',
   'target', 'coverage', '.nyc_output',
@@ -262,7 +262,7 @@ export function buildNewFileDiff(relativePath: string, content: string): string 
 export class FileService {
   private watcher: FSWatcher | null = null
   private stopGitHeadWatch: (() => void) | null = null
-  private workspacePath: string
+  protected workspacePath: string
   private readonly isHomeWorkspace: boolean
   private debounceTimer: ReturnType<typeof setTimeout> | null = null
   private pendingChange: FileChangeEvent | null = null
@@ -271,6 +271,16 @@ export class FileService {
   constructor(workspacePath: string, homePath: string = homedir()) {
     this.workspacePath = workspacePath
     this.isHomeWorkspace = resolve(workspacePath) === resolve(homePath)
+  }
+
+  /** Run git in the workspace; a remote workspace runs it over ssh instead. */
+  protected git(args: string[], options: { timeout: number; maxBuffer?: number }): Promise<{ stdout: string; stderr: string }> {
+    return execFileAsync('git', args, { cwd: this.workspacePath, ...options })
+  }
+
+  /** Read a workspace-relative file without the symlink guard (untracked-file diffs only). */
+  protected readWorkspaceFile(relativePath: string): Promise<string> {
+    return readFile(join(this.workspacePath, relativePath), 'utf-8')
   }
 
   /** True when an entry at `depth` below the workspace root must be skipped. */
@@ -356,8 +366,7 @@ export class FileService {
 
     try {
       // Without -z, Git quotes a name with a space or a non-ASCII letter.
-      const { stdout } = await execFileAsync('git', ['status', '--porcelain=v1', '-z', '--untracked-files=all'], {
-        cwd: this.workspacePath,
+      const { stdout } = await this.git(['status', '--porcelain=v1', '-z', '--untracked-files=all'], {
         timeout: 10_000,
         maxBuffer: GIT_OUTPUT_MAX_BUFFER_BYTES,
       })
@@ -395,10 +404,7 @@ export class FileService {
   // "outside a repo" — that would silently mask real failures.
   private async probeGitRepo(): Promise<'inside' | 'outside' | 'broken'> {
     try {
-      await execFileAsync('git', ['rev-parse', '--git-dir'], {
-        cwd: this.workspacePath,
-        timeout: 5_000,
-      })
+      await this.git(['rev-parse', '--git-dir'], { timeout: 5_000 })
       return 'inside'
     } catch (err) {
       return isBenignGitError(err) ? 'outside' : 'broken'
@@ -410,10 +416,7 @@ export class FileService {
    */
   async getGitBranch(): Promise<string | null> {
     try {
-      const { stdout } = await execFileAsync('git', ['branch', '--show-current'], {
-        cwd: this.workspacePath,
-        timeout: 5_000,
-      })
+      const { stdout } = await this.git(['branch', '--show-current'], { timeout: 5_000 })
       return stdout.trim() || null
     } catch {
       return null
@@ -429,8 +432,7 @@ export class FileService {
     try {
       // The stored content, not a textconv rendering: discard applies these patches in reverse.
       const args = [LITERAL_PATHSPECS, ...gitDiffArgs('--no-textconv', '--', filePath ?? '.')]
-      const { stdout } = await execFileAsync('git', args, {
-        cwd: this.workspacePath,
+      const { stdout } = await this.git(args, {
         timeout: 10_000,
         maxBuffer: GIT_OUTPUT_MAX_BUFFER_BYTES,
       })
@@ -498,10 +500,7 @@ export class FileService {
    */
   async getGitPrefix(): Promise<string> {
     try {
-      const { stdout } = await execFileAsync('git', ['rev-parse', '--show-prefix'], {
-        cwd: this.workspacePath,
-        timeout: 5_000,
-      })
+      const { stdout } = await this.git(['rev-parse', '--show-prefix'], { timeout: 5_000 })
       return stdout.trim()
     } catch (err) {
       if (isBenignGitError(err) || (await this.probeGitRepo()) === 'outside') return ''
@@ -520,7 +519,7 @@ export class FileService {
     const diffs: string[] = []
     for (const { path, relativePath } of untrackedPaths) {
       try {
-        const content = await readFile(join(this.workspacePath, relativePath), 'utf-8')
+        const content = await this.readWorkspaceFile(relativePath)
         diffs.push(buildNewFileDiff(path, content))
       } catch {
         // Skip unreadable or binary-like untracked files.
@@ -537,8 +536,7 @@ export class FileService {
   async getStagedDiff(filePath?: string): Promise<string> {
     try {
       const args = [LITERAL_PATHSPECS, ...gitDiffArgs('--cached', '--', filePath ?? '.')]
-      const { stdout } = await execFileAsync('git', args, {
-        cwd: this.workspacePath,
+      const { stdout } = await this.git(args, {
         timeout: 10_000,
         maxBuffer: GIT_OUTPUT_MAX_BUFFER_BYTES,
       })

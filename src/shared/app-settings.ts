@@ -7,6 +7,7 @@ import { isVoiceDevice } from './voice-device'
 import { isChatWidth } from './chat-width'
 import { normalizeKeyboardShortcuts } from './keyboard-shortcuts'
 import { normalizeSkillGroups } from './skill-groups'
+import { normalizeBudgetLimit } from './session-usage'
 
 const ENGINE_SETTINGS: readonly AgentEngine[] = ['auto', 'pi', 'omp']
 const VOICE_PRECISIONS: readonly VoicePrecision[] = ['int8', 'fp16']
@@ -43,5 +44,7 @@ export function normalizeStoredSettings(stored: Record<string, unknown>, languag
   }
   if (!isVoicePrecision(merged.voicePrecision)) merged.voicePrecision = DEFAULT_SETTINGS.voicePrecision
   if (!isVoiceDevice(merged.voiceDevice)) merged.voiceDevice = DEFAULT_SETTINGS.voiceDevice
+  merged.sessionBudgetUsd = normalizeBudgetLimit(merged.sessionBudgetUsd)
+  merged.sessionBudgetTokens = normalizeBudgetLimit(merged.sessionBudgetTokens)
   return merged
 }

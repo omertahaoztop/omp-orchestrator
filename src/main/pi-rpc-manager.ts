@@ -29,6 +29,7 @@ import { getGuiDataPath } from './app-data-paths'
 import { loadPiDotenv } from './pi-dotenv'
 import { childProcessEnv } from './windows-exe-search'
 import { t, tEnglish } from '../shared/i18n'
+import { buildSshAgentInvocation, isRemotePermissionModeAllowed } from './ssh-remote'
 
 /**
  * Manages a Pi RPC child process.
@@ -781,18 +782,27 @@ export class PiRpcManager extends EventEmitter {
     this.stderrBuffer = ''
 
     // Pre-flight: if the binary we resolved doesn't exist, fail fast with a
-    // clear message instead of letting spawn die with a cryptic ENOENT.
+    // clear message instead of letting spawn die with a cryptic ENOENT. A
+    // remote start needs neither a local binary nor a local folder.
     const { failureReason } = resolveStartCli(options)
-    if (failureReason) {
+    if (failureReason && !options.host) {
       return this.failPreflight(
         describePiStartFailure(failureReason, t),
         describePiStartFailure(failureReason, tEnglish)
       )
     }
-    if (options.cwd && (!existsSync(options.cwd) || !statSync(options.cwd).isDirectory())) {
+    if (!options.host && options.cwd && (!existsSync(options.cwd) || !statSync(options.cwd).isDirectory())) {
       return this.failPreflight(
         t('errors.pi.cwdMissing', { cwd: options.cwd }),
         tEnglish('errors.pi.cwdMissing', { cwd: options.cwd })
+      )
+    }
+    const mode = options.env?.PI_DESKTOP_PERMISSION_MODE
+    if (options.host && !isRemotePermissionModeAllowed(mode)) {
+      const key = `permissionMode.${mode}.label`
+      return this.failPreflight(
+        t('errors.remote.permissionModeUnsupported', { host: options.host, mode: mode ? t(key, { defaultValue: mode }) : '-' }),
+        tEnglish('errors.remote.permissionModeUnsupported', { host: options.host, mode: mode ? tEnglish(key, { defaultValue: mode }) : '-' })
       )
     }
 
@@ -875,17 +885,19 @@ export class PiRpcManager extends EventEmitter {
   ): Promise<'ready' | 'crashed' | 'timeout' | 'aborted'> {
     const args = buildPiArgs(options)
     const cli = resolveStartCli(options)
+    // The remote host runs its own install, so only the engine name carries over.
+    const engine = options.host ? options.engine ?? cli.kind ?? 'pi' : cli.kind ?? 'pi'
 
     const spawnOptions: SpawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
-      cwd: options.cwd,
+      cwd: options.host ? undefined : options.cwd,
       // Windows only: redirect TEMP so pi-subagents can mkdir without EPERM on
       // locked %LocalAppData%\Temp trees. POSIX keeps the system temp (OS cleanup).
       // OMP_ARTIFACTS_EXTERNAL_VIEWER: the app previews show_artifact files, so omp-artifacts needs no kitty.
       env: buildPiRunEnv(cli.needsShell, { ...process.env, ...buildPiChildEnv(), OMP_ARTIFACTS_EXTERNAL_VIEWER: '1', ...options.env }),
       // .cmd/.bat/.ps1 shims on Windows can't be invoked directly from
       // spawn — they need the cmd.exe interpreter via shell:true.
-      shell: cli.needsShell,
+      shell: cli.needsShell && !options.host,
       // On POSIX, make the child its own process-group leader so kill()'s
       // negative-PID group kill reaps Pi and all its descendants. Skipped on
       // Windows, where it would spawn a detached console window with shell:true.
@@ -897,7 +909,10 @@ export class PiRpcManager extends EventEmitter {
       // Escaping happens inside the try so a path or argument cmd.exe cannot
       // carry fails this attempt like any other spawn failure ('crashed'),
       // instead of throwing out of start().
-      const invocation = buildPiInvocation(cli, args)
+      // ssh -T has no pty: closing stdin in kill() ends the channel, so the remote agent sees EOF and exits.
+      const invocation = options.host
+        ? buildSshAgentInvocation(options.host, options.cwd ?? '~', [engine, ...args])
+        : buildPiInvocation(cli, args)
       console.log('[Pi] Spawning with cwd:', options.cwd)
       console.log('[Pi] Spawn argv     :', [invocation.file, ...invocation.args])
       proc = spawn(invocation.file, invocation.args, spawnOptions)
@@ -906,7 +921,7 @@ export class PiRpcManager extends EventEmitter {
       return Promise.resolve('crashed')
     }
     this.process = proc
-    this.runningEngine = cli.kind ?? 'pi'
+    this.runningEngine = engine
     this.startupSawOutput = false
     this.startupPhase = 'spawning'
     this.setupStreams()

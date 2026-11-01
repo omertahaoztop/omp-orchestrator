@@ -4,7 +4,7 @@ import { tmpdir } from 'os'
 import { isAbsolute, join, relative, resolve, sep } from 'path'
 import { spawn } from 'child_process'
 import {
-  GitCommandError, inspectGitRepository, isMissingRepositoryError, runGit, type GitRepositoryInfo,
+  GitCommandError, describeGitFailure, inspectGitRepository, isMissingRepositoryError, runGit, type GitRepositoryInfo,
 } from './git-worktree'
 import type {
   GitConveyorCommitOptions,
@@ -900,4 +900,53 @@ export async function readPullRequestBody(cwd: string, url: string): Promise<str
 /** Replace the description of a GitHub pull request through the GitHub CLI. */
 export async function updatePullRequestBody(cwd: string, url: string, body: string): Promise<void> {
   await runCommand('gh', ['pr', 'edit', url, '--body', body], cwd)
+}
+
+/** The local branch a worktree merges into: origin's default branch, else main or master. */
+async function localBaseBranch(repoRoot: string): Promise<string | null> {
+  const remote = await gitConfig(repoRoot, 'remote.origin.url') ? DEFAULT_PUSH_REMOTE : null
+  for (const branch of [await defaultBranchForRemote(repoRoot, remote), ...CONVENTIONAL_BASE_BRANCHES]) {
+    if (branch && await runGit(['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`], repoRoot).then(() => true, () => false)) return branch
+  }
+  return null
+}
+
+/**
+ * Merge the branch the worktree has checked out now into the base branch of
+ * the main checkout. Every blocker is a GitSwitchRefusal and nothing is
+ * forced: the main checkout must be clean and already on the base branch, and
+ * a conflicting merge is aborted so the main checkout ends exactly as it started.
+ */
+export async function mergeBranchIntoBase(
+  repoRoot: string, worktreePath: string,
+): Promise<{ branch: string; baseBranch: string; head: string }> {
+  const worktree = await inspectGitRepository(worktreePath)
+  // The tab's saved branch goes stale after a branch switch, so merge what is checked out.
+  const branch = worktree.branch
+  if (!branch) throw new GitSwitchRefusal(t('errors.git.detachedHeadMerge'))
+  if (countTrackedPorcelainFiles(worktree.status) > 0) throw new GitSwitchRefusal(t('errors.git.mergeCommitFirst'))
+  const baseBranch = await localBaseBranch(repoRoot)
+  if (!baseBranch) throw new GitSwitchRefusal(t('errors.git.mergeBaseMissing'))
+  const main = await inspectGitRepository(repoRoot)
+  if (main.branch !== baseBranch) {
+    throw new GitSwitchRefusal(t('errors.git.mergeMainNotOnBase', { base: baseBranch, current: main.branch ?? 'HEAD' }))
+  }
+  if (countTrackedPorcelainFiles(main.status) > 0) throw new GitSwitchRefusal(t('errors.git.mergeMainDirty', { base: baseBranch }))
+  const operation = await activeGitOperation(repoRoot)
+  if (operation) throw new GitSwitchRefusal(t('errors.git.mergeOperationInProgress', { operation }))
+  if (await runGit(['merge-base', '--is-ancestor', branch, 'HEAD'], repoRoot).then(() => true, () => false)) {
+    throw new GitSwitchRefusal(t('errors.git.mergeNothingToMerge', { branch, base: baseBranch }))
+  }
+  try {
+    await runGit(['merge', '--no-edit', branch], repoRoot)
+  } catch (error) {
+    if (await runGit(['rev-parse', '--verify', '--quiet', 'MERGE_HEAD'], repoRoot).then(() => true, () => false)) {
+      await runGit(['merge', '--abort'], repoRoot)
+      throw new GitSwitchRefusal(t('errors.git.mergeConflicts', { branch, base: baseBranch }))
+    }
+    // Git refused before starting (untracked files in the way): nothing to undo.
+    if (error instanceof GitCommandError) throw new GitSwitchRefusal(describeGitFailure(error.args, error.stdout, error.stderr))
+    throw error
+  }
+  return { branch, baseBranch, head: (await runGit(['rev-parse', 'HEAD'], repoRoot)).stdout.trim() }
 }

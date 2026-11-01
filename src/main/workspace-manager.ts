@@ -3,6 +3,8 @@ import { readFile, writeFile, mkdir, rename, copyFile, rm } from 'fs/promises'
 import { existsSync } from 'fs'
 import { PiRpcManager } from './pi-rpc-manager'
 import { FileService } from './file-service'
+import { RemoteFileService } from './remote-file-service'
+import { remoteFileExists, resolveRemoteDirectory } from './ssh-remote'
 import {
   WHOLE_WORKSPACE_CHANGE_PATH,
   promptRanWithoutAgent,
@@ -18,6 +20,7 @@ import {
   type PiStartOptions,
   type RepoSet,
   type Workspace,
+  type WorkspaceRemoveOptions,
   type WorkspaceRemoveResult,
   type WorkspaceTabOptions,
   type SessionRuntimeInfo,
@@ -632,12 +635,16 @@ export class WorkspaceManager {
     // starts a new session: OMP refuses a --session file that does not exist,
     // and --continue would open an earlier conversation in this empty tab.
     const ownPath = options.sessionPath || options.forkSessionPath ? null : entry.info.sessionPath
-    const ownFileWritten = ownPath !== null && existsSync(ownPath)
+    // A remote session file lives on the host, never on this disk.
+    const ownFileWritten = ownPath !== null && (workspace.host ? await remoteFileExists(workspace.host, ownPath) : existsSync(ownPath))
     const startOptions: PiStartOptions = {
       cwd: workspace.path,
       ...(ownPath !== null && ownFileWritten ? { sessionPath: ownPath } : {}),
       ...options,
       ...(ownPath !== null && !ownFileWritten ? { continueSession: false } : {}),
+      // Callers validate cwd on the local disk and may fall back to $HOME; a remote agent must run in the host path.
+      ...(workspace.host ? { cwd: workspace.path } : {}),
+      host: workspace.host,
     }
     // Start the engine that owns the session file rather than the configured
     // default: the stores are separate, so only the engine that wrote a session
@@ -896,10 +903,10 @@ export class WorkspaceManager {
     return this.fileServices.get(this.activeWorkspaceId) ?? null
   }
 
-  async createWorkspace(name: string, path: string): Promise<Workspace> {
+  async createWorkspace(name: string, path: string, host?: string): Promise<Workspace> {
     // Check for duplicate path (case-insensitive on Windows, so "Documents"
     // and "documents" resolve to the same workspace instead of duplicating).
-    const existing = this.workspaces.find((w) => pathsEqual(w.path, path))
+    const existing = this.workspaces.find((w) => pathsEqual(w.path, path) && w.host === host)
     if (existing) {
       return this.setActiveWorkspace(existing.id)
     }
@@ -912,6 +919,7 @@ export class WorkspaceManager {
       lastActiveAt: Date.now(),
       color: WORKSPACE_COLORS[this.nextColorIndex % WORKSPACE_COLORS.length],
       kind: 'folder',
+      ...(host ? { host } : {}),
     }
 
     this.nextColorIndex++
@@ -921,7 +929,7 @@ export class WorkspaceManager {
     const piManager = new PiRpcManager()
     this.piManagers.set(workspace.id, piManager)
     this.wirePiManager(piManager)
-    const fileService = new FileService(path)
+    const fileService = this.newFileService(workspace)
     this.fileServices.set(workspace.id, fileService)
 
     // Auto-set as active if it's the first workspace
@@ -958,7 +966,7 @@ export class WorkspaceManager {
     return workspace
   }
 
-  async removeWorkspace(workspaceId: string): Promise<WorkspaceRemoveResult> {
+  async removeWorkspace(workspaceId: string, options: WorkspaceRemoveOptions = {}): Promise<WorkspaceRemoveResult> {
     const index = this.workspaces.findIndex((w) => w.id === workspaceId)
     if (index === -1) throw new Error(t('errors.workspace.notFound', { workspaceId }))
     const workspace = this.workspaces[index]
@@ -987,7 +995,7 @@ export class WorkspaceManager {
       fileService.stopGitWatching()
       this.fileServices.delete(workspaceId)
     }
-    if (workspace.kind === 'worktree' && workspace.managed !== false && workspace.repoRoot) {
+    if (workspace.kind === 'worktree' && workspace.managed !== false && workspace.repoRoot && !options.keepWorktree) {
       try {
         await removeGitWorktree(workspace.repoRoot, workspace.path)
         worktreeRemoved = true
@@ -1045,7 +1053,7 @@ export class WorkspaceManager {
    * bound at spawn), and re-arms watching if it's the active one. The renderer
    * restarts the active workspace's Pi after this commits.
    */
-  async changeWorkspacePath(workspaceId: string, newPath: string): Promise<void> {
+  async changeWorkspacePath(workspaceId: string, newPath: string, host?: string): Promise<void> {
     const workspace = this.workspaces.find((w) => w.id === workspaceId)
     if (!workspace) throw new Error(t('errors.workspace.notFound', { workspaceId }))
     if (workspace.kind === 'worktree') {
@@ -1054,9 +1062,12 @@ export class WorkspaceManager {
     if (workspace.kind === 'repoSet') {
       throw new Error(t('errors.workspace.repoSetCannotChangeFolder'))
     }
-    if (!existsSync(newPath)) throw new Error(t('errors.workspace.folderMissing', { path: newPath }))
+    if (host) newPath = await resolveRemoteDirectory(host, newPath)
+    else if (!existsSync(newPath)) throw new Error(t('errors.workspace.folderMissing', { path: newPath }))
 
     workspace.path = newPath
+    if (host) workspace.host = host
+    else delete workspace.host
     // Pi's working directory is bound at spawn, so every session runtime must
     // stop before the project path changes. The renderer restarts the active
     // runtime after this commits; inactive sessions restart when selected.
@@ -1067,7 +1078,7 @@ export class WorkspaceManager {
     const oldFs = this.fileServices.get(workspaceId)
     oldFs?.stopWatching()
     oldFs?.stopGitWatching()
-    this.fileServices.set(workspaceId, new FileService(newPath))
+    this.fileServices.set(workspaceId, this.newFileService(workspace))
     await this.saveWorkspaces()
     // Re-arm the watcher if this is the active workspace.
     if (this.activeWorkspaceId === workspaceId) {
@@ -1080,7 +1091,12 @@ export class WorkspaceManager {
   /** Whether the active workspace's folder currently exists on disk. */
   activeWorkspacePathExists(): boolean {
     const ws = this.getActiveWorkspace()
-    return ws ? existsSync(ws.path) : false
+    // A remote folder was checked over ssh when saved; probing it here would block on the network.
+    return ws ? !!ws.host || existsSync(ws.path) : false
+  }
+
+  private newFileService(workspace: Pick<Workspace, 'path' | 'host'>): FileService {
+    return workspace.host ? new RemoteFileService(workspace.host, workspace.path) : new FileService(workspace.path)
   }
 
   private async adoptExistingWorktree(
@@ -1215,6 +1231,7 @@ export class WorkspaceManager {
       ? this.workspaces.find((w) => w.id === options.sourceWorkspaceId)
       : this.getActiveWorkspace()
     if (!source) throw new Error(t('errors.workspace.noSourceForNewTab'))
+    if (source.host) throw new Error(t('errors.remote.unsupported'))
     if (!existsSync(source.path)) throw new Error(t('errors.workspace.sourceFolderMissing', { path: source.path }))
 
     const git = await inspectGitRepository(source.path)
@@ -1477,7 +1494,7 @@ export class WorkspaceManager {
         this.wirePiManager(manager)
       }
       if (!this.fileServices.has(ws.id)) {
-        this.fileServices.set(ws.id, new FileService(ws.path))
+        this.fileServices.set(ws.id, this.newFileService(ws))
       }
     }
   }

@@ -373,6 +373,7 @@ export function AppConfirmDialog(): React.JSX.Element | null {
   const { t } = useTranslation()
   const request = useAppStore((state) => state.confirmRequest)
   const resolveConfirm = useAppStore((state) => state.resolveConfirm)
+  const [, redraw] = useState(0)
 
   useEffect(() => {
     if (!request) return
@@ -392,6 +393,21 @@ export function AppConfirmDialog(): React.JSX.Element | null {
     <DialogOverlay hidden={false} onBackdropClick={() => resolveConfirm(false)}>
       <DialogBox prompt={request.title ?? t('common.confirm')} onCancel={() => resolveConfirm(false)}>
         <PromptBody text={request.message} />
+        {request.option && (
+          <label className="mb-4 flex items-start gap-2 text-sm text-primary">
+            <input
+              type="checkbox"
+              checked={request.option.checked}
+              onChange={(e) => {
+                // The caller owns `option` and reads it back after the dialog resolves.
+                request.option!.checked = e.target.checked
+                redraw((n) => n + 1)
+              }}
+              className="mt-0.5 accent-accent"
+            />
+            <span>{request.option.label}</span>
+          </label>
+        )}
         <div className="flex justify-end gap-2">
           <button
             onClick={() => resolveConfirm(false)}

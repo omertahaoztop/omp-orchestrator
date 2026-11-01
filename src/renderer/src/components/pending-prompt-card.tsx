@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, Hourglass } from 'lucide-react'
+import { ArrowUpRight, Hourglass, Server } from 'lucide-react'
+import { clsx } from 'clsx'
 import type { PendingPromptItem } from '../../../shared/ipc-contracts'
 import { RelativeTime } from '../utils/relative-time'
+import { isToolApproval } from '../approval-queue'
 import { AskForm } from './ask-form'
 
 const SECONDARY_BUTTON = 'rounded-md border border-border-strong px-3 py-1.5 text-xs text-muted hover:bg-surface-hover transition-colors'
@@ -15,12 +17,17 @@ export function PendingPromptCard({
   projectName,
   onAnswer,
   onOpen,
+  host,
+  selected = false,
 }: {
   item: PendingPromptItem
   sessionTitle: string
   projectName: string
   onAnswer: (response: Record<string, unknown> | null) => void
   onOpen: (() => void) | null
+  /** SSH host of a remote workspace: approving on the wrong machine is the costliest mistake. */
+  host?: string
+  selected?: boolean
 }): React.JSX.Element {
   const { t } = useTranslation()
   const { request } = item
@@ -77,7 +84,19 @@ export function PendingPromptCard({
   })()
 
   return (
-    <article className="space-y-3 rounded-lg border border-warning/40 bg-warning-bg/10 px-4 py-3">
+    <article
+      aria-current={selected || undefined}
+      className={clsx(
+        'space-y-3 rounded-lg border bg-warning-bg/10 px-4 py-3',
+        selected ? 'border-accent ring-2 ring-accent/60' : 'border-warning/40',
+      )}
+    >
+      {host && (
+        <div className="flex items-center gap-2 rounded-md border border-warning bg-warning-bg px-3 py-2 text-base font-semibold text-warning">
+          <Server size={16} className="shrink-0" />
+          <span className="break-all">{t('missionControl.inbox.remoteHost', { host })}</span>
+        </div>
+      )}
       <header className="flex items-start gap-2">
         <Hourglass size={14} className="mt-0.5 shrink-0 text-warning" />
         <div className="min-w-0 flex-1">
@@ -96,9 +115,11 @@ export function PendingPromptCard({
           </button>
         )}
       </header>
-      {request.method !== 'ask' && request.title && (
+      {request.method !== 'ask' && request.title && (isToolApproval(request) ? (
+        <pre className="whitespace-pre-wrap break-all rounded-md border border-border bg-app px-3 py-2 font-mono text-xs text-primary">{request.title}</pre>
+      ) : (
         <p className="whitespace-pre-wrap break-words text-sm text-primary">{request.title}</p>
-      )}
+      ))}
       {body}
     </article>
   )

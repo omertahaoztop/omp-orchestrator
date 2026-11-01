@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import {
-  captureShortcut, duplicateShortcutOwner, formatShortcut, shortcutProblem, SHORTCUT_ACTIONS,
+  captureShortcut, duplicateShortcutOwner, formatShortcut, sessionNumberIndex, shortcutProblem, SHORTCUT_ACTIONS,
   type KeyboardShortcuts, type ShortcutAction, type ShortcutProblem,
 } from '../../../shared/keyboard-shortcuts'
 import { DEFAULT_SETTINGS } from '../../../shared/default-settings'
@@ -24,6 +24,9 @@ function actionLabel(action: ShortcutAction, t: TFunction): string {
     case 'nextProject': return t('settings.shortcuts.nextProject')
     case 'previousSession': return t('settings.shortcuts.previousSession')
     case 'nextSession': return t('settings.shortcuts.nextSession')
+    case 'session1': case 'session2': case 'session3': case 'session4': case 'session5':
+    case 'session6': case 'session7': case 'session8': case 'session9':
+      return t('settings.shortcuts.switchToSession', { number: sessionNumberIndex(action)! + 1 })
     case 'pushToTalk': return t('settings.shortcuts.pushToTalk')
     case 'globalDictation': return t('settings.shortcuts.globalDictation')
   }

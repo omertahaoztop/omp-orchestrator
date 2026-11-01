@@ -271,7 +271,7 @@ test('a pre-flight failure shows interface text and logs English', async () => {
     assert.ok(status.error?.includes(missingCwd))
     // The log feeds the diagnostics report, which stays English.
     const logged = appLog.getRecent().filter((entry) => entry.message === PREFLIGHT_LOG_MESSAGE).at(-1)
-    assert.equal(logged?.detail, `Pi working directory does not exist or is not a directory:\n  ${missingCwd}`)
+    assert.equal(logged?.detail, `Agent working directory does not exist or is not a directory:\n  ${missingCwd}`)
   } finally {
     await i18n.changeLanguage(SOURCE_LANGUAGE)
     setPiExecutableOverride(null, 'auto')

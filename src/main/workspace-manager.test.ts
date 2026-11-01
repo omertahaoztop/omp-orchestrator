@@ -269,6 +269,12 @@ test('creates and removes a clean managed worktree tab', async () => {
     assert.equal(result.worktreeRemoved, true)
     assert.equal(result.preservedWorktreePaths, undefined)
     assert.equal(existsSync(tab.path), false)
+    assert.equal(git(['branch', '--list', tab.branch!], repo).includes(tab.branch!), true, 'closing keeps the branch')
+
+    const kept = await mgr.createWorktreeWorkspace()
+    const keptResult = await mgr.removeWorkspace(kept.id, { keepWorktree: true })
+    assert.equal(keptResult.worktreeRemoved, undefined)
+    assert.equal(existsSync(kept.path), true, 'the user chose to keep the clean worktree')
 
     await writeFile(join(repo, 'source-dirty.txt'), 'stays in source\\n', 'utf-8')
     const dirtySourceTab = await mgr.createWorktreeWorkspace()

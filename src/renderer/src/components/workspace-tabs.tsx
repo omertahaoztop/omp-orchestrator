@@ -10,6 +10,7 @@ import { activeShortcuts } from '../utils/app-shortcuts'
 import { formatShortcut } from '../../../shared/keyboard-shortcuts'
 import { pathsEqual } from '../../../shared/path-compare'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
+import { RemoteHostBadge } from './remote-workspace-dialog'
 import type { Workspace } from '../../../shared/ipc-contracts'
 
 const PROJECT_TAB_DRAG_TYPE = 'application/x-pi-desktop-project-tab'
@@ -45,9 +46,21 @@ export function WorkspaceTabs(): React.JSX.Element {
   const newSessionShortcut = useAppStore((state) => activeShortcuts(state).newSession)
   const setCurrentView = useAppStore((state) => state.setCurrentView)
 
-  const toolView = ['settings', 'packages', 'notes', 'skills', 'diagnostics'] as const
+  const toolView = ['settings', 'packages', 'notes', 'skills', 'diagnostics', 'stats'] as const
   const toolsActive =
     toolView.includes(currentView as (typeof toolView)[number]) || globalWorkflowOpen
+  // Same labels as the sidebar's Tools entries; the workflow overlay covers whatever view is behind it.
+  const toolLabels: Record<(typeof toolView)[number], string> = {
+    settings: t('common.settings'),
+    skills: t('common.skills'),
+    packages: t('sidebar.tools.packages'),
+    notes: t('sidebar.tools.notes'),
+    diagnostics: t('sidebar.tools.diagnostics'),
+    stats: t('sidebar.tools.stats'),
+  }
+  const toolLabel = globalWorkflowOpen
+    ? t('sidebar.tools.allWorkflows')
+    : (toolLabels[currentView as (typeof toolView)[number]] ?? '')
 
   const tabs = useMemo(
     () => getProjectTabs(workspaces, projectTabOrder),
@@ -150,7 +163,7 @@ export function WorkspaceTabs(): React.JSX.Element {
                 })
               }}
               className="flex min-w-0 flex-1 items-center gap-2 text-left"
-              title={`${workspace.path}${workspace.branch ? `\n${workspace.branch}` : ''}`}
+              title={`${workspace.host ? `${workspace.host}:` : ''}${workspace.path}${workspace.branch ? `\n${workspace.branch}` : ''}`}
             >
               {isLinkedTask ? (
                 <Boxes size={13} className="shrink-0 text-special" />
@@ -160,6 +173,7 @@ export function WorkspaceTabs(): React.JSX.Element {
                 <FolderOpen size={13} className="shrink-0 text-dim" />
               )}
               <span className="min-w-0 flex-1 truncate font-medium">{tabLabel(workspace)}</span>
+              {workspace.host && <RemoteHostBadge host={workspace.host} />}
               {isWorking && <Loader2 size={12} className="shrink-0 animate-spin text-accent-fg" />}
               {needsApproval && <AlertCircle size={12} className="shrink-0 text-warning" />}
               {completed && <CheckCircle2 size={12} className="shrink-0 text-success" />}
@@ -198,10 +212,10 @@ export function WorkspaceTabs(): React.JSX.Element {
           <div
             aria-current="page"
             className="flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left text-xs"
-            title={t('workspaceTabs.tools')}
+            title={toolLabel}
           >
             <Settings size={13} className="shrink-0 text-accent-fg" />
-            <span className="truncate font-medium">{t('workspaceTabs.tools')}</span>
+            <span className="truncate font-medium">{toolLabel}</span>
           </div>
           <button
             type="button"
@@ -252,9 +266,9 @@ export function WorkspaceTabs(): React.JSX.Element {
         <Boxes size={15} />
       </button>
     </div>
-    {sessionTabs.length > 0 && (
-      <div className="flex h-8 shrink-0 items-center gap-1 overflow-x-auto border-b border-border/70 px-2">
-        <span className="mr-1 shrink-0 text-[10px] uppercase tracking-wide text-faint">{t('workspaceTabs.sessions')}</span>
+    {/* A lone session adds nothing to its project tab above; menu Close Session still closes it. */}
+    {sessionTabs.length > 1 && (
+      <div role="group" aria-label={t('workspaceTabs.sessions')} className="flex h-8 shrink-0 items-center gap-1 overflow-x-auto border-b border-border/70 px-2">
         {sessionTabs.map((runtime) => {
           const session = sessionList.find((item) => runtime.sessionPath && pathsEqual(item.path, runtime.sessionPath))
           const active = runtime.runtimeId === activeSessionRuntimeId || runtime.active

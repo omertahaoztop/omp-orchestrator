@@ -3,6 +3,8 @@ import { useAppStore, countPromptsWaitingElsewhere, formatPromptsWaiting } from 
 import { agentEngineLabel } from '../../../shared/agent-engine-label'
 import { clsx } from 'clsx'
 import { ProjectBranchSelector } from './project-branch-selector'
+import { formatUsageCompact, useProjectUsage, useSessionUsageMap } from '../session-usage'
+import { formatBudget, formatUsd, usageFromStats } from '../../../shared/session-usage'
 import {
   PanelLeft,
   Terminal,
@@ -41,6 +43,15 @@ export function StatusBar(): React.JSX.Element {
       (!activeWorkspace || run.workspaceId === activeWorkspace.id) &&
       (run.status === 'running' || run.status === 'paused')
   ).length
+  const activeRuntimeId = useAppStore((state) => state.activeSessionRuntimeId)
+  const usageEntries = useSessionUsageMap()
+  const usageEntry = activeRuntimeId ? usageEntries[activeRuntimeId] : undefined
+  // A runtime that has not reported yet still shows the stats Chat already loaded.
+  const sessionUsage = usageEntry?.usage ?? (sessionStats ? usageFromStats(sessionStats) : null)
+  const budgetLevel = usageEntry?.level ?? 'off'
+  const budgetLimit = usageEntry ? formatBudget(usageEntry.budget) : ''
+  const projectUsage = useProjectUsage(activeWorkspace?.id)
+  const projectSessionCount = Object.values(usageEntries).filter((entry) => entry.workspaceId === activeWorkspace?.id).length
 
   // Blocking prompts held for OTHER workspaces (any extension's select/
   // confirm/input/editor) — the active workspace's prompt is already on screen.
@@ -75,8 +86,8 @@ export function StatusBar(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Git branch of the active workspace */}
-        {activeWorkspace && <ProjectBranchSelector key={activeWorkspace.id} workspaceId={activeWorkspace.id} />}
+        {/* Git branch of the active workspace; branch switching is local-only */}
+        {activeWorkspace && !activeWorkspace.host && <ProjectBranchSelector key={activeWorkspace.id} workspaceId={activeWorkspace.id} />}
 
         {/* Streaming indicator */}
         {isStreaming && (
@@ -174,11 +185,35 @@ export function StatusBar(): React.JSX.Element {
           </button>
         )}
 
-        {/* Cost */}
-        {sessionStats?.cost !== undefined && sessionStats.cost > 0 && (
-          <div className="flex items-center gap-1 text-dim">
+        {sessionUsage && (sessionUsage.totalTokens > 0 || sessionUsage.costUsd > 0) && (
+          <div
+            className={clsx(
+              'flex items-center gap-1',
+              budgetLevel === 'over' ? 'text-error' : budgetLevel === 'warn' ? 'text-warning' : 'text-dim'
+            )}
+            title={[
+              t('statusBar.sessionUsage', {
+                tokens: sessionUsage.totalTokens.toLocaleString(i18n.language),
+                cost: formatUsd(sessionUsage.costUsd),
+              }),
+              budgetLimit ? t('statusBar.sessionBudget', { limit: budgetLimit }) : '',
+            ].filter(Boolean).join('\n')}
+          >
             <DollarSign size={10} />
-            <span>${sessionStats.cost.toFixed(2)}</span>
+            <span>{formatUsageCompact(sessionUsage)}</span>
+          </div>
+        )}
+
+        {projectUsage && projectSessionCount > 1 && (
+          <div
+            className="flex items-center gap-1 text-dim"
+            title={t('statusBar.projectUsage', {
+              sessions: projectSessionCount,
+              tokens: projectUsage.totalTokens.toLocaleString(i18n.language),
+              cost: formatUsd(projectUsage.costUsd),
+            })}
+          >
+            <span>{t('statusBar.projectUsageShort', { cost: formatUsd(projectUsage.costUsd) })}</span>
           </div>
         )}
 

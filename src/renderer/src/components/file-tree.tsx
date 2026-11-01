@@ -497,8 +497,10 @@ export function FilePreview(): React.JSX.Element | null {
   const isDirty = content !== null && savedContent !== null && content !== savedContent
 
   const displayPath = file?.relativePath ?? file?.name ?? ''
+  // Webview previews load file:// from this disk, which a remote workspace's files are not on.
+  const isRemote = useAppStore((state) => Boolean(state.activeWorkspace?.host))
   const isMarkdown = /\.(md|markdown|mdx)$/i.test(displayPath)
-  const isHtml = /\.(html?|htm)$/i.test(displayPath)
+  const isHtml = !isRemote && /\.(html?|htm)$/i.test(displayPath)
   // PDFs render in Chromium's built-in viewer via the <webview> — binary, so we
   // never read them as text or offer editing.
   const isPdf = /\.pdf$/i.test(displayPath)
@@ -701,7 +703,9 @@ export function FilePreview(): React.JSX.Element | null {
 
       {/* Content */}
       <div className="flex flex-1 flex-col overflow-auto">
-        {isPdf ? (
+        {isPdf && isRemote ? (
+          <p className="p-4 text-xs text-dim">{t('errors.remote.unsupported')}</p>
+        ) : isPdf ? (
           <Webview
             // Ask Chromium's PDF viewer to open with both the thumbnail/bookmark
             // sidebar and the top toolbar hidden, for a clean embedded preview.

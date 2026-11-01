@@ -24,6 +24,7 @@ import { shortcutProblem } from '../../../shared/keyboard-shortcuts'
 import { TypeSafeSettings } from './typesafe-settings'
 import { Settings, Save, RotateCcw, FolderOpen, RefreshCw, Check, ChevronDown } from 'lucide-react'
 import { DEFAULT_SETTINGS } from '../../../shared/default-settings'
+import { normalizeBudgetLimit } from '../../../shared/session-usage'
 import { activeShortcuts } from '../utils/app-shortcuts'
 import { applyUiFont } from '../utils/ui-font'
 import { isChatWidth } from '../../../shared/chat-width'
@@ -137,6 +138,9 @@ export function SettingsPanel(): React.JSX.Element {
   const [notifyOnlyQuestions, setNotifyOnlyQuestions] = useState(draft0.notifyOnlyQuestions ?? settings?.notifyOnlyQuestions ?? DEFAULT_SETTINGS.notifyOnlyQuestions)
   const [suggestNextSteps, setSuggestNextSteps] = useState(draft0.suggestNextSteps ?? settings?.suggestNextSteps ?? DEFAULT_SETTINGS.suggestNextSteps)
   const [summaryModel, setSummaryModel] = useState(draft0.summaryModel ?? settings?.summaryModel ?? DEFAULT_SETTINGS.summaryModel)
+  // Kept as typed text so "0." survives editing; parsed to a limit or null (off) on save.
+  const [sessionBudgetUsd, setSessionBudgetUsd] = useState(String((draft0.sessionBudgetUsd !== undefined ? draft0.sessionBudgetUsd : settings?.sessionBudgetUsd) ?? ''))
+  const [sessionBudgetTokens, setSessionBudgetTokens] = useState(String((draft0.sessionBudgetTokens !== undefined ? draft0.sessionBudgetTokens : settings?.sessionBudgetTokens) ?? ''))
   const [resumeLastSession, setResumeLastSession] = useState(draft0.resumeLastSession ?? settings?.resumeLastSession ?? DEFAULT_SETTINGS.resumeLastSession)
   const [openToHomeOnLaunch, setOpenToHomeOnLaunch] = useState(draft0.openToHomeOnLaunch ?? settings?.openToHomeOnLaunch ?? DEFAULT_SETTINGS.openToHomeOnLaunch)
   const [runOnStartup, setRunOnStartup] = useState(draft0.runOnStartup ?? settings?.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup)
@@ -326,6 +330,8 @@ export function SettingsPanel(): React.JSX.Element {
     setNotifyOnlyQuestions(draft.notifyOnlyQuestions ?? settings.notifyOnlyQuestions)
     setSuggestNextSteps(draft.suggestNextSteps ?? settings.suggestNextSteps)
     setSummaryModel(draft.summaryModel ?? settings.summaryModel)
+    setSessionBudgetUsd(String((draft.sessionBudgetUsd !== undefined ? draft.sessionBudgetUsd : settings.sessionBudgetUsd) ?? ''))
+    setSessionBudgetTokens(String((draft.sessionBudgetTokens !== undefined ? draft.sessionBudgetTokens : settings.sessionBudgetTokens) ?? ''))
     setResumeLastSession(draft.resumeLastSession ?? settings.resumeLastSession)
     setOpenToHomeOnLaunch(draft.openToHomeOnLaunch ?? settings.openToHomeOnLaunch)
     setRunOnStartup(draft.runOnStartup ?? settings.runOnStartup)
@@ -587,6 +593,8 @@ export function SettingsPanel(): React.JSX.Element {
       notifyOnlyQuestions,
       suggestNextSteps,
       summaryModel,
+      sessionBudgetUsd: normalizeBudgetLimit(Number(sessionBudgetUsd)),
+      sessionBudgetTokens: normalizeBudgetLimit(Math.round(Number(sessionBudgetTokens))),
       resumeLastSession,
       openToHomeOnLaunch,
       runOnStartup,
@@ -663,6 +671,8 @@ export function SettingsPanel(): React.JSX.Element {
       notifyOnlyQuestions: DEFAULT_SETTINGS.notifyOnlyQuestions,
       suggestNextSteps: DEFAULT_SETTINGS.suggestNextSteps,
       summaryModel: DEFAULT_SETTINGS.summaryModel,
+      sessionBudgetUsd: DEFAULT_SETTINGS.sessionBudgetUsd,
+      sessionBudgetTokens: DEFAULT_SETTINGS.sessionBudgetTokens,
       resumeLastSession: DEFAULT_SETTINGS.resumeLastSession,
       openToHomeOnLaunch: DEFAULT_SETTINGS.openToHomeOnLaunch,
       runOnStartup: DEFAULT_SETTINGS.runOnStartup,
@@ -690,6 +700,8 @@ export function SettingsPanel(): React.JSX.Element {
     setNotifyOnlyQuestions(defaults.notifyOnlyQuestions!)
     setSuggestNextSteps(defaults.suggestNextSteps!)
     setSummaryModel(defaults.summaryModel!)
+    setSessionBudgetUsd(String(defaults.sessionBudgetUsd ?? ''))
+    setSessionBudgetTokens(String(defaults.sessionBudgetTokens ?? ''))
     setResumeLastSession(defaults.resumeLastSession!)
     setOpenToHomeOnLaunch(defaults.openToHomeOnLaunch!)
     setRunOnStartup(defaults.runOnStartup!)
@@ -917,22 +929,20 @@ export function SettingsPanel(): React.JSX.Element {
           </SettingsRow>
 
           <SettingsRow label={t('settings.uiFontFamily.label')} description={t('settings.uiFontFamily.description')}>
-            <select
-              aria-label={t('settings.uiFontFamily.label')}
+            <SelectField
+              ariaLabel={t('settings.uiFontFamily.label')}
               value={uiFontFamily}
-              onChange={(e) => {
-                const family = e.target.value
+              onChange={(family) => {
                 setUiFontFamily(family)
                 applyUiFont(family)
                 setSettingsDraft({ uiFontFamily: family })
               }}
-              className="w-full rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm text-primary focus:border-focus focus:outline-none"
             >
               <option value="">{t('settings.uiFontFamily.placeholder')}</option>
               {Array.from(new Set(['Inter Variable', 'Arial', 'Helvetica Neue', 'Segoe UI', 'Verdana', 'Georgia', 'JetBrains Mono Variable', uiFontFamily])).filter(Boolean).map((family) => (
                 <option key={family} value={family}>{family}</option>
               ))}
-            </select>
+            </SelectField>
           </SettingsRow>
 
           <SettingsRow label={t('settings.uiFontSize.label')} description={t('settings.uiFontSize.description')}>
@@ -1124,6 +1134,31 @@ export function SettingsPanel(): React.JSX.Element {
               onChange={(e) => { setSummaryModel(e.target.value); setSettingsDraft({ summaryModel: e.target.value }) }}
               className="w-56 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm text-primary placeholder:text-faint focus:border-focus focus:outline-none"
             />
+          </SettingsRow>
+
+          <SettingsRow label={t('settings.sessionBudget.label')} description={t('settings.sessionBudget.description')}>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                step="0.5"
+                value={sessionBudgetUsd}
+                placeholder={t('settings.sessionBudget.usdPlaceholder')}
+                aria-label={t('settings.sessionBudget.usdPlaceholder')}
+                onChange={(e) => { setSessionBudgetUsd(e.target.value); setSettingsDraft({ sessionBudgetUsd: normalizeBudgetLimit(Number(e.target.value)) }) }}
+                className="w-28 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm text-primary placeholder:text-faint focus:border-focus focus:outline-none"
+              />
+              <input
+                type="number"
+                min={0}
+                step={10000}
+                value={sessionBudgetTokens}
+                placeholder={t('settings.sessionBudget.tokensPlaceholder')}
+                aria-label={t('settings.sessionBudget.tokensPlaceholder')}
+                onChange={(e) => { setSessionBudgetTokens(e.target.value); setSettingsDraft({ sessionBudgetTokens: normalizeBudgetLimit(Math.round(Number(e.target.value))) }) }}
+                className="w-32 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm text-primary placeholder:text-faint focus:border-focus focus:outline-none"
+              />
+            </div>
           </SettingsRow>
 
           <SettingsRow
@@ -1396,16 +1431,19 @@ function SettingsRow({
 function SelectField({
   value,
   onChange,
+  ariaLabel,
   children,
 }: {
   value: string
   onChange: (value: string) => void
+  ariaLabel?: string
   children: React.ReactNode
 }): React.JSX.Element {
   return (
     <div className="relative">
       <select
         value={value}
+        aria-label={ariaLabel}
         onChange={(e) => onChange(e.target.value)}
         className="w-full appearance-none rounded-md border border-border-strong bg-surface py-1.5 pl-3 pr-9 text-sm text-primary hover:border-border-strong-hover focus:border-focus focus:outline-none"
       >

@@ -25,6 +25,12 @@
       "downloadButton": "Скачать"
     }
   },
+  "budget": {
+    "continue": "",
+    "hitMessage": "",
+    "hitTitle": "",
+    "stop": ""
+  },
   "chat": {
     "activity": {
       "stalled": "Модель не отвечает уже {{silent}}. Возможна задержка у провайдера.",
@@ -400,12 +406,21 @@
       "branchPushed": "Ветка отправлена.",
       "committed": "Создан коммит {{sha}}.",
       "committedAndPushed": "Создан коммит {{sha}}, ветка отправлена.",
+      "merged": "",
       "openLinkTitle": "Открыть в браузере",
       "prCreated": "Пул-реквест создан.",
       "pushedCommits_one": "Отправлен {{count}} коммит.",
       "pushedCommits_few": "Отправлено {{count}} коммита.",
       "pushedCommits_many": "Отправлено {{count}} коммитов.",
       "pushedCommits_other": "Отправлено {{count}} коммита."
+    },
+    "merge": {
+      "buttonLabel": "",
+      "buttonTitle": "",
+      "commitFirstTitle": "",
+      "confirmLabel": "",
+      "confirmMessage": "",
+      "confirmTitle": ""
     },
     "openPrButtonLabel": "Открыть PR #{{number}}",
     "openPrButtonTitle": "Открыть пул-реквест #{{number}} этой ветки на GitHub",
@@ -652,9 +667,18 @@
       "commitSelectionEmpty": "Не выбраны файлы для коммита",
       "commitSelectionOutsideWorkspace": "Файлы для коммита должны находиться в активном проекте",
       "detachedHeadCommit": "Нельзя создать коммит при отсоединённом HEAD",
+      "detachedHeadMerge": "",
       "detachedHeadPush": "Нельзя отправить изменения при отсоединённом HEAD",
       "ignoredFilesBlockSwitch": "Переход на {{branch}} перезапишет или удалит эти локальные файлы, которые Git не показывает как изменения. Переместите их и повторите переход:\n{{files}}",
       "localBranchRequired": "Выберите существующую локальную ветку",
+      "mergeBaseMissing": "",
+      "mergeCommitFirst": "",
+      "mergeConflicts": "",
+      "mergeMainDirty": "",
+      "mergeMainNotOnBase": "",
+      "mergeManagedWorktreeOnly": "",
+      "mergeNothingToMerge": "",
+      "mergeOperationInProgress": "",
       "namedBranchRequired": "Для пул-реквеста нужна именованная ветка",
       "newFileNotCommittable": "Нельзя включить {{path}} в коммит: файл не является новым в выбранных изменениях или игнорируется Git",
       "noTrackedChanges": "В проекте нет отслеживаемых изменений для коммита. Сначала добавьте новые файлы в индекс, чтобы включить их.",
@@ -712,6 +736,15 @@
       "startupTimeoutBusyWithStderr": "{{message}}\n\nВывод stderr Pi при запуске:\n{{detail}}",
       "startupTimeoutSilentNoOutput": "Pi ничего не вывел за {{seconds}} с.\n\nВывод не получен. Найдите точную команду запуска в журнале приложения и попробуйте выполнить `pi --mode rpc` в терминале.",
       "startupTimeoutSilentWithStderr": "Pi ничего не вывел за {{seconds}} с.\n\nВывод stderr Pi при запуске:\n{{detail}}"
+    },
+    "remote": {
+      "connectFailed": "",
+      "folderMissing": "",
+      "invalidHost": "",
+      "permissionModeUnsupported": "",
+      "sshMissing": "",
+      "timeout": "",
+      "unsupported": ""
     },
     "routines": {
       "badCron": "Неверное расписание \"{{cron}}\". Укажите пять полей: минута час день месяц день недели.",
@@ -813,15 +846,15 @@
   "home": {
     "actions": {
       "linkedTask": {
-        "description": "Одна задача в нескольких репозиториях",
         "title": "Связанная задача"
       },
+      "new": "",
+      "newMenu": "",
       "newSession": {
         "inWorkspace": "В {{project}}",
         "pickFolderFirst": "Сначала выберите папку"
       },
       "newTask": {
-        "description": "Начать работу в новой сессии {{agent}}",
         "title": "Новая задача"
       },
       "openFolder": {
@@ -829,12 +862,21 @@
         "title": "Открыть папку"
       }
     },
+    "activeSessions": {
+      "empty": "",
+      "hostTitle": "",
+      "title": "",
+      "usageTitle": ""
+    },
+    "attention": {
+      "empty": "",
+      "title": ""
+    },
     "changedFiles": {
       "moreOpenDiff_one": "Ещё +{{count}} — открыть изменения",
       "moreOpenDiff_few": "Ещё +{{count}} — открыть изменения",
       "moreOpenDiff_many": "Ещё +{{count}} — открыть изменения",
-      "moreOpenDiff_other": "Ещё +{{count}} — открыть изменения",
-      "noWorkspace": "Проект не выбран."
+      "moreOpenDiff_other": "Ещё +{{count}} — открыть изменения"
     },
     "errorBanner": {
       "checkInstalled": "Проверьте, что {{agent}} установлен и путь к нему указан верно.",
@@ -939,6 +981,8 @@
     "inbox": {
       "deny": "",
       "empty": "",
+      "keyHint": "",
+      "remoteHost": "",
       "title": "",
       "waitingSince": ""
     },
@@ -980,7 +1024,6 @@
       "failed": "ошибка",
       "idle": "бездействует",
       "needsApproval": "нужно одобрение",
-      "stopped": "остановлено",
       "working": "в работе"
     },
     "startingSession": "Запуск сессии",
@@ -1065,6 +1108,8 @@
     "viewNoteTitle": "Просмотреть заметку"
   },
   "notifications": {
+    "budgetHit": "",
+    "budgetTitle": "",
     "completed": "Pi завершил работу.",
     "failed": "Pi остановился с ошибкой.",
     "focusSummary": "",
@@ -1181,6 +1226,20 @@
       "target": "Цель: {{path}}",
       "title": "Разрешить {{tool}}?"
     }
+  },
+  "remoteWorkspace": {
+    "badgeTitle": "",
+    "dialog": {
+      "addTitle": "",
+      "checking": "",
+      "connect": "",
+      "editTitle": "",
+      "hostLabel": "",
+      "hostPlaceholder": "",
+      "intro": "",
+      "pathLabel": ""
+    },
+    "gitActionsUnavailable": ""
   },
   "repoSets": {
     "bar": {
@@ -1520,6 +1579,12 @@
       "typesafe": "TypeSafe Jev",
       "voiceDictation": "Голосовая диктовка"
     },
+    "sessionBudget": {
+      "description": "",
+      "label": "",
+      "tokensPlaceholder": "",
+      "usdPlaceholder": ""
+    },
     "shortcuts": {
       "actionWithShortcut": "{{action}} ({{shortcut}})",
       "commandPalette": "Палитра команд",
@@ -1543,7 +1608,8 @@
       "pushToTalk": "Диктовка: удерживайте, чтобы говорить",
       "reserved": "Это сочетание занято действием системного меню или редактора.",
       "reset": "Сбросить сочетания",
-      "sidebar": "Боковая панель"
+      "sidebar": "Боковая панель",
+      "switchToSession": ""
     },
     "showThinking": {
       "description": "Показывать блоки размышления модели в ответах",
@@ -1674,12 +1740,13 @@
       "workspaceSection": "Проект"
     },
     "newSessionButton": {
+      "inWorktreeLabel": "",
+      "inWorktreeTitle": "",
       "label": "Новая сессия",
       "openProjectToBegin": "Откройте проект для начала",
-      "shortcutKbd": "Ctrl N",
       "startsIn": "Запускается в {{project}}",
-      "titleNoProject": "Сначала откройте проект",
-      "titleWithShortcut": "Начать новую сессию в этом проекте (Ctrl/Cmd+N)"
+      "title": "",
+      "titleNoProject": "Сначала откройте проект"
     },
     "openProjectFolder": {
       "ariaLabel": "Открыть папку проекта",
@@ -1708,17 +1775,20 @@
       "diagnostics": "Диагностика",
       "notes": "Заметки",
       "packages": "Пакеты",
-      "sectionLabel": "Инструменты"
+      "sectionLabel": "Инструменты",
+      "stats": ""
     },
     "workflowRunsForSession": "Запуски процессов этой сессии",
     "workspaceMenu": {
       "changeFolder": "Сменить папку…",
+      "editRemote": "",
       "rename": "Переименовать"
     },
     "workspaceSwitcher": {
       "namePlaceholder": "Название проекта",
       "noWorkspace": "Нет проекта",
       "openProjectEllipsis": "Открыть проект…",
+      "openRemoteEllipsis": "",
       "triggerTitle": "Щелчок — переключить · двойной — переименовать · правой кнопкой — параметры"
     }
   },
@@ -1752,6 +1822,7 @@
     "selectPrompt": "Выберите навык для просмотра SKILL.md"
   },
   "stats": {
+    "empty": "",
     "heatmap": {
       "dayTooltip_one": "{{date}} — сообщений: {{count}}",
       "dayTooltip_few": "{{date}} — сообщений: {{count}}",
@@ -1783,10 +1854,12 @@
       "thirtyDays": "30 дн.",
       "threeMonths": "3 мес."
     },
+    "subtitle": "",
     "tabs": {
       "models": "модели",
       "overview": "обзор"
     },
+    "title": "",
     "tokenChart": {
       "barTooltip": "{{label}} — токенов: {{tokens}}",
       "empty": "За этот период токены не использовались."
@@ -1873,6 +1946,10 @@
     "piRunning": "{{agent}} работает (PID: {{pid}})",
     "piStarting": "{{agent}} запускается",
     "piStopped": "{{agent}} остановлен",
+    "projectUsage": "",
+    "projectUsageShort": "",
+    "sessionBudget": "",
+    "sessionUsage": "",
     "showTerminal": "Показать терминал",
     "steerQueued_one": "Указаний в очереди: {{count}}",
     "steerQueued_few": "Указаний в очереди: {{count}}",
@@ -1905,6 +1982,7 @@
       "keepWorkingLabel": "Продолжить работу",
       "newMessage": "Pi ещё отвечает в этой сессии. Новая сессия остановит его: записанная часть ответа сохранится, остальная часть, включая выполняемые вызовы инструментов, будет отброшена.",
       "okLabel": "OK",
+      "removeCleanWorktreeOption": "",
       "removeWorkspaceMessage": "Убрать «{{name}}» с боковой панели? Процесс Pi будет остановлен; файлы на диске сохранятся.",
       "removeWorkspaceTitle": "Убрать проект",
       "startAnywayLabel": "Всё равно запустить",
@@ -2367,7 +2445,6 @@
     "newSessionAriaLabel": "Новая сессия в этом проекте",
     "newSessionFallback": "Новая сессия",
     "removeWorkspaceAriaLabel": "Убрать {{name}}",
-    "sessions": "Сессии",
-    "tools": "Инструменты"
+    "sessions": "Сессии"
   }
 }

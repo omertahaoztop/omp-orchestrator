@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS } from '../../../shared/default-settings'
 import {
-  matchesShortcut, releasesShortcut, SHORTCUT_ACTIONS, shortcutProblem, type KeyboardShortcuts, type ShortcutAction,
+  matchesShortcut, releasesShortcut, sessionNumberIndex, SHORTCUT_ACTIONS, shortcutProblem, type KeyboardShortcuts, type ShortcutAction,
 } from '../../../shared/keyboard-shortcuts'
 import type { AppSettings } from '../../../shared/ipc-contracts'
 import { useAppStore } from '../store'
@@ -18,6 +18,7 @@ const SHORTCUT_RECORDER_SELECTOR = '[data-shortcut-recorder]'
 // Root elements of the CodeMirror code editor and the xterm terminal.
 const CODE_EDITOR_SELECTOR = '.cm-editor'
 const TERMINAL_SELECTOR = '.xterm'
+const MAC_OPTION_TEXT_SELECTOR = 'input, textarea, [contenteditable]:not([contenteditable="false"]), .cm-editor'
 
 // The push-to-talk binding while its key is held down, so the matching key-up ends it.
 let heldPushToTalk: string | null = null
@@ -93,6 +94,15 @@ export async function runAppShortcut(action: CommandShortcutAction): Promise<voi
       await state.switchSession(tabs[index].sessionPath!, state.activeWorkspace?.path)
       return
     }
+    case 'session1': case 'session2': case 'session3': case 'session4': case 'session5':
+    case 'session6': case 'session7': case 'session8': case 'session9': {
+      const tab = sessionTabs(state.sessionRuntimes, state.activeWorkspace?.id)[sessionNumberIndex(action)!]
+      if (!tab) return
+      state.setWorkflowPanelOpen(false)
+      state.setCurrentView('chat')
+      if (tab.runtimeId !== state.activeSessionRuntimeId) await state.switchSession(tab.sessionPath!, state.activeWorkspace?.path)
+      return
+    }
     case 'settings':
       state.setCurrentView('settings')
       return
@@ -114,22 +124,22 @@ function targetIsWithin(event: KeyboardEvent, selector: string): boolean {
   return event.target instanceof Element && event.target.closest(selector) !== null
 }
 
-/** Ctrl with no other modifier: the keys that xterm can send to the shell as control characters. */
-function isPlainCtrlChord(event: KeyboardEvent): boolean {
-  return event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey
+/** Ctrl or Alt alone: keys xterm can send to the shell as control characters or Meta-prefixed (tmux Alt+1). */
+function isTerminalChord(event: KeyboardEvent): boolean {
+  return event.ctrlKey !== event.altKey && !event.metaKey && !event.shiftKey
 }
 
 /**
  * The listener that runs the shortcut `event` matches. In the code editor, the bubble listener
  * for every key, so the editor's own commands (indent, find next, fold) keep their keys. In the
- * terminal, the bubble listener for plain Ctrl chords: xterm sends Ctrl+K, Ctrl+B (the tmux
+ * terminal, the bubble listener for plain Ctrl or Alt chords: xterm sends Ctrl+K, Ctrl+B (the tmux
  * prefix) or Ctrl+[ (Escape) to the shell and stops the event, and lets a chord it has no
  * character for (Ctrl+Comma) bubble on. The terminal toggle never waits, so it closes the
  * terminal from inside it. All other keys, the capture listener.
  */
 function shortcutPhase(event: KeyboardEvent, action: ShortcutAction): ShortcutListenerPhase {
   if (targetIsWithin(event, CODE_EDITOR_SELECTOR)) return 'bubble'
-  const terminalKey = action !== 'terminal' && isPlainCtrlChord(event) && targetIsWithin(event, TERMINAL_SELECTOR)
+  const terminalKey = action !== 'terminal' && isTerminalChord(event) && targetIsWithin(event, TERMINAL_SELECTOR)
   return terminalKey ? 'bubble' : 'capture'
 }
 
@@ -145,6 +155,8 @@ function dispatchAppShortcut(event: KeyboardEvent, phase: ShortcutListenerPhase)
   // The main process owns the system-wide dictation key.
   if (!action || action === 'globalDictation') return
   if (shortcutPhase(event, action) !== phase) return
+  // On macOS Option+digit types [ ] | { } in text; leave it to the field.
+  if (platform === 'darwin' && event.altKey && !event.ctrlKey && !event.metaKey && targetIsWithin(event, MAC_OPTION_TEXT_SELECTOR)) return
   event.preventDefault()
   event.stopPropagation()
   if (event.repeat) return

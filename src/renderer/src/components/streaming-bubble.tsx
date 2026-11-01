@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MarkdownRenderer } from './markdown-renderer'
+import { ThinkingBlock } from './thinking-block'
 import { toolLabel, toolCallLabel, toolCallStatusLabel } from '../message-grouping'
 import { splitClaudeCliMarkers } from '../claude-cli-markers'
 import { mayBeNextStepsCall } from '../next-steps'
 import { toolCallIconFor } from './tool-call-icon'
 import { useAppStore } from '../store'
 import { DEFAULT_SETTINGS } from '../../../shared/default-settings'
-import { Brain, Bot, Loader2 } from 'lucide-react'
+import { Bot, Loader2 } from 'lucide-react'
 import { clsx } from 'clsx'
 
 interface StreamingBubbleProps {
@@ -43,18 +44,7 @@ export function StreamingBubble({ content: rawContent, thinking, toolCalls }: St
   const thinkingEnabled = useAppStore(
     (state) => state.settingsDraft.showThinking ?? state.settings?.showThinking ?? DEFAULT_SETTINGS.showThinking
   )
-  const thinkingScrollRef = useRef<HTMLDivElement>(null)
-
-  // Follow the thinking tail only when the user is already at/near the bottom,
-  // so scrolling up mid-stream to re-read is not yanked back down.
-  useEffect(() => {
-    const el = thinkingScrollRef.current
-    if (!el) return
-    const distanceFromBottom = el.scrollHeight - el.clientHeight - el.scrollTop
-    if (distanceFromBottom <= 48) {
-      el.scrollTop = el.scrollHeight
-    }
-  }, [thinking])
+  const [thinkingOpen, setThinkingOpen] = useState(false)
 
   return (
     <div className="mb-4">
@@ -65,21 +55,7 @@ export function StreamingBubble({ content: rawContent, thinking, toolCalls }: St
 
         <div className="min-w-0 flex-1">
           {thinking && thinkingEnabled && (
-            <div className="thinking-hover mb-2 min-w-0">
-              <div className="flex h-7 items-center gap-1.5 text-sm text-dim">
-                <Brain size={12} className="shrink-0" />
-                <Loader2 size={12} className="shrink-0 animate-spin text-special" />
-                <span>{t('common.thinking')}</span>
-              </div>
-              <div
-                ref={thinkingScrollRef}
-                className="max-h-36 min-w-0 overflow-x-hidden overflow-y-auto"
-              >
-                <div className="markdown-body min-w-0 font-sans italic text-sm text-muted break-words [overflow-wrap:anywhere]">
-                  <MarkdownRenderer content={thinking} />
-                </div>
-              </div>
-            </div>
+            <ThinkingBlock text={thinking} open={thinkingOpen} onToggle={() => setThinkingOpen(!thinkingOpen)} streaming className="mb-2" />
           )}
 
           {visibleToolCalls.length > 0 && (

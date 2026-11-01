@@ -170,6 +170,8 @@ export interface ConfirmOptions {
   cancelLabel?: string
   // Style the confirm button as destructive (red).
   danger?: boolean
+  /** A checkbox shown above the buttons; the caller reads `checked` after the dialog resolves. */
+  option?: { label: string; checked: boolean }
 }
 
 export interface ConfirmRequest extends ConfirmOptions {
@@ -221,7 +223,7 @@ export function countPromptsWaitingElsewhere(
   return total
 }
 
-/** Badge/status label for held prompts, e.g. "2 Pi prompts waiting". */
+/** Badge/status label for held prompts, e.g. "2 agent prompts waiting". */
 export function formatPromptsWaiting(count: number): string {
   return t('store.promptsWaiting', { count })
 }
@@ -329,7 +331,7 @@ interface AppState {
   pendingFollowUp: string[]
 
   // UI
-  currentView: 'home' | 'chat' | 'mission-control' | 'settings' | 'sessions' | 'timeline' | 'packages' | 'diff' | 'notes' | 'skills' | 'diagnostics'
+  currentView: 'home' | 'chat' | 'mission-control' | 'settings' | 'sessions' | 'timeline' | 'packages' | 'diff' | 'notes' | 'skills' | 'diagnostics' | 'stats'
   // Scope for the Sessions view: 'current' shows only the active workspace's
   // sessions, 'all' keeps every project's history visible. Entry points set it
   // (sidebar Sessions = current, View all / command palette = all); the panel's
@@ -666,6 +668,8 @@ interface AppActions {
   removeWorkspace: (workspaceId: string) => Promise<void>
   renameWorkspace: (workspaceId: string, name: string) => Promise<void>
   changeWorkspaceFolder: (workspaceId: string, newPath: string) => Promise<void>
+  /** Add (or, with `workspaceId`, repoint) an SSH workspace and switch to it. Throws the ssh check's error. */
+  saveRemoteWorkspace: (host: string, path: string, workspaceId?: string) => Promise<boolean>
 
   // Timeline
   addTimelineEvent: (event: TimelineEvent) => void
@@ -2045,7 +2049,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           }
           const messages = loaded.map((entry) => {
             const existing = previous.get(key(entry))?.shift()
-            return existing ? { ...entry, id: existing.id, initiallyShowThinking: existing.initiallyShowThinking } : entry
+            return existing ? { ...entry, id: existing.id } : entry
           })
           // Back in a turn that is still running: its unanswered tools are running.
           const reattached = get().isStreaming && get().reattachedMidTurn
@@ -3092,7 +3096,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     // through activateWorkspace instead, so every caller gets the dirty-editor
     // ask, the chat clear, and the status resync; the already-active duplicate
     // needs nothing at all.
-    const duplicate = get().workspaces.find((w) => pathsEqual(w.path, path))
+    const duplicate = get().workspaces.find((w) => !w.host && pathsEqual(w.path, path))
     if (duplicate) {
       if (duplicate.id !== get().activeWorkspace?.id) {
         await get().activateWorkspace(duplicate.id)
@@ -3205,10 +3209,10 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
       // Only a genuinely new path gets created (main leaves the active
       // workspace alone then, except for the very first workspace, where
       // there is no prior state for the confirm to protect).
-      let ws = get().workspaces.find((w) => pathsEqual(w.path, folderPath))
+      let ws = get().workspaces.find((w) => !w.host && pathsEqual(w.path, folderPath))
       if (!ws) {
         await get().createWorkspace(workspaceNameFromFolderPath(folderPath), folderPath)
-        ws = get().workspaces.find((w) => pathsEqual(w.path, folderPath))
+        ws = get().workspaces.find((w) => !w.host && pathsEqual(w.path, folderPath))
         if (!ws) return false
       }
       const switched = await get().activateWorkspace(ws.id)
@@ -3294,6 +3298,10 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     const linkedTask = workspace?.linkedTask
     const isTab = isWorktree || !!linkedTask
     const workspaceLabel = workspace?.name ?? workspaceId
+    // Default stays as before: a clean managed worktree is removed; the branch always stays.
+    const removeWorktree = isManagedWorktree
+      ? { label: t('store.confirm.removeCleanWorktreeOption', { branch: workspace?.branch ?? '' }), checked: true }
+      : undefined
     const confirmed = await get().requestConfirm({
       title: isTab ? t('store.confirm.closeTabLabel') : t('store.confirm.removeWorkspaceTitle'),
       message: linkedTask
@@ -3308,6 +3316,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
       confirmLabel: isTab ? t('store.confirm.closeTabLabel') : t('common.remove'),
       cancelLabel: t('common.cancel'),
       danger: true,
+      option: removeWorktree,
     })
     if (!confirmed) return
     // Removing the active workspace closes its preview via the adoption
@@ -3317,7 +3326,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     }
     const previousActiveId = get().activeWorkspace?.id ?? null
     try {
-      const result = await window.piDesktop.workspace.remove(workspaceId)
+      const result = await window.piDesktop.workspace.remove(workspaceId, removeWorktree ? { keepWorktree: !removeWorktree.checked } : undefined)
       await get().loadWorkspaces()
       get().saveComposerDraft(workspaceId, EMPTY_COMPOSER_DRAFT)
       set((state) => ({
@@ -3378,6 +3387,32 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
         timestamp: Date.now(),
       })
     }
+  },
+
+  saveRemoteWorkspace: async (host, path, workspaceId) => {
+    if (workspaceId) {
+      // Same guards and restart as changeWorkspaceFolder: the agent's folder is bound at spawn.
+      const isActive = workspaceId === get().activeWorkspace?.id
+      if (isActive && !(await get().confirmSessionChange('changeFolder'))) return false
+      if (isActive && !(await get().confirmDiscardEditorChanges())) return false
+      const restartNeeded = isActive && get().piStatus === 'running'
+      await window.piDesktop.workspace.saveRemote(host, path, workspaceId)
+      await get().loadWorkspaces()
+      if (isActive) set({ previewTarget: null, editorDirty: false })
+      if (restartNeeded) await get().restartPi()
+      return true
+    }
+    // An existing entry goes through activateWorkspace, like openFolderAsWorkspace does for local folders.
+    let ws = get().workspaces.find((w) => w.host === host && pathsEqual(w.path, path))
+    if (!ws) {
+      const previousActiveId = get().activeWorkspace?.id ?? null
+      ws = await window.piDesktop.workspace.saveRemote(host, path)
+      await get().loadWorkspaces()
+      adoptMainSideActivation(get, set, previousActiveId)
+    }
+    const switched = await get().activateWorkspace(ws.id)
+    if (switched) get().setCurrentView('chat')
+    return switched
   },
 
   // ─── Timeline ────────────────────────────────────────────────────────
@@ -4085,7 +4120,6 @@ function handleTurnComplete(
         content: text.content,
         timestamp: final?.timestamp ?? Date.now(),
         thinking: thinking || undefined,
-        initiallyShowThinking: Boolean(state.streamingThinking),
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         model,
         provider,

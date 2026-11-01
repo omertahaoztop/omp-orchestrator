@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
-import { AlertCircle, ExternalLink, GitCommitHorizontal, GitPullRequest, Loader2, Sparkles, Upload, X } from 'lucide-react'
+import { AlertCircle, ExternalLink, GitCommitHorizontal, GitMerge, GitPullRequest, Loader2, Sparkles, Upload, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store'
 import type { GitCommitMessageError, GitConveyorStatus, GitFileStatus } from '../../../shared/ipc-contracts'
@@ -44,7 +44,7 @@ interface ConveyorFeedback {
   link: string | null
 }
 
-type ConveyorAction = 'commit' | 'commitPush' | 'push' | 'pr'
+type ConveyorAction = 'commit' | 'commitPush' | 'push' | 'pr' | 'merge'
 
 type GitStatusError = { message: string; dismissed: boolean } | null
 type GitStatusErrorAction =
@@ -240,6 +240,7 @@ export function GitConveyorActions({ children, onChanged, selection, shortcutAct
 }): React.JSX.Element {
   const { t } = useTranslation()
   const workspaceId = useAppStore((state) => state.activeWorkspace?.id)
+  const managedWorktree = useAppStore((state) => state.activeWorkspace?.kind === 'worktree' && state.activeWorkspace.managed !== false)
   const shortcutRequest = useAppStore((state) => state.diffShortcutRequest)
   const [status, setStatus] = useState<GitConveyorStatus | null>(null)
   const [suggestion, setSuggestion] = useState<'idle' | 'generating' | GitCommitMessageError>('idle')
@@ -479,6 +480,32 @@ export function GitConveyorActions({ children, onChanged, selection, shortcutAct
     )
   }
 
+  const mergeToBase = (): void => {
+    const branch = status?.branch
+    if (!branch) return
+    void run(
+      'merge',
+      async () => {
+        const confirmed = await useAppStore.getState().requestConfirm({
+          title: t('conveyor.merge.confirmTitle'),
+          message: t('conveyor.merge.confirmMessage', { branch }),
+          confirmLabel: t('conveyor.merge.confirmLabel'),
+          cancelLabel: t('common.cancel'),
+          danger: true,
+        })
+        if (!confirmed) return null
+        assertWorkspace(workspaceId)
+        const result = await window.piDesktop.git.mergeToBase(workspaceId!)
+        if (!result.ok) throw new Error(result.error)
+        return result
+      },
+      (result) => result && {
+        message: t('conveyor.feedback.merged', { branch: result.branch, base: result.baseBranch, sha: result.head.slice(0, 8) }),
+        link: null,
+      },
+    )
+  }
+
   return (
     <>
       <div className="flex min-w-0 flex-wrap items-center justify-start gap-1.5 lg:justify-end">
@@ -516,6 +543,12 @@ export function GitConveyorActions({ children, onChanged, selection, shortcutAct
           <button type="button" onClick={openPrDialog} disabled={busy !== null || prBlocker !== null} className="flex shrink-0 items-center gap-1 rounded border border-border px-2 py-1 text-[10px] text-muted transition-colors hover:bg-surface-hover hover:text-primary disabled:cursor-not-allowed disabled:opacity-40" title={prBlocker ?? t('conveyor.prButtonTitle')}>
             {busy === 'pr' ? <Loader2 size={11} className="animate-spin" /> : <GitPullRequest size={11} />}
             {t('conveyor.prButtonLabel')}
+          </button>
+        )}
+        {managedWorktree && (
+          <button type="button" onClick={mergeToBase} disabled={busy !== null || !status?.branch || (status?.dirtyTrackedFiles ?? 0) > 0} className="flex shrink-0 items-center gap-1 rounded border border-border px-2 py-1 text-[10px] text-muted transition-colors hover:bg-surface-hover hover:text-primary disabled:cursor-not-allowed disabled:opacity-40" title={(status?.dirtyTrackedFiles ?? 0) > 0 ? t('conveyor.merge.commitFirstTitle') : t('conveyor.merge.buttonTitle')}>
+            {busy === 'merge' ? <Loader2 size={11} className="animate-spin" /> : <GitMerge size={11} />}
+            {t('conveyor.merge.buttonLabel')}
           </button>
         )}
         {repositoryUrl && (

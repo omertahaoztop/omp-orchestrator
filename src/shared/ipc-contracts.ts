@@ -120,6 +120,7 @@ export const IPC_CHANNELS = {
   WORKSPACE_SET_ACTIVE: 'workspace:set-active',
   WORKSPACE_GET_ACTIVE: 'workspace:get-active',
   WORKSPACE_CHANGE_PATH: 'workspace:change-path',
+  WORKSPACE_SAVE_REMOTE: 'workspace:save-remote',
   WORKSPACE_PATH_EXISTS: 'workspace:path-exists',
   WORKSPACE_START_PI: 'workspace:start-pi',
   WORKSPACE_STOP_PI: 'workspace:stop-pi',
@@ -127,6 +128,8 @@ export const IPC_CHANNELS = {
   WORKSPACE_ACTIVITY_GET: 'workspace:activity',
   SESSION_DIGESTS_GET: 'session-digests:get',
   SESSION_DIGEST_MARK_READ: 'session-digests:mark-read',
+  SESSION_USAGE_GET: 'session-usage:get',
+  SESSION_USAGE_RAISE_BUDGET: 'session-usage:raise-budget',
   NOTIFY_FOCUS_GET: 'notify:focus-get',
   NOTIFY_FOCUS_SET: 'notify:focus-set',
   ARTIFACTS_LIST: 'artifacts:list',
@@ -189,6 +192,7 @@ export const IPC_CHANNELS = {
   GIT_CONVEYOR_COMMIT: 'git:conveyor-commit',
   GIT_CONVEYOR_PUSH: 'git:conveyor-push',
   GIT_CONVEYOR_CREATE_PR: 'git:conveyor-create-pr',
+  GIT_CONVEYOR_MERGE_TO_BASE: 'git:conveyor-merge-to-base',
 
   // Terminal
   TERMINAL_START: 'terminal:start',
@@ -236,6 +240,7 @@ export const IPC_CHANNELS = {
   EVENT_PENDING_PROMPTS: 'event:pending-prompts',
   EVENT_WORKSPACE_ACTIVITY: 'event:workspace-activity',
   EVENT_SESSION_DIGESTS: 'event:session-digests',
+  EVENT_SESSION_USAGE: 'event:session-usage',
   EVENT_NOTIFY_FOCUS: 'event:notify-focus',
   EVENT_ARTIFACT_SHOWN: 'event:artifact-shown',
   EVENT_PLAN_REVIEW: 'event:plan-review',
@@ -337,6 +342,9 @@ export interface SessionLaunchTaskOptions {
 
 /** A branch switch or creation lands with the new status, or is refused with a reason for the user. */
 export type GitBranchSwitchResult = { ok: true; status: GitConveyorStatus } | { ok: false; error: string }
+
+/** Merge to main lands on the main checkout's base branch, or is refused with a reason for the user. */
+export type GitMergeToBaseResult = { ok: true; branch: string; baseBranch: string; head: string } | { ok: false; error: string }
 
 export interface GitConveyorStatus {
   branch: string | null
@@ -450,6 +458,8 @@ export interface PiStartOptions {
    */
   engine?: AgentEngineKind
   args?: string[]
+  /** Set by main from the workspace: run the agent on this SSH host instead of locally. */
+  host?: string
   env?: Record<string, string>
 }
 
@@ -459,6 +469,8 @@ export interface TerminalStartOptions {
   cwd?: string
   cols?: number
   rows?: number
+  /** Open the shell on this SSH host, in `cwd` there. */
+  host?: string
 }
 
 export interface TerminalStartResult {
@@ -1477,6 +1489,9 @@ export interface AppSettings {
   // Desktop notifications only for questions and approvals; finished and
   // failed turns show as unread on Komuta instead.
   notifyOnlyQuestions: boolean
+  // Default per-session spending limits; null is off.
+  sessionBudgetUsd: number | null
+  sessionBudgetTokens: number | null
   // Interface language: 'system' (follow the OS language list) or a bundled
   // language code. Unknown values reset to 'system' on load.
   language: string
@@ -1587,6 +1602,11 @@ export interface WorkspaceTabOptions {
   startPi?: boolean
 }
 
+export interface WorkspaceRemoveOptions {
+  /** Leave a clean managed worktree on disk instead of removing it. */
+  keepWorktree?: boolean
+}
+
 /** Result of closing a workspace tab. Dirty worktrees are preserved. */
 export interface WorkspaceRemoveResult {
   worktreeRemoved?: boolean
@@ -1617,6 +1637,8 @@ export interface Workspace {
   taskPrompt?: string
   /** The repositories of a `repoSet` tab; `path` is its main repository's checkout. */
   linkedTask?: LinkedTask
+  /** SSH host alias for a remote workspace; absent means local. */
+  host?: string
 }
 
 // ─── Repo Set Types ─────────────────────────────────────────────────────────

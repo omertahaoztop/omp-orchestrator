@@ -30,6 +30,7 @@ import { registerWorkflowHandlers } from './ipc/workflow-handlers'
 import { registerSubagentHandlers } from './ipc/subagent-handlers'
 import { wireWorkspaceActivity, type WindowControls } from './ipc/workspace-activity-wiring'
 import { wireSessionDigests } from './ipc/session-digest-wiring'
+import { wireSessionUsage } from './ipc/session-usage-wiring'
 import { wireArtifacts } from './ipc/artifact-wiring'
 import { wirePlanReview } from './ipc/plan-review-wiring'
 import { registerRoutineHandlers } from './ipc/routine-handlers'
@@ -103,6 +104,7 @@ export function registerIpcHandlers(
     focusRuntimeId: workspaceActivity.focusRuntimeId,
   })
   wireSessionDigests(ctx, matrix?.handleDigests)
+  wireSessionUsage(ctx, windowControls, iconPath)
   wireArtifacts(ctx)
   wirePlanReview(ctx, windowControls.showWindow)
 

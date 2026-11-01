@@ -37,7 +37,7 @@ export function createIpcContext(workspaceManager: WorkspaceManager): IpcContext
   // Helper: get Pi manager for active workspace
   function getActivePi(): PiRpcManager {
     const pi = workspaceManager.getActivePiManager()
-    if (!pi) throw new Error('No active workspace or Pi not running')
+    if (!pi) throw new Error('No active workspace or agent not running')
     return pi
   }
 

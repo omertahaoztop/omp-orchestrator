@@ -4,8 +4,8 @@
     "completedInAnotherWorkspace": "Finished in the background in another workspace",
     "failed": "Stopped with an error",
     "failedInAnotherWorkspace": "Stopped with an error in another workspace",
-    "working": "Pi is working",
-    "workingInAnotherWorkspace": "Pi is working in another workspace"
+    "working": "The agent is working",
+    "workingInAnotherWorkspace": "The agent is working in another workspace"
   },
   "app": {
     "dropFolder": {
@@ -24,6 +24,12 @@
       "dismissAriaLabel": "Dismiss update notification",
       "downloadButton": "Download"
     }
+  },
+  "budget": {
+    "continue": "Continue (raise limit)",
+    "hitMessage": "A session in {{project}} reached its budget of {{limit}} after spending {{cost}} and {{tokens}} tokens, so its turn was stopped. Raise the limit and continue, or leave it stopped?",
+    "hitTitle": "Session budget reached",
+    "stop": "Stop"
   },
   "chat": {
     "activity": {
@@ -66,7 +72,7 @@
       "waitingOnEngine": "{{agent}} is up — waiting for the engine to finish loading. Local models can take a while…"
     },
     "extensionUi": {
-      "askFallbackTitle": "Pi has questions",
+      "askFallbackTitle": "The agent has questions",
       "askMultiHint": "Select one or more",
       "askOtherPlaceholder": "Other: type your own answer",
       "askRecommended": "Recommended",
@@ -77,7 +83,7 @@
       "notificationFallback": "Notification",
       "selectFallbackTitle": "Select",
       "showWithShortcut": "Show ({{shortcut}})",
-      "waitingForAnswer": "Pi is waiting for an answer"
+      "waitingForAnswer": "The agent is waiting for an answer"
     },
     "insertNote": {
       "ariaLabel": "Insert note",
@@ -382,10 +388,19 @@
       "branchPushed": "Branch pushed.",
       "committed": "Committed {{sha}}.",
       "committedAndPushed": "Committed {{sha}} and pushed the branch.",
+      "merged": "Merged {{branch}} into {{base}} ({{sha}}) in the main checkout.",
       "openLinkTitle": "Open in the browser",
       "prCreated": "Pull request created.",
       "pushedCommits_one": "Pushed {{count}} commit.",
       "pushedCommits_other": "Pushed {{count}} commits."
+    },
+    "merge": {
+      "buttonLabel": "Merge to main",
+      "buttonTitle": "Merge this worktree's branch into the default branch of the main checkout",
+      "commitFirstTitle": "Commit your changes before merging",
+      "confirmLabel": "Merge",
+      "confirmMessage": "Merge {{branch}} into the default branch (main or master) in the main checkout? Nothing changes if the main checkout has uncommitted changes, is on another branch, or the branches conflict.",
+      "confirmTitle": "Merge to main"
     },
     "openPrButtonLabel": "Open PR #{{number}}",
     "openPrButtonTitle": "Open pull request #{{number}} of this branch on GitHub",
@@ -624,9 +639,18 @@
       "commitSelectionEmpty": "No files are selected to commit",
       "commitSelectionOutsideWorkspace": "The files selected to commit must be inside the active workspace",
       "detachedHeadCommit": "Cannot commit from a detached HEAD",
+      "detachedHeadMerge": "Cannot merge from a detached HEAD. Check out a branch in this worktree first",
       "detachedHeadPush": "Cannot push from a detached HEAD",
       "ignoredFilesBlockSwitch": "Switching to {{branch}} would overwrite or delete these local files, which Git does not show as changes. Move them out of the way, then switch again:\n{{files}}",
       "localBranchRequired": "Choose an existing local branch",
+      "mergeBaseMissing": "The repository has no local main or master branch to merge into",
+      "mergeCommitFirst": "Commit the worktree's changes before merging",
+      "mergeConflicts": "Merging {{branch}} into {{base}} conflicts. The merge was aborted and the main checkout is unchanged. Resolve it in a pull request or merge by hand",
+      "mergeMainDirty": "The main checkout has uncommitted changes on {{base}}. Commit or discard them before merging",
+      "mergeMainNotOnBase": "The main checkout is on {{current}}, not {{base}}. Switch it to {{base}} before merging",
+      "mergeManagedWorktreeOnly": "Merge to main works only in a worktree tab created by OMP Orchestrator",
+      "mergeNothingToMerge": "{{base}} already contains every commit of {{branch}}; nothing to merge",
+      "mergeOperationInProgress": "Cannot merge while a Git {{operation}} is in progress in the main checkout",
       "namedBranchRequired": "A named branch is required to create a pull request",
       "newFileNotCommittable": "{{path}} cannot be committed: it is not a new file in the selected changes, or Git ignores it",
       "noTrackedChanges": "No tracked changes to commit in this workspace. Stage untracked files first to include them.",
@@ -667,23 +691,32 @@
       "commandFailedFallback": "Command failed",
       "commandTimedOut": "Command {{commandType}} timed out after {{timeoutMs}}ms",
       "configuredPathMissing": "The Pi executable path set in {{settingsHint}} does not exist:\n  {{path}}\n\nPoint it at Pi's cli.js (or its install directory), or clear the field to auto-detect. Auto-detection also found nothing.\n\n{{installHint}}",
-      "crashedBeforeReady": "Pi crashed before becoming ready.",
-      "cwdMissing": "Pi working directory does not exist or is not a directory:\n  {{cwd}}",
-      "exitedBeforeReady": "Pi exited with code {{code}} before becoming ready.",
-      "failedToCreateManager": "Failed to create Pi manager",
+      "crashedBeforeReady": "The agent crashed before becoming ready.",
+      "cwdMissing": "Agent working directory does not exist or is not a directory:\n  {{cwd}}",
+      "exitedBeforeReady": "The agent exited with code {{code}} before becoming ready.",
+      "failedToCreateManager": "Failed to create agent manager",
       "installHint": "Install Pi with:\n  {{npmCommand}}\nor install OMP with:\n  {{bunCommand}}",
       "nodeNotFound": "Node binary not found at resolved path:\n  {{node}}\n\nPi's .js entry point requires Node. Install Node from https://nodejs.org or set the NODE env var to your Node binary path.",
-      "noManagerForWorkspace": "No Pi manager for workspace",
+      "noManagerForWorkspace": "No agent manager for workspace",
       "notFound": "Pi binary not found. Searched the login shell PATH, npm's global prefix, node version managers (nvm, fnm, volta, asdf, mise, nodenv, n) and common install locations.\n\n{{installHint}}\n\nAlready installed? Set the full path to Pi's cli.js in {{settingsHint}}.",
-      "processExited": "Pi process exited",
-      "processKilled": "Pi process killed",
-      "processNotRunning": "Pi process is not running",
+      "processExited": "Agent process exited",
+      "processKilled": "Agent process killed",
+      "processNotRunning": "Agent process is not running",
       "settingsHint": "Settings > Agent Configuration > Agent Installation",
       "spawnError": "Spawn error: {{detail}}",
-      "startupTimeoutBusy": "Pi started but did not become ready within {{seconds}}s.\n\nPi was alive and producing output, but never answered the readiness check. Extension startup hooks run before Pi reads commands, and a hook that calls a local model server can wait this long while the model loads or prefills a large prompt. Check the engine and model-server logs, then retry.",
-      "startupTimeoutBusyWithStderr": "{{message}}\n\nPi stderr captured during startup:\n{{detail}}",
-      "startupTimeoutSilentNoOutput": "Pi produced no output within {{seconds}}s.\n\nNo output captured. Check the app log for the exact spawn command, and try running `pi --mode rpc` directly in a terminal.",
-      "startupTimeoutSilentWithStderr": "Pi produced no output within {{seconds}}s.\n\nPi stderr captured during startup:\n{{detail}}"
+      "startupTimeoutBusy": "The agent started but did not become ready within {{seconds}}s.\n\nIt was alive and producing output, but never answered the readiness check. Extension startup hooks run before the agent reads commands, and a hook that calls a local model server can wait this long while the model loads or prefills a large prompt. Check the engine and model-server logs, then retry.",
+      "startupTimeoutBusyWithStderr": "{{message}}\n\nAgent stderr captured during startup:\n{{detail}}",
+      "startupTimeoutSilentNoOutput": "The agent produced no output within {{seconds}}s.\n\nNo output captured. Check the app log for the exact spawn command, and try running `pi --mode rpc` directly in a terminal.",
+      "startupTimeoutSilentWithStderr": "The agent produced no output within {{seconds}}s.\n\nAgent stderr captured during startup:\n{{detail}}"
+    },
+    "remote": {
+      "connectFailed": "Could not connect to {{host}}: {{detail}}",
+      "folderMissing": "Folder {{path}} does not exist on {{host}}.",
+      "invalidHost": "Invalid SSH host: {{host}}",
+      "permissionModeUnsupported": "The {{mode}} permission mode cannot run on {{host}}: its approval prompts cannot reach a remote agent. Switch to Trusted or Plan / Read-only to use this remote workspace.",
+      "sshMissing": "ssh was not found on this computer.",
+      "timeout": "SSH to {{host}} timed out.",
+      "unsupported": "Not available for remote workspaces."
     },
     "routines": {
       "badCron": "Invalid schedule \"{{cron}}\". Use five fields: minute hour day month weekday.",
@@ -695,7 +728,7 @@
       "alreadyAttached": "Session file is already attached to a live runtime",
       "attachedToDifferentWorkspace": "Session is already attached to a different workspace runtime",
       "ompNoClone": "The OMP engine does not support cloning a session",
-      "pathMustExist": "{{field}} must point to an existing Pi session file",
+      "pathMustExist": "{{field}} must point to an existing agent session file",
       "projectMismatch": "Session project does not match the active workspace",
       "runtimeNotFound": "Session runtime not found: {{runtimeId}}"
     },
@@ -783,15 +816,15 @@
   "home": {
     "actions": {
       "linkedTask": {
-        "description": "One task across several repositories",
         "title": "Linked task"
       },
+      "new": "New",
+      "newMenu": "More ways to start",
       "newSession": {
         "inWorkspace": "In {{project}}",
         "pickFolderFirst": "Pick a folder first"
       },
       "newTask": {
-        "description": "Start work in a fresh {{agent}} session",
         "title": "New Task"
       },
       "openFolder": {
@@ -799,10 +832,19 @@
         "title": "Open Folder"
       }
     },
+    "activeSessions": {
+      "empty": "No sessions running. Start one with New.",
+      "hostTitle": "Runs on {{host}}",
+      "title": "Active Sessions",
+      "usageTitle": "Tokens: {{input}} in · {{output}} out · cost"
+    },
+    "attention": {
+      "empty": "Nothing is waiting for you.",
+      "title": "Needs Attention"
+    },
     "changedFiles": {
       "moreOpenDiff_one": "+{{count}} more — open diff review",
-      "moreOpenDiff_other": "+{{count}} more — open diff review",
-      "noWorkspace": "No workspace selected."
+      "moreOpenDiff_other": "+{{count}} more — open diff review"
     },
     "errorBanner": {
       "checkInstalled": "Check that {{agent}} is installed and its path is correct.",
@@ -903,13 +945,15 @@
     "inbox": {
       "deny": "Deny",
       "empty": "Nothing is waiting for your answer.",
+      "keyHint": "With the list focused: j / k move · a allow · d deny · Enter open session",
+      "remoteHost": "Runs on {{host}}",
       "title": "Waiting for you",
       "waitingSince": "asked"
     },
     "needsAttention_one": "{{count}} needs attention",
     "needsAttention_other": "{{count}} needs attention",
     "newTask": "New task",
-    "noLiveRuntimes": "No live session runtimes yet. Start a task to put Pi to work in the background.",
+    "noLiveRuntimes": "No live session runtimes yet. Start a task to put the agent to work in the background.",
     "noWorkflowRuns": "No workflow runs yet.",
     "open": "Open",
     "openAllWorkflows": "Open all workflows",
@@ -942,7 +986,6 @@
       "failed": "failed",
       "idle": "idle",
       "needsApproval": "needs approval",
-      "stopped": "stopped",
       "working": "working"
     },
     "startingSession": "Starting session",
@@ -1027,11 +1070,13 @@
     "viewNoteTitle": "View note"
   },
   "notifications": {
-    "completed": "Pi finished working.",
-    "failed": "Pi stopped with an error.",
+    "budgetHit": "Budget reached at {{cost}}; the turn was stopped",
+    "budgetTitle": "Session budget",
+    "completed": "The agent finished working.",
+    "failed": "The agent stopped with an error.",
     "focusSummary": "While you were focused: {{completed}} finished, {{failed}} failed.",
     "focusSummaryTitle": "Focus ended",
-    "needs-approval": "Pi is waiting for your approval.",
+    "needs-approval": "The agent is waiting for your approval.",
     "withSession": "{{body}} Click to open the finished session."
   },
   "packages": {
@@ -1141,6 +1186,20 @@
       "target": "Target: {{path}}",
       "title": "Allow {{tool}}?"
     }
+  },
+  "remoteWorkspace": {
+    "badgeTitle": "Remote workspace on {{host}} (over SSH)",
+    "dialog": {
+      "addTitle": "Open remote folder",
+      "checking": "Checking over SSH…",
+      "connect": "Connect",
+      "editTitle": "Edit remote folder",
+      "hostLabel": "SSH host",
+      "hostPlaceholder": "devbox or user@host",
+      "intro": "The agent, file tree, git status and terminal run over SSH using your ~/.ssh/config. The key must work without a password prompt.",
+      "pathLabel": "Remote folder"
+    },
+    "gitActionsUnavailable": "Commit, push, pull requests and discard are not available for remote workspaces. Use the terminal."
   },
   "repoSets": {
     "bar": {
@@ -1380,7 +1439,7 @@
       "confirmButton": "Enable",
       "confirmMessage": "Each run spawns Claude and Codex in addition to {{engine}}. This can significantly increase token usage and credit/API costs. Only enable this if you are comfortable with the extra spend.",
       "confirmTitle": "Enable council planning?",
-      "description": "Spawns Claude/Codex alongside Pi to plan tasks. Increases token usage and credit/API costs.",
+      "description": "Spawns Claude/Codex alongside the agent to plan tasks. Increases token usage and credit/API costs.",
       "label": "Enable council planning"
     },
     "councilMembers": {
@@ -1403,7 +1462,7 @@
       "label": "Dark Theme"
     },
     "desktopNotifications": {
-      "description": "Notify when Pi finishes, fails, or waits for approval in a workspace you are not looking at",
+      "description": "Notify when the agent finishes, fails, or waits for approval in a workspace you are not looking at",
       "label": "Desktop Notifications"
     },
     "language": {
@@ -1426,11 +1485,11 @@
       "label": "Notify only for questions"
     },
     "openToHomeOnLaunch": {
-      "description": "On: full Home launcher (stats, recents, open folder). Off: open Chat with the empty-session center prompt and project picker.",
+      "description": "On: full Home screen (pending prompts, active sessions, recents, open folder). Off: open Chat with the empty-session center prompt and project picker.",
       "label": "Open to Home Screen on Launch"
     },
     "permissionMode": {
-      "description": "Default safety mode for Pi actions",
+      "description": "Default safety mode for agent actions",
       "label": "Permission Mode"
     },
     "permissionRules": {
@@ -1462,6 +1521,12 @@
       "typesafe": "TypeSafe Jev",
       "voiceDictation": "Voice dictation"
     },
+    "sessionBudget": {
+      "description": "Default limit for each session. At 80% the cost turns amber; at 100% the turn stops and you are asked whether to raise it. Leave empty for no limit.",
+      "label": "Session budget",
+      "tokensPlaceholder": "Tokens",
+      "usdPlaceholder": "USD"
+    },
     "shortcuts": {
       "actionWithShortcut": "{{action}} ({{shortcut}})",
       "commandPalette": "Command palette",
@@ -1474,7 +1539,7 @@
       "globalDictation": "Voice dictation from any app: press to start or stop",
       "heading": "Keyboard shortcuts",
       "inUse": "{{shortcut}} is already used by {{action}}. Choose another combination.",
-      "invalid": "Use Cmd or Ctrl with a letter, number, punctuation key, or F1–F12.",
+      "invalid": "Use Cmd or Ctrl with a letter, number, punctuation key, or F1–F12, or Alt with a number.",
       "modelSelector": "Model selector",
       "nextProject": "Next project",
       "nextSession": "Next open session",
@@ -1485,7 +1550,8 @@
       "pushToTalk": "Voice dictation: hold to talk",
       "reserved": "This combination is reserved for a native menu or editor action.",
       "reset": "Reset shortcuts",
-      "sidebar": "Sidebar"
+      "sidebar": "Sidebar",
+      "switchToSession": "Open session tab {{number}}"
     },
     "showThinking": {
       "description": "Display model thinking blocks in responses",
@@ -1614,19 +1680,20 @@
       "workspaceSection": "Workspace"
     },
     "newSessionButton": {
+      "inWorktreeLabel": "In worktree",
+      "inWorktreeTitle": "Start a new session in a fresh worktree on its own branch",
       "label": "New session",
       "openProjectToBegin": "Open a project to begin",
-      "shortcutKbd": "Ctrl N",
       "startsIn": "Starts in {{project}}",
-      "titleNoProject": "Open a project first",
-      "titleWithShortcut": "Start a new session in this project (Ctrl/Cmd+N)"
+      "title": "Start a new session in this project",
+      "titleNoProject": "Open a project first"
     },
     "openProjectFolder": {
       "ariaLabel": "Open project folder",
       "titleWithShortcut": "Open project folder (Ctrl/Cmd+O)"
     },
-    "promptsWaitingInOtherWorkspaces_one": "{{count}} Pi prompt waiting in other workspaces",
-    "promptsWaitingInOtherWorkspaces_other": "{{count}} Pi prompts waiting in other workspaces",
+    "promptsWaitingInOtherWorkspaces_one": "{{count}} agent prompt waiting in other workspaces",
+    "promptsWaitingInOtherWorkspaces_other": "{{count}} agent prompts waiting in other workspaces",
     "recentSessions": {
       "emptyInProject": "No sessions in this project yet.",
       "emptyNoProject": "Open a project to see its sessions.",
@@ -1646,17 +1713,20 @@
       "diagnostics": "Diagnostics",
       "notes": "Notes",
       "packages": "Packages",
-      "sectionLabel": "Tools"
+      "sectionLabel": "Tools",
+      "stats": "Stats"
     },
     "workflowRunsForSession": "Workflow runs for this session",
     "workspaceMenu": {
       "changeFolder": "Change folder…",
+      "editRemote": "Edit remote folder…",
       "rename": "Rename"
     },
     "workspaceSwitcher": {
       "namePlaceholder": "Workspace name",
       "noWorkspace": "No workspace",
       "openProjectEllipsis": "Open project…",
+      "openRemoteEllipsis": "Open remote folder…",
       "triggerTitle": "Click to switch · double-click to rename · right-click for options"
     }
   },
@@ -1690,6 +1760,7 @@
     "selectPrompt": "Select a skill to view its SKILL.md"
   },
   "stats": {
+    "empty": "No activity recorded yet. Stats appear after your first sessions.",
     "heatmap": {
       "dayTooltip_one": "{{date}} — {{count}} messages",
       "dayTooltip_other": "{{date}} — {{count}} messages"
@@ -1717,10 +1788,12 @@
       "thirtyDays": "30d",
       "threeMonths": "3mo"
     },
+    "subtitle": "Activity, token usage and models across all sessions",
     "tabs": {
       "models": "models",
       "overview": "overview"
     },
+    "title": "Stats",
     "tokenChart": {
       "barTooltip": "{{label}} — {{tokens}} tokens",
       "empty": "No token usage in this range."
@@ -1805,6 +1878,10 @@
     "piRunning": "{{agent}} running (PID: {{pid}})",
     "piStarting": "{{agent}} starting",
     "piStopped": "{{agent}} stopped",
+    "projectUsage": "This project: {{sessions}} open sessions, {{tokens}} tokens, {{cost}}",
+    "projectUsageShort": "Project {{cost}}",
+    "sessionBudget": "Budget: {{limit}}",
+    "sessionUsage": "This session: {{tokens}} tokens (input + output), {{cost}}",
     "showTerminal": "Show terminal",
     "steerQueued_one": "{{count}} steer queued",
     "steerQueued_other": "{{count}} steer queued",
@@ -1817,32 +1894,33 @@
   "store": {
     "confirm": {
       "changeAnywayLabel": "Change anyway",
-      "changeFolderMessage": "Pi has not finished responding in this session. Changing the project folder restarts Pi, which stops it: whatever Pi already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
+      "changeFolderMessage": "The agent has not finished responding in this session. Changing the project folder restarts the agent, which stops it: whatever the agent already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
       "cloneAnywayLabel": "Clone anyway",
-      "cloneMessage": "Pi has not finished responding in this session. Cloning this branch stops it: whatever Pi already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
+      "cloneMessage": "The agent has not finished responding in this session. Cloning this branch stops it: whatever the agent already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
       "closeInPlaceLinkedTaskMessage": "Close \"{{name}}\"? Your repositories and their files do not change.",
       "closeIsolatedLinkedTaskMessage": "Close \"{{name}}\"? Clean worktrees of this task are removed; worktrees with uncommitted changes stay on disk. Branches are kept.",
-      "closeManagedWorktreeMessage": "Close \"{{name}}\"? Clean worktrees are removed; tabs with uncommitted changes are preserved on disk.",
-      "closeSessionTabMessage": "Pi is still working in this session. Closing the tab stops its runtime; saved messages remain available from Sessions.",
+      "closeManagedWorktreeMessage": "Close \"{{name}}\"? A worktree with uncommitted changes always stays on disk.",
+      "closeSessionTabMessage": "The agent is still working in this session. Closing the tab stops its runtime; saved messages remain available from Sessions.",
       "closeSessionTabTitle": "Close session tab?",
       "closeTabLabel": "Close tab",
       "closeUnmanagedWorktreeMessage": "Close \"{{name}}\"? This existing worktree and its files remain on disk.",
       "forkAnywayLabel": "Fork anyway",
-      "forkMessage": "Pi has not finished responding in this session. Forking this session stops it: whatever Pi already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
+      "forkMessage": "The agent has not finished responding in this session. Forking this session stops it: whatever the agent already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
       "keepUntrustedLabel": "Keep untrusted",
       "keepWorkingLabel": "Keep working",
-      "newMessage": "Pi has not finished responding in this session. Starting a new session stops it: whatever Pi already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
+      "newMessage": "The agent has not finished responding in this session. Starting a new session stops it: whatever the agent already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
       "okLabel": "OK",
-      "removeWorkspaceMessage": "Remove \"{{name}}\" from the sidebar? Its Pi process stops; files on disk are not touched.",
+      "removeCleanWorktreeOption": "Remove the worktree folder if it has no uncommitted changes. The branch {{branch}} is kept.",
+      "removeWorkspaceMessage": "Remove \"{{name}}\" from the sidebar? Its agent process stops; files on disk are not touched.",
       "removeWorkspaceTitle": "Remove workspace",
       "startAnywayLabel": "Start anyway",
-      "stillWorkingTitle": "Pi is still working",
+      "stillWorkingTitle": "The agent is still working",
       "switchAnywayLabel": "Switch anyway",
-      "switchMessage": "Pi has not finished responding in this session. Opening another session stops it: whatever Pi already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
-      "trustWorkspaceMessage": "This workspace defines permission rules (.pi-desktop/permission-rules.json) with allow rules that would let Pi skip confirmation prompts. They are ignored until you trust this workspace; its deny rules always apply. Only trust workspaces from a source you trust.",
+      "switchMessage": "The agent has not finished responding in this session. Opening another session stops it: whatever the agent already wrote to the session is kept, but the rest of the response — including any tool calls still running — is discarded.",
+      "trustWorkspaceMessage": "This workspace defines permission rules (.pi-desktop/permission-rules.json) with allow rules that would let the agent skip confirmation prompts. They are ignored until you trust this workspace; its deny rules always apply. Only trust workspaces from a source you trust.",
       "trustWorkspaceTitle": "Trust this workspace?",
-      "workspaceMessage": "Pi has not finished responding in this session. It keeps working after you switch: the response is saved to the session and restored when you come back, and any prompt Pi raises while you are away is held and shown on your return.",
-      "workspaceRulesNoticeMessage": "This workspace defines its own permission rules (.pi-desktop/permission-rules.json). Its deny rules restrict Pi while you work here; your global rules apply otherwise.",
+      "workspaceMessage": "The agent has not finished responding in this session. It keeps working after you switch: the response is saved to the session and restored when you come back, and any prompt the agent raises while you are away is held and shown on your return.",
+      "workspaceRulesNoticeMessage": "This workspace defines its own permission rules (.pi-desktop/permission-rules.json). Its deny rules restrict the agent while you work here; your global rules apply otherwise.",
       "workspaceRulesNoticeTitle": "Workspace permission rules"
     },
     "messages": {
@@ -1867,7 +1945,7 @@
       "error": "Error: {{detail}}",
       "followUpError": "Follow-up error: {{detail}}",
       "imageFallbackName": "Image {{index}}",
-      "installedPackage": "Installed {{spec}}. Restart Pi to load it.",
+      "installedPackage": "Installed {{spec}}. Restart the agent to load it.",
       "installFailed": "Install failed",
       "modelError": "Model error: {{detail}}",
       "modelsFileNotLoaded": "The models file has not loaded yet. Try again.",
@@ -1891,13 +1969,13 @@
       "truncatedHistory_other": "Showing the latest {{count}} of {{total}} messages for performance. Older turns are still on disk in the session file.",
       "unarchiveError": "Unarchive error: {{detail}}",
       "unknownError": "Unknown error",
-      "updatedAllPackages": "Updated packages. Restart Pi to load them.",
-      "updatedPackage": "Updated {{spec}}. Restart Pi to load it.",
+      "updatedAllPackages": "Updated packages. Restart the agent to load them.",
+      "updatedPackage": "Updated {{spec}}. Restart the agent to load it.",
       "updatePackageFailed": "Update failed",
       "writeFailed": "Write failed"
     },
-    "promptsWaiting_one": "{{count}} Pi prompt waiting",
-    "promptsWaiting_other": "{{count}} Pi prompts waiting"
+    "promptsWaiting_one": "{{count}} agent prompt waiting",
+    "promptsWaiting_other": "{{count}} agent prompts waiting"
   },
   "taskLauncher": {
     "closeAriaLabel": "Close task launcher",
@@ -2239,7 +2317,6 @@
     "newSessionAriaLabel": "New session in this project",
     "newSessionFallback": "New session",
     "removeWorkspaceAriaLabel": "Remove {{name}}",
-    "sessions": "Sessions",
-    "tools": "Tools"
+    "sessions": "Sessions"
   }
 }

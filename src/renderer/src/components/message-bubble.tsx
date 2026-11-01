@@ -21,6 +21,7 @@ import { highlightCodeToHtml } from './chat-code-highlight'
 import { LineNumberedCode } from './line-numbered-code'
 import { MarkdownRenderer } from './markdown-renderer'
 import { CopyButton } from './copy-button'
+import { ThinkingBlock } from './thinking-block'
 import { useContextMenu, buildMessageContextMenu } from './context-menu'
 import { RelativeTime } from '../utils/relative-time'
 import { isImeComposing } from '../utils/ime-composing'
@@ -31,7 +32,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  Brain,
   Bot,
   Edit3,
   GitBranch,
@@ -59,7 +59,7 @@ function MessageBubbleImpl({
 }): React.JSX.Element {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
-  const [showThinking, setShowThinking] = useState(message.initiallyShowThinking ?? false)
+  const [showThinking, setShowThinking] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(message.content)
 
@@ -411,24 +411,7 @@ function AssistantMessage({
     // The collapsible thinking block, reused in the attributed (header) layout and
     // the grouped (padded-block) layout below.
     const thinkingBlock = showThinkingBlock ? (
-      <div className="thinking-hover">
-        <div className="flex h-7 items-center gap-1">
-          <button
-            onClick={onToggleThinking}
-            className="flex items-center gap-1 text-sm text-dim hover:text-muted transition-colors"
-          >
-            <Brain size={12} />
-            {showThinking ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            {t('common.thinking')}
-          </button>
-          <CopyButton text={message.thinking!} className="thinking-copy-btn" />
-        </div>
-        {showThinking && (
-          <div className="markdown-body min-w-0 font-sans italic text-sm text-muted break-words [overflow-wrap:anywhere]">
-            <MarkdownRenderer content={message.thinking!} />
-          </div>
-        )}
-      </div>
+      <ThinkingBlock text={message.thinking!} open={showThinking} onToggle={onToggleThinking} />
     ) : null
     return (
       <div className="group mb-4">
@@ -531,29 +514,12 @@ function AssistantMessage({
               nothing below, so the mb-2 would stack on the message's own mb-4 and
               leave the block with a bigger gap below than above. */}
           {message.thinking && thinkingEnabled && (
-            <div
-              className={clsx(
-                'thinking-hover',
-                (message.content.trim().length > 0 || (message.toolCalls?.length ?? 0) > 0) && 'mb-2'
-              )}
-            >
-              <div className="flex h-7 items-center gap-1">
-                <button
-                  onClick={onToggleThinking}
-                  className="flex items-center gap-1 text-sm text-dim hover:text-muted transition-colors"
-                >
-                  <Brain size={12} />
-                  {showThinking ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                  {t('common.thinking')}
-                </button>
-                <CopyButton text={message.thinking} className="thinking-copy-btn" />
-              </div>
-              {showThinking && (
-                <div className="markdown-body min-w-0 font-sans italic text-sm text-muted break-words [overflow-wrap:anywhere]">
-                  <MarkdownRenderer content={message.thinking} />
-                </div>
-              )}
-            </div>
+            <ThinkingBlock
+              text={message.thinking}
+              open={showThinking}
+              onToggle={onToggleThinking}
+              className={(message.content.trim().length > 0 || (message.toolCalls?.length ?? 0) > 0) ? 'mb-2' : undefined}
+            />
           )}
 
           {/* Text content */}

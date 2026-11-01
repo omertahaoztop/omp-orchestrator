@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Settings,
   FolderOpen,
+  GitBranch,
   Plus,
   PanelLeftClose,
   Clock,
@@ -24,7 +25,9 @@ import {
   Archive,
   Sparkles,
   Stethoscope,
+  BarChart3,
   Pencil,
+  Server,
   Workflow as WorkflowIcon,
 } from 'lucide-react'
 import { useMemo, useState, useRef } from 'react'
@@ -34,14 +37,17 @@ import { getSessionEngineLabel, getSessionRowLabels, hasMixedSessionEngines } fr
 import { ResizeHandle } from './resize-handle'
 import { formatRelativeTime } from '../utils/format-relative-time'
 import { SessionRuntimeIndicator } from './session-runtime-indicator'
+import { RemoteHostBadge, RemoteWorkspaceDialog } from './remote-workspace-dialog'
 import { resolveRunSessionId } from '../utils/workflow-runs'
 import { useGlobalWorkflowOpen } from '../hooks'
 import { clampSidebarWidth, resolveSidebarWidth } from '../../../shared/sidebar-width'
 import type { SessionListItem } from '../../../shared/ipc-contracts'
 import { isImeComposing } from '../utils/ime-composing'
+import { activeShortcuts } from '../utils/app-shortcuts'
+import { formatShortcut } from '../../../shared/keyboard-shortcuts'
 
 /** Views reachable from the sidebar's Tools group. */
-type ToolView = 'packages' | 'notes' | 'skills' | 'diagnostics' | 'settings'
+type ToolView = 'packages' | 'notes' | 'skills' | 'diagnostics' | 'stats' | 'settings'
 
 /** Cap how many workspace groups appear in the Recent list. */
 const MAX_RECENT_GROUPS = 12
@@ -63,11 +69,15 @@ export function Sidebar(): React.JSX.Element {
     Object.values(state.sessionDigests).filter((digest) => digest.finishedAt !== null && !digest.read).length)
   const setCurrentView = useAppStore((state) => state.setCurrentView)
   const toggleSidebar = useAppStore((state) => state.toggleSidebar)
+  const sidebarShortcut = useAppStore((state) => activeShortcuts(state).sidebar)
+  const newSessionShortcut = useAppStore((state) => activeShortcuts(state).newSession)
+  const platform = window.piDesktop.system.platform
   const sessionState = useAppStore((state) => state.sessionState)
   const sessionList = useAppStore((state) => state.sessionList)
   const sessionRuntimes = useAppStore((state) => state.sessionRuntimes)
   const activeSessionRuntimeId = useAppStore((state) => state.activeSessionRuntimeId)
   const createNewSession = useAppStore((state) => state.createNewSession)
+  const createWorktreeTab = useAppStore((state) => state.createWorktreeTab)
   const setTaskLauncherOpen = useAppStore((state) => state.setTaskLauncherOpen)
   const openFolderAsWorkspace = useAppStore((state) => state.openFolderAsWorkspace)
   const openWorkflowRunsForSession = useAppStore((state) => state.openWorkflowRunsForSession)
@@ -458,7 +468,9 @@ export function Sidebar(): React.JSX.Element {
         <button
           onClick={toggleSidebar}
           className="rounded p-1 text-muted hover:bg-surface-hover hover:text-primary"
-          title={t('sidebar.header.closeSidebar')}
+          title={sidebarShortcut
+            ? t('settings.shortcuts.actionWithShortcut', { action: t('sidebar.header.closeSidebar'), shortcut: formatShortcut(sidebarShortcut, platform) })
+            : t('sidebar.header.closeSidebar')}
           aria-label={t('sidebar.header.closeSidebar')}
         >
           <PanelLeftClose size={16} />
@@ -487,19 +499,34 @@ export function Sidebar(): React.JSX.Element {
             disabled={!activeWorkspace}
             className="group flex w-full items-center gap-2 rounded-lg bg-accent px-3 py-2.5 text-sm font-medium text-white shadow-sm shadow-accent/20 transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50"
             title={
-              activeWorkspace
-                ? t('sidebar.newSessionButton.titleWithShortcut')
-                : t('sidebar.newSessionButton.titleNoProject')
+              !activeWorkspace
+                ? t('sidebar.newSessionButton.titleNoProject')
+                : newSessionShortcut
+                  ? t('settings.shortcuts.actionWithShortcut', { action: t('sidebar.newSessionButton.title'), shortcut: formatShortcut(newSessionShortcut, platform) })
+                  : t('sidebar.newSessionButton.title')
             }
           >
             <Plus size={15} className="shrink-0 transition-transform group-hover:rotate-90" />
             <span className="flex-1 text-left">{t('sidebar.newSessionButton.label')}</span>
-            <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-white/75">{t('sidebar.newSessionButton.shortcutKbd')}</kbd>
+            {newSessionShortcut && <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-white/75">{formatShortcut(newSessionShortcut, platform)}</kbd>}
           </button>
-          <div className="mt-1.5 px-1 text-[11px] text-faint">
-            {activeWorkspace
-              ? t('sidebar.newSessionButton.startsIn', { project: activeWorkspace.name })
-              : t('sidebar.newSessionButton.openProjectToBegin')}
+          <div className="mt-1.5 flex items-center gap-2 px-1 text-[11px] text-faint">
+            <span className="min-w-0 flex-1 truncate">
+              {activeWorkspace
+                ? t('sidebar.newSessionButton.startsIn', { project: activeWorkspace.name })
+                : t('sidebar.newSessionButton.openProjectToBegin')}
+            </span>
+            {activeWorkspace && !activeWorkspace.linkedTask && !activeWorkspace.host && (
+              <button
+                type="button"
+                onClick={() => void createWorktreeTab()}
+                className="flex shrink-0 items-center gap-1 rounded px-1 py-0.5 text-muted transition-colors hover:bg-highlight hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus"
+                title={t('sidebar.newSessionButton.inWorktreeTitle')}
+              >
+                <GitBranch size={11} />
+                {t('sidebar.newSessionButton.inWorktreeLabel')}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -688,6 +715,13 @@ export function Sidebar(): React.JSX.Element {
             active={toolViewShowing('diagnostics')}
             onClick={() => openToolView('diagnostics')}
           />
+          <SidebarItem
+            compact
+            icon={<BarChart3 size={13} />}
+            label={t('sidebar.tools.stats')}
+            active={toolViewShowing('stats')}
+            onClick={() => openToolView('stats')}
+          />
           {/* Global workflow list lives here — "browse everything" territory —
               so the Activity section stays scoped to the current project. */}
           <SidebarItem
@@ -749,6 +783,7 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
   const [isOpen, setIsOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const [newName, setNewName] = useState('')
+  const [remoteDialog, setRemoteDialog] = useState<'add' | 'edit' | null>(null)
 
   const handleRename = async () => {
     if (!activeWorkspace || !newName.trim()) return
@@ -779,15 +814,22 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
         disabled: !activeWorkspace,
         action: startRenaming,
       },
-      {
-        id: 'change-folder',
-        label: t('sidebar.workspaceMenu.changeFolder'),
-        icon: <FolderOpen size={14} />,
-        disabled: !activeWorkspace,
-        action: () => {
-          void handleChangeFolder()
-        },
-      },
+      activeWorkspace?.host
+        ? {
+            id: 'edit-remote',
+            label: t('sidebar.workspaceMenu.editRemote'),
+            icon: <Server size={14} />,
+            action: () => setRemoteDialog('edit'),
+          }
+        : {
+            id: 'change-folder',
+            label: t('sidebar.workspaceMenu.changeFolder'),
+            icon: <FolderOpen size={14} />,
+            disabled: !activeWorkspace,
+            action: () => {
+              void handleChangeFolder()
+            },
+          },
     ])
   }
 
@@ -829,11 +871,14 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
             <div className="min-w-0">
               <div className="truncate text-sm">{activeWorkspace?.name ?? t('sidebar.workspaceSwitcher.noWorkspace')}</div>
               {activeWorkspace && (
-                <div className="truncate text-[10px] text-faint">{activeWorkspace.path}</div>
+                <div className="truncate text-[10px] text-faint">
+                  {activeWorkspace.host ? `${activeWorkspace.host}:${activeWorkspace.path}` : activeWorkspace.path}
+                </div>
               )}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
+            {activeWorkspace?.host && <RemoteHostBadge host={activeWorkspace.host} />}
             {backgroundActivity && (
               <span
                 className={clsx(
@@ -863,6 +908,12 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
         </button>
       )}
       {WorkspaceContextMenu}
+      {remoteDialog && (
+        <RemoteWorkspaceDialog
+          workspace={remoteDialog === 'edit' ? activeWorkspace ?? undefined : undefined}
+          onClose={() => setRemoteDialog(null)}
+        />
+      )}
 
       {/* Dropdown */}
       {isOpen && (
@@ -885,6 +936,7 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
                   style={{ backgroundColor: ws.color }}
                 />
                 <span className="text-sm text-secondary truncate">{ws.name}</span>
+                {ws.host && <RemoteHostBadge host={ws.host} />}
                 {ws.id === activeWorkspace?.id && (
                   <Check size={12} className="shrink-0 text-success" />
                 )}
@@ -936,6 +988,17 @@ function WorkspaceSwitcher({ onOpenProject }: { onOpenProject: () => void }): Re
           >
             <FolderOpen size={12} />
             {t('sidebar.workspaceSwitcher.openProjectEllipsis')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(false)
+              setRemoteDialog('add')
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-secondary"
+          >
+            <Server size={12} />
+            {t('sidebar.workspaceSwitcher.openRemoteEllipsis')}
           </button>
         </div>
       )}

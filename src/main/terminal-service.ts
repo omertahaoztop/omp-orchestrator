@@ -4,6 +4,7 @@ import pty, { type IPty } from 'node-pty'
 import type { TerminalStartOptions, TerminalStartResult } from '../shared/ipc-contracts'
 import { loadPiDotenv } from './pi-dotenv'
 import { childProcessEnv } from './windows-exe-search'
+import { buildSshShellArgv } from './ssh-remote'
 
 // Classic VT100 grid, used until the renderer reports the fitted size.
 export const DEFAULT_TERMINAL_COLS = 80
@@ -35,14 +36,14 @@ export class TerminalService {
   ): TerminalStartResult {
     this.stop()
 
-    const shell = getShell()
-    const cwd = getCwd(options.cwd)
+    const shell = options.host ? 'ssh' : getShell()
+    const cwd = options.host ? os.homedir() : getCwd(options.cwd)
 
     this.cwd = cwd
     // node-pty's `encoding` option calls setEncoding() under the hood,
     // which Windows (conpty/winpty) does not support and logs a warning
     // for. Only pass it on POSIX platforms.
-    const terminal = pty.spawn(shell, [], {
+    const terminal = pty.spawn(shell, options.host ? buildSshShellArgv(options.host, options.cwd ?? '~') : [], {
       name: TERMINAL_TYPE,
       cols: options.cols ?? DEFAULT_TERMINAL_COLS,
       rows: options.rows ?? DEFAULT_TERMINAL_ROWS,
@@ -65,7 +66,7 @@ export class TerminalService {
     return {
       pid: terminal.pid,
       shell,
-      cwd,
+      cwd: options.host ? options.cwd ?? '~' : cwd,
     }
   }
 
