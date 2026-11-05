@@ -1,6 +1,6 @@
 # Maintainer: Ömer Taha Öztop <omertahaoztop at gmail dot com>
 pkgname=omp-orchestrator
-pkgver=0.4.0
+pkgver=0.4.1
 pkgrel=1
 pkgdesc='Desktop orchestrator for the oh-my-pi (omp) and Pi coding agents'
 arch=('x86_64')
@@ -11,7 +11,7 @@ makedepends=('git' 'nodejs' 'npm' 'python')
 conflicts=("$pkgname-bin")
 options=('!strip' '!debug')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('6dbe1f291ec51fe1e3bcfa2e0b2ae23b4ece5241c168ac8a6846063c257b910f')
+sha256sums=('caad4c18a97f17e5954a4c1cdf76b84599af431175df46b5c9a8de1592fd138a')
 
 build() {
   cd "$pkgname-$pkgver"
