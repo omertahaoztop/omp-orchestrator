@@ -16,7 +16,7 @@ import { SubagentTaskRow } from './subagent-task-row'
  * the strip shows only running rows and the rows the live turn spawned.
  */
 
-const STATUS_KEYS = ['subagent-slash', 'subagent-slash-text', 'subagents-edit'] as const
+export const SUBAGENT_STATUS_KEYS: readonly string[] = ['subagent-slash', 'subagent-slash-text', 'subagents-edit']
 const HIDE_DELAY_MS = 1200
 const ROW_HEIGHT_PX = 28
 const MAX_VISIBLE_ROWS = 4
@@ -41,7 +41,7 @@ export function SubagentProgress(): React.JSX.Element | null {
 
   const statusLines = useMemo(() => {
     const lines: string[] = []
-    for (const key of STATUS_KEYS) {
+    for (const key of SUBAGENT_STATUS_KEYS) {
       if (extensionStatuses[key]) lines.push(stripAnsi(extensionStatuses[key]))
     }
     return lines

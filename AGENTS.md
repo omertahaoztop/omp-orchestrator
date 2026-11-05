@@ -219,6 +219,7 @@ src/
         │   ├── format-relative-time.ts # Relative-time labels capped at days
         │   ├── relative-time.tsx # Shared ticking "now" for relative labels
         │   ├── stale-guard.ts    # Last-write-wins guard for overlapping loads
+        │   ├── ansi-spans.ts     # Terminal color codes -> styled text runs (extension status lines in the status bar)
         │   ├── preview-load-error.ts # Preview load/save failure kept as data, translated at render
         │   ├── chat-width.ts     # Chat column width setting -> message/composer max-width classes
         │   ├── process-status-label.ts # Translated agent process status (status popover, Diagnostics)
@@ -258,7 +259,7 @@ src/
             ├── code-editor-highlight.ts  # Theme-aware highlight style
             ├── code-editor-git.ts # Git change markers in the editor gutter
             ├── code-editor-setup.ts # codemirror basicSetup without the lint keymap (no linter; Mod+Shift+M stays the app's)
-            ├── status-bar.tsx     # Agent status, branch menu, workflows, context, compact, cost, panel toggles
+            ├── status-bar.tsx     # Agent status, branch menu, extension status lines (`setStatus`, TUI colors kept), workflows, context, compact, cost, panel toggles
             ├── status-popover.tsx # System status popup
             ├── settings-panel.tsx # Language, theme, font, behavior, shortcuts, council settings (live-preview draft)
             ├── shortcut-settings.tsx # Settings > Keyboard shortcuts recorder

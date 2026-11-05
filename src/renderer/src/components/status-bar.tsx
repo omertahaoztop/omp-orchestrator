@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore, countPromptsWaitingElsewhere, formatPromptsWaiting } from '../store'
 import { agentEngineLabel } from '../../../shared/agent-engine-label'
@@ -5,6 +6,9 @@ import { clsx } from 'clsx'
 import { ProjectBranchSelector } from './project-branch-selector'
 import { formatUsageCompact, useProjectUsage, useSessionUsageMap } from '../session-usage'
 import { formatBudget, formatUsd, usageFromStats } from '../../../shared/session-usage'
+import { ansiSpans } from '../utils/ansi-spans'
+import { stripAnsi } from '../utils/strip-ansi'
+import { SUBAGENT_STATUS_KEYS } from './subagent-progress'
 import {
   PanelLeft,
   Terminal,
@@ -52,6 +56,16 @@ export function StatusBar(): React.JSX.Element {
   const budgetLimit = usageEntry ? formatBudget(usageEntry.budget) : ''
   const projectUsage = useProjectUsage(activeWorkspace?.id)
   const projectSessionCount = Object.values(usageEntries).filter((entry) => entry.workspaceId === activeWorkspace?.id).length
+  const extensionStatuses = useAppStore((state) => state.extensionStatuses)
+  // Extension footer lines (OMP `ctx.ui.setStatus`), in key order like the TUI footer; the subagent strip owns its own keys.
+  const footerStatuses = useMemo(
+    () =>
+      Object.keys(extensionStatuses)
+        .filter((key) => !SUBAGENT_STATUS_KEYS.includes(key) && stripAnsi(extensionStatuses[key]).trim())
+        .sort((a, b) => a.localeCompare(b))
+        .map((key) => ({ key, spans: ansiSpans(extensionStatuses[key]), plain: stripAnsi(extensionStatuses[key]) })),
+    [extensionStatuses]
+  )
 
   // Blocking prompts held for OTHER workspaces (any extension's select/
   // confirm/input/editor) — the active workspace's prompt is already on screen.
@@ -63,7 +77,7 @@ export function StatusBar(): React.JSX.Element {
   return (
     <div className="flex h-7 items-center justify-between border-t border-border bg-app px-3 text-xs">
       {/* Left section */}
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
         {/* Pi Status */}
         <div className="flex items-center gap-1.5">
           <div
@@ -118,10 +132,35 @@ export function StatusBar(): React.JSX.Element {
             {formatPromptsWaiting(promptsWaitingElsewhere)}
           </span>
         )}
+
+        {footerStatuses.length > 0 && (
+          <div
+            className="min-w-0 flex-1 truncate font-mono text-[11px] text-dim"
+            title={footerStatuses.map((status) => status.plain).join('\n')}
+          >
+            {footerStatuses.map((status, index) => (
+              <span key={status.key} className={index > 0 ? 'ml-4' : undefined}>
+                {status.spans.map((span, spanIndex) => (
+                  <span
+                    key={spanIndex}
+                    style={{
+                      color: span.color,
+                      fontWeight: span.bold ? 600 : undefined,
+                      fontStyle: span.italic ? 'italic' : undefined,
+                      opacity: span.dim ? 0.6 : undefined,
+                    }}
+                  >
+                    {span.text}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Right section */}
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-3 pl-3">
         {/* Dedicated workflow navigator */}
         <button
           data-workflow-toggle="true"
